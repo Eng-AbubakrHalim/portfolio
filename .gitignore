@@ -1,0 +1,29 @@
+# build output
+dist/
+# generated types
+.astro/
+
+# dependencies
+node_modules/
+
+# raw source images and screenshots (never committed)
+_raw/
+
+# local tooling output
+playwright-report/
+test-results/
+screenshots/
+lighthouse/
+
+# logs
+npm-debug.log*
+
+# environment variables
+.env
+.env.production
+
+# OS / editor
+.DS_Store
+Thumbs.db
+desktop.ini
+.idea/
