@@ -1,0 +1,1072 @@
+---
+import Base from '../layouts/Base.astro';
+import SectionHeader from '../components/SectionHeader.astro';
+import tokensCss from '../styles/tokens.css?raw';
+import { contrast, readHexTokens } from '../lib/contrast';
+
+// Read the palette straight from tokens.css so this page can't drift from it.
+const darkBlock = tokensCss.slice(tokensCss.indexOf(':root {'), tokensCss.indexOf(":root[data-theme='light']"));
+const lightBlock = tokensCss.slice(tokensCss.indexOf(":root[data-theme='light']"), tokensCss.indexOf(":root[data-accent='copper']"));
+const dark = readHexTokens(darkBlock);
+const light = { ...dark, ...readHexTokens(lightBlock) };
+
+const ratio = (a: string, b: string) => contrast(a, b).toFixed(2);
+const pass = (r: number, min = 4.5) => (r >= min ? 'AA' : 'Fail');
+
+const colourRows = [
+  { token: '--bg', use: 'Page background' },
+  { token: '--fg', use: 'Primary text', vs: 'bg' },
+  { token: '--muted', use: 'Secondary text, labels', vs: 'bg' },
+  { token: '--rule', use: 'Hairlines, grid lines (decorative)' },
+  { token: '--surface', use: 'Image frames, code' },
+  { token: '--frame', use: 'Dark frame for CAD screenshots' },
+];
+
+const accents = [
+  { key: 'orange', name: 'Signal orange', dark: dark['accent-orange'], light: light['accent-orange'] },
+  { key: 'copper', name: 'Muted copper', dark: dark['accent-copper'], light: light['accent-copper'] },
+];
+
+const specimens = [
+  {
+    id: 'familjen',
+    num: '01',
+    name: 'Familjen Grotesk',
+    variable: '--font-familjen',
+    fit: 4.76,
+    source: 'Google Fonts via Fontsource, OFL',
+    axes: 'wght 400–700 (variable)',
+  },
+  {
+    id: 'instrument',
+    num: '02',
+    name: 'Instrument Sans',
+    variable: '--font-instrument',
+    fit: 5.1,
+    source: 'Google Fonts via Fontsource, OFL',
+    axes: 'wght 400–700 (variable)',
+  },
+];
+
+const monos = [
+  { id: 'plex', name: 'IBM Plex Mono', variable: '--font-plex-mono' },
+  { id: 'jetbrains', name: 'JetBrains Mono', variable: '--font-jetbrains-mono' },
+];
+
+const scale = [
+  { token: '--text-h1', range: '36–88px', sample: '4-channel industrial DAQ module', cls: 'display' },
+  { token: '--text-h2', range: '28–56px', sample: 'Selected work', cls: 'display' },
+  { token: '--text-h3', range: '20–28px', sample: 'Output-stage stability', cls: 'display' },
+  { token: '--text-lead', range: '18–22px', sample: 'Electrical engineer designing industrial measurement hardware.', cls: '' },
+  { token: '--text-body', range: '16–18px', sample: 'Schematic capture, simulation in LTspice, four-layer layout and firmware bring-up on STM32.', cls: '' },
+  { token: '--text-small', range: '14–15px', sample: 'Figure 2. Output stage with isolation resistor and feedback capacitor.', cls: '' },
+  { token: '--text-label', range: '12–13px', sample: 'ROLE / YEAR / TOOLS / STATUS', cls: 'mono-label' },
+];
+
+const spaces = [
+  ['--space-half', 4], ['--space-1', 8], ['--space-2', 16], ['--space-3', 24], ['--space-4', 32],
+  ['--space-5', 48], ['--space-6', 64], ['--space-7', 96], ['--space-8', 128], ['--space-9', 192],
+] as const;
+
+const easings = [
+  { name: '--ease-out', use: 'Entrances', bez: [0.22, 1, 0.36, 1], gsap: 'ep-out' },
+  { name: '--ease-in', use: 'Exits', bez: [0.5, 0, 0.75, 0], gsap: 'ep-in' },
+  { name: '--ease-in-out', use: 'Moves', bez: [0.65, 0, 0.35, 1], gsap: 'ep-inout' },
+  { name: 'linear', use: 'Scroll-scrubbed progress only', bez: [0, 0, 1, 1], gsap: 'none' },
+];
+const curvePath = ([x1, y1, x2, y2]: readonly number[]) =>
+  `M0 100 C ${x1 * 100} ${100 - y1 * 100} ${x2 * 100} ${100 - y2 * 100} 100 0`;
+
+const workRows = [
+  ['01', '4-channel industrial DAQ module', 'Hardware design · 2026'],
+  ['02', 'M.2-to-EDSFF SSD tester adapter', 'Rigid-flex · 2026'],
+  ['03', 'Datasheet lookup tool', 'Python · SQLite FTS5 · 2026'],
+  ['04', 'Smart Posture Correction', 'Capstone · 2026'],
+  ['05', 'UTM Robocon electronics', 'STM32 · CAN · 2024–25'],
+];
+---
+
+<Base
+  title="Styleguide — Abubakr M. Abdelhalim"
+  fonts={['--font-familjen', '--font-instrument', '--font-plex-mono', '--font-jetbrains-mono']}
+  noindex
+>
+  <header class="sg-top page">
+    <div class="sg-top__id">
+      <span class="label">Styleguide</span>
+      <span class="label">v2 · Phase 2 · Not linked from the site</span>
+    </div>
+
+    <div class="sg-controls" aria-label="Preview controls">
+      <div class="sg-control" role="group" aria-labelledby="ctl-theme">
+        <span class="label" id="ctl-theme">Theme</span>
+        <button type="button" data-set="theme" data-value="dark">Dark</button>
+        <button type="button" data-set="theme" data-value="light">Light</button>
+      </div>
+      <div class="sg-control" role="group" aria-labelledby="ctl-accent">
+        <span class="label" id="ctl-accent">Accent</span>
+        <button type="button" data-set="accent" data-value="orange">Orange</button>
+        <button type="button" data-set="accent" data-value="copper">Copper</button>
+      </div>
+      <div class="sg-control" role="group" aria-labelledby="ctl-display">
+        <span class="label" id="ctl-display">Display</span>
+        <button type="button" data-set="display" data-value="familjen">Familjen</button>
+        <button type="button" data-set="display" data-value="instrument">Instrument</button>
+      </div>
+      <div class="sg-control" role="group" aria-labelledby="ctl-mono">
+        <span class="label" id="ctl-mono">Mono</span>
+        <button type="button" data-set="mono" data-value="plex">Plex</button>
+        <button type="button" data-set="mono" data-value="jetbrains">JetBrains</button>
+      </div>
+    </div>
+  </header>
+
+  <main id="main" class="page">
+    <h1 class="visually-hidden">Design tokens and type specimen</h1>
+
+    {
+      specimens.map((s) => (
+        <section
+          class="sg-section sg-specimen"
+          aria-labelledby={`spec-${s.id}`}
+          style={`--font-display: var(${s.variable}), sans-serif; --font-body: var(${s.variable}), sans-serif; --fit: ${s.fit};`}
+        >
+          <SectionHeader num={s.num} title={`Option ${s.num === '01' ? 'A' : 'B'} — ${s.name}`} id={`spec-${s.id}`} />
+
+          <div class="specimen-hero">
+            <p class="specimen-hero__name" aria-label="Abubakr M. Abdelhalim">
+              <span>Abubakr M.</span>
+              <span>Abdelhalim</span>
+            </p>
+            <div class="specimen-hero__below">
+              <p class="specimen-hero__position">Electrical engineer designing industrial measurement hardware.</p>
+              <p class="meta-row label">
+                <span>Based in Malaysia</span>
+                <span aria-hidden="true">·</span>
+                <span>Graduating Feb 2027</span>
+                <span aria-hidden="true">·</span>
+                <span>Open to roles</span>
+              </p>
+            </div>
+          </div>
+
+          <div class="specimen-body">
+            <dl class="spec-table">
+              <div><dt class="label">Family</dt><dd>{s.name}</dd></div>
+              <div><dt class="label">Source</dt><dd>{s.source}</dd></div>
+              <div><dt class="label">Axes</dt><dd>{s.axes}</dd></div>
+              <div><dt class="label">Hero</dt><dd>500 weight, −0.035em tracking, 0.92 leading</dd></div>
+            </dl>
+
+            <div class="specimen-samples">
+              <p class="specimen-lead">
+                I design measurement and control hardware, from schematic capture and simulation to PCB layout and firmware
+                bring-up. From July to October 2026 I worked at Pythonium.ai in Johor Bahru on a four-channel industrial
+                data-acquisition module.
+              </p>
+              <p class="specimen-paragraph measure">
+                I'm in the final year of a Bachelor of Electrical Engineering (Hons) at Universiti Teknologi Malaysia,
+                graduating in February 2027. My final-year project measures supraharmonic emissions (2–150 kHz) from PV
+                inverter systems. Before that I led the electronics department of UTM Robocon for two competition cycles.
+              </p>
+
+              <div class="weights" aria-label="Weights">
+                <span style="font-weight: 400">Regular 400</span>
+                <span style="font-weight: 500">Medium 500</span>
+                <span style="font-weight: 600">Semibold 600</span>
+                <span style="font-weight: 700">Bold 700</span>
+              </div>
+
+              <p class="glyphs">AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz</p>
+              <p class="glyphs glyphs--num">0123456789 · 4–20 mA · ±0.1 % · 3.3 V · 24 V · 2–150 kHz · 100 µF</p>
+            </div>
+          </div>
+        </section>
+      ))
+    }
+
+    <section class="sg-section" aria-labelledby="sg-mono">
+      <SectionHeader num="03" title="Monospace — labels, numbers, specs" id="sg-mono" />
+      <div class="mono-compare">
+        {
+          monos.map((m) => (
+            <div class="mono-col" style={`--font-mono: var(${m.variable}), monospace;`}>
+              <p class="label mono-col__name">{m.name}</p>
+              <p class="mono mono-sample">01&nbsp;&nbsp;Work&nbsp;&nbsp;&nbsp;02&nbsp;&nbsp;Projects&nbsp;&nbsp;&nbsp;03&nbsp;&nbsp;Toolkit</p>
+              <p class="label mono-sample">Role / Year / Tools / Status</p>
+              <p class="mono mono-sample">STM32H563 · AD4111 · LT3514 · LAN8742A</p>
+              <p class="mono mono-sample">0123456789 · 4–20 mA · 24 V</p>
+            </div>
+          ))
+        }
+      </div>
+    </section>
+
+    <section class="sg-section" aria-labelledby="sg-colour">
+      <SectionHeader num="04" title="Colour" id="sg-colour" />
+      <div class="table-wrap" data-lenis-prevent>
+        <table class="colour-table">
+          <caption class="visually-hidden">Colour tokens in dark and light themes with WCAG contrast against the background</caption>
+          <thead>
+            <tr>
+              <th scope="col" class="label">Token</th>
+              <th scope="col" class="label">Use</th>
+              <th scope="col" class="label">Dark</th>
+              <th scope="col" class="label">Light</th>
+            </tr>
+          </thead>
+          <tbody>
+            {
+              colourRows.map((row) => {
+                const key = row.token.slice(2);
+                return (
+                  <tr>
+                    <th scope="row" class="mono">{row.token}</th>
+                    <td>{row.use}</td>
+                    {[dark, light].map((pal) => {
+                      const r = row.vs ? contrast(pal[key], pal.bg) : null;
+                      return (
+                        <td>
+                          <span class="swatch-cell">
+                            <span class="swatch" style={`background:${pal[key]}`} />
+                            <span class="mono">{pal[key]}</span>
+                            {r !== null && (
+                              <span class={`mono ratio ${r >= 4.5 ? '' : 'ratio--fail'}`}>
+                                {r.toFixed(2)}:1 {pass(r)}
+                              </span>
+                            )}
+                          </span>
+                        </td>
+                      );
+                    })}
+                  </tr>
+                );
+              })
+            }
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="sg-section" aria-labelledby="sg-accent">
+      <SectionHeader num="05" title="Accent — pick one" id="sg-accent" />
+      <p class="measure muted sg-note">
+        Used only for the active nav indicator, links, focus rings and small highlights. Light mode uses a darker
+        shade of the same hue so link text stays above 4.5:1.
+      </p>
+      <div class="accent-compare">
+        {
+          accents.map((a) => (
+            <div class="accent-col">
+              <p class="label">{a.name}</p>
+              <div class="accent-pair">
+                <div class="accent-tile" style={`background:${dark.bg}; color:${dark.fg}; --a:${a.dark}`}>
+                  <span class="mono accent-tile__theme">Dark</span>
+                  <span class="accent-tile__nav mono">
+                    <span class="accent-tile__line" />
+                    01&nbsp;&nbsp;Work
+                  </span>
+                  <span class="accent-tile__link">abdelhalimabubakr@gmail.com</span>
+                  <span class="accent-tile__focus mono">Focus</span>
+                  <span class="mono accent-tile__hex">{a.dark} · {ratio(a.dark, dark.bg)}:1</span>
+                </div>
+                <div class="accent-tile" style={`background:${light.bg}; color:${light.fg}; --a:${a.light}`}>
+                  <span class="mono accent-tile__theme">Light</span>
+                  <span class="accent-tile__nav mono">
+                    <span class="accent-tile__line" />
+                    01&nbsp;&nbsp;Work
+                  </span>
+                  <span class="accent-tile__link">abdelhalimabubakr@gmail.com</span>
+                  <span class="accent-tile__focus mono">Focus</span>
+                  <span class="mono accent-tile__hex">{a.light} · {ratio(a.light, light.bg)}:1</span>
+                </div>
+              </div>
+            </div>
+          ))
+        }
+      </div>
+    </section>
+
+    <section class="sg-section" aria-labelledby="sg-scale">
+      <SectionHeader num="06" title="Type scale" id="sg-scale" />
+      <ol class="scale" role="list">
+        {
+          scale.map((s) => (
+            <li class="scale__row">
+              <span class="mono scale__token">{s.token}</span>
+              <span class="mono muted scale__range">{s.range}</span>
+              <span class={`scale__sample ${s.cls}`} style={`font-size: var(${s.token})`}>
+                {s.sample}
+              </span>
+            </li>
+          ))
+        }
+      </ol>
+    </section>
+
+    <section class="sg-section" aria-labelledby="sg-space">
+      <SectionHeader num="07" title="Space and grid" id="sg-space" />
+      <ol class="spaces" role="list">
+        {
+          spaces.map(([token, px]) => (
+            <li class="spaces__row">
+              <span class="mono spaces__token">{token}</span>
+              <span class="mono muted spaces__px">{px}px</span>
+              <span class="spaces__bar" style={`width: var(${token})`} />
+            </li>
+          ))
+        }
+      </ol>
+
+      <p class="label sg-sub">12 columns · gutter 16–32px · page margin 16–56px</p>
+      <div class="grid grid-demo" aria-hidden="true">
+        {Array.from({ length: 12 }, (_, i) => <span class="grid-demo__col mono">{String(i + 1).padStart(2, '0')}</span>)}
+      </div>
+    </section>
+
+    <section class="sg-section" aria-labelledby="sg-motion">
+      <SectionHeader num="08" title="Motion" id="sg-motion" />
+      <p class="measure muted sg-note" data-reduced-note hidden>
+        Reduced motion is on: demos show their final state only.
+      </p>
+
+      <div class="motion-block">
+        <div class="motion-block__head">
+          <p class="label">Easing · 500ms each</p>
+          <button type="button" class="replay mono" data-play="ease">Play</button>
+        </div>
+        <ol class="curves" role="list">
+          {
+            easings.map((e) => (
+              <li class="curve">
+                <svg viewBox="-4 -4 108 108" class="curve__plot" aria-hidden="true">
+                  <rect x="0" y="0" width="100" height="100" class="curve__box" />
+                  <path d={curvePath(e.bez)} class="curve__path" />
+                </svg>
+                <div class="curve__track">
+                  <span class="curve__dot" data-ease={e.gsap} />
+                </div>
+                <p class="mono curve__name">{e.name}</p>
+                <p class="label curve__use">{e.use}</p>
+              </li>
+            ))
+          }
+        </ol>
+      </div>
+
+      <div class="motion-block">
+        <div class="motion-block__head">
+          <p class="label">Durations · reveal = 16px translate + fade</p>
+          <button type="button" class="replay mono" data-play="dur">Play</button>
+        </div>
+        <ol class="durations" role="list">
+          <li><span class="mono">--dur-fast 150ms</span><span class="muted">Hover, press</span><span class="dur-chip" data-dur="0.15">Reveal</span></li>
+          <li><span class="mono">--dur-base 300ms</span><span class="muted">Reveals, small moves</span><span class="dur-chip" data-dur="0.3">Reveal</span></li>
+          <li><span class="mono">--dur-slow 500ms</span><span class="muted">Section entrances</span><span class="dur-chip" data-dur="0.5">Reveal</span></li>
+        </ol>
+      </div>
+
+      <div class="motion-block">
+        <div class="motion-block__head">
+          <p class="label">Hero · masked line slide, 500ms + 60ms stagger</p>
+          <button type="button" class="replay mono" data-play="hero">Replay</button>
+        </div>
+        <div class="hero-demo">
+          <p class="hero-demo__name" data-hero-demo>Abubakr M.<br />Abdelhalim</p>
+        </div>
+      </div>
+
+      <div class="motion-block">
+        <div class="motion-block__head">
+          <p class="label">Section header · rule scales 0–100%, heading slides up</p>
+          <button type="button" class="replay mono" data-play="section">Replay</button>
+        </div>
+        <div data-section-demo>
+          <SectionHeader num="01" title="Work" as="h3" />
+        </div>
+      </div>
+
+      <div class="motion-block">
+        <div class="motion-block__head">
+          <p class="label">List stagger · 50ms</p>
+          <button type="button" class="replay mono" data-play="stagger">Replay</button>
+        </div>
+        <ol class="work-demo" role="list" data-stagger-demo>
+          {
+            workRows.map(([n, t, meta]) => (
+              <li class="work-demo__row">
+                <span class="mono muted">{n}</span>
+                <span class="work-demo__title">{t}</span>
+                <span class="label">{meta}</span>
+              </li>
+            ))
+          }
+        </ol>
+      </div>
+    </section>
+  </main>
+</Base>
+
+<script>
+  import { gsap, lineReveal, DUR, EASE, STAGGER, prefersReducedMotion } from '../scripts/motion';
+
+  const root = document.documentElement;
+  const keys = ['theme', 'accent', 'display', 'mono'] as const;
+  const defaults: Record<(typeof keys)[number], string> = {
+    theme: 'dark',
+    accent: 'orange',
+    display: 'familjen',
+    mono: 'plex',
+  };
+
+  function apply(key: (typeof keys)[number], value: string) {
+    root.dataset[key] = value;
+    document.querySelectorAll<HTMLButtonElement>(`[data-set="${key}"]`).forEach((b) => {
+      b.setAttribute('aria-pressed', String(b.dataset.value === value));
+    });
+    try {
+      localStorage.setItem(key === 'theme' ? 'theme' : `sg-${key}`, value);
+    } catch {}
+  }
+
+  for (const key of keys) {
+    let stored: string | null = null;
+    try {
+      stored = localStorage.getItem(key === 'theme' ? 'theme' : `sg-${key}`);
+    } catch {}
+    apply(key, stored ?? root.dataset[key] ?? defaults[key]);
+  }
+
+  document.querySelectorAll<HTMLButtonElement>('[data-set]').forEach((b) => {
+    b.addEventListener('click', () => apply(b.dataset.set as (typeof keys)[number], b.dataset.value!));
+  });
+
+  // ---------- Motion demos ----------
+  const reduced = prefersReducedMotion();
+  if (reduced) {
+    document.querySelector<HTMLElement>('[data-reduced-note]')!.hidden = false;
+    document.querySelectorAll<HTMLButtonElement>('.replay').forEach((b) => (b.disabled = true));
+  }
+
+  // Split only after webfonts are in, so line breaks match the final layout.
+  function initDemos() {
+    const demos: Record<string, () => void> = {
+      ease() {
+        document.querySelectorAll<HTMLElement>('.curve__dot').forEach((dot) => {
+          const track = dot.parentElement!;
+          gsap.fromTo(
+            dot,
+            { x: 0 },
+            { x: track.clientWidth - dot.offsetWidth, duration: DUR.slow, ease: dot.dataset.ease, overwrite: true },
+          );
+        });
+      },
+      dur() {
+        document.querySelectorAll<HTMLElement>('.dur-chip').forEach((chip) => {
+          gsap.fromTo(
+            chip,
+            { autoAlpha: 0, y: 16 },
+            { autoAlpha: 1, y: 0, duration: Number(chip.dataset.dur), ease: EASE.out, overwrite: true },
+          );
+        });
+      },
+      hero: (() => {
+        const el = document.querySelector<HTMLElement>('[data-hero-demo]')!;
+        const reveal = reduced ? null : lineReveal(el, { duration: DUR.slow, stagger: 0.06, paused: true });
+        reveal?.tween?.progress(1);
+        return () => reveal?.tween?.restart();
+      })(),
+      section: (() => {
+        const wrap = document.querySelector<HTMLElement>('[data-section-demo]')!;
+        const rule = wrap.querySelector<HTMLElement>('[data-rule]')!;
+        const num = wrap.querySelector<HTMLElement>('.section-head__num')!;
+        const title = wrap.querySelector<HTMLElement>('[data-lines]')!;
+        const reveal = reduced ? null : lineReveal(title, { duration: DUR.slow, delay: 0.1, paused: true });
+        reveal?.tween?.progress(1);
+        return () => {
+          gsap.fromTo(rule, { scaleX: 0 }, { scaleX: 1, duration: DUR.slow, ease: EASE.out, overwrite: true });
+          gsap.fromTo(num, { autoAlpha: 0, y: 12 }, { autoAlpha: 1, y: 0, duration: DUR.base, delay: 0.1, ease: EASE.out, overwrite: true });
+          reveal?.tween?.restart(true);
+        };
+      })(),
+      stagger() {
+        const rows = document.querySelectorAll<HTMLElement>('[data-stagger-demo] > li');
+        gsap.fromTo(
+          rows,
+          { autoAlpha: 0, y: 16 },
+          { autoAlpha: 1, y: 0, duration: DUR.base, stagger: STAGGER, ease: EASE.out, overwrite: true },
+        );
+      },
+    };
+
+    document.querySelectorAll<HTMLButtonElement>('[data-play]').forEach((b) => {
+      b.addEventListener('click', () => demos[b.dataset.play!]?.());
+    });
+  }
+
+  document.fonts.ready.then(initDemos);
+</script>
+
+<style>
+  /* ---------- Top bar ---------- */
+  .sg-top {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--space-2) var(--space-4);
+    padding-block: var(--space-2);
+    background: var(--bg);
+    border-bottom: var(--hairline) solid var(--rule);
+  }
+
+  .sg-top__id {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-1) var(--space-3);
+  }
+
+  .sg-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-1) var(--space-3);
+  }
+
+  .sg-control {
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+  }
+
+  .sg-control .label {
+    margin-right: var(--space-half);
+  }
+
+  .sg-control button {
+    font-family: var(--font-mono);
+    font-size: var(--text-label);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    padding: var(--space-half) var(--space-1);
+    border: var(--hairline) solid var(--rule);
+    color: var(--muted);
+    transition:
+      color var(--dur-fast) var(--ease-out),
+      border-color var(--dur-fast) var(--ease-out);
+  }
+
+  .sg-control button:hover {
+    color: var(--fg);
+  }
+
+  .sg-control button[aria-pressed='true'] {
+    color: var(--fg);
+    border-color: var(--accent);
+  }
+
+  /* ---------- Sections ---------- */
+  .sg-section {
+    padding-block: var(--section-pad) 0;
+  }
+
+  .sg-section:last-child {
+    padding-bottom: var(--section-pad);
+  }
+
+  .sg-note {
+    margin-bottom: var(--space-4);
+  }
+
+  .sg-sub {
+    margin-block: var(--space-6) var(--space-2);
+  }
+
+  /* ---------- Specimen ---------- */
+  .sg-specimen {
+    font-family: var(--font-body);
+  }
+
+  .specimen-hero {
+    container-type: inline-size;
+    margin-bottom: var(--space-6);
+  }
+
+  .specimen-hero__name,
+  .hero-demo__name {
+    font-family: var(--font-display);
+    font-weight: 500;
+    line-height: var(--leading-display);
+    letter-spacing: var(--tracking-display);
+  }
+
+  /* font-size and tracking live on the same element so the em tracking scales with the line */
+  .specimen-hero__name span {
+    display: block;
+    white-space: nowrap;
+    font-size: calc(100cqi / var(--fit));
+    letter-spacing: var(--tracking-display);
+  }
+
+  .specimen-hero__below {
+    display: grid;
+    gap: var(--space-2);
+    margin-top: var(--space-4);
+  }
+
+  .specimen-hero__position {
+    font-size: var(--text-lead);
+    max-width: 32ch;
+  }
+
+  .meta-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-1);
+  }
+
+  .specimen-body {
+    display: grid;
+    grid-template-columns: repeat(var(--columns), minmax(0, 1fr));
+    column-gap: var(--gutter);
+    row-gap: var(--space-5);
+    border-top: var(--hairline) solid var(--rule);
+    padding-top: var(--space-4);
+  }
+
+  .spec-table {
+    grid-column: 1 / -1;
+    display: grid;
+    gap: var(--space-1);
+    align-content: start;
+  }
+
+  .spec-table div {
+    display: grid;
+    grid-template-columns: 7rem 1fr;
+    gap: var(--space-2);
+    font-size: var(--text-small);
+  }
+
+  .specimen-samples {
+    grid-column: 1 / -1;
+    display: grid;
+    gap: var(--space-4);
+  }
+
+  .specimen-lead {
+    font-size: var(--text-h3);
+    line-height: 1.35;
+    letter-spacing: -0.01em;
+    max-width: 40ch;
+  }
+
+  .weights {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-1) var(--space-4);
+    font-size: var(--text-h3);
+  }
+
+  .glyphs {
+    font-size: var(--text-h3);
+    overflow-wrap: anywhere;
+    color: var(--muted);
+  }
+
+  .glyphs--num {
+    font-variant-numeric: tabular-nums;
+  }
+
+  @media (min-width: 64rem) {
+    .spec-table {
+      grid-column: 1 / span 3;
+    }
+    .specimen-samples {
+      grid-column: 4 / -1;
+    }
+    .specimen-hero__below {
+      grid-template-columns: repeat(var(--columns), minmax(0, 1fr));
+      column-gap: var(--gutter);
+      align-items: end;
+    }
+    .specimen-hero__position {
+      grid-column: 1 / span 6;
+    }
+    .meta-row {
+      grid-column: 7 / -1;
+      justify-content: flex-end;
+    }
+  }
+
+  /* ---------- Mono ---------- */
+  .mono-compare {
+    display: grid;
+    gap: var(--space-5) var(--gutter);
+  }
+
+  .mono-col {
+    display: grid;
+    gap: var(--space-2);
+    border-top: var(--hairline) solid var(--rule);
+    padding-top: var(--space-2);
+  }
+
+  .mono-col__name {
+    color: var(--fg);
+  }
+
+  .mono-sample {
+    font-size: var(--text-small);
+    overflow-wrap: anywhere;
+  }
+
+  @media (min-width: 48rem) {
+    .mono-compare {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  /* ---------- Colour ---------- */
+  .table-wrap {
+    overflow-x: auto;
+  }
+
+  .colour-table {
+    width: 100%;
+    min-width: 40rem;
+    border-collapse: collapse;
+    font-size: var(--text-small);
+  }
+
+  .colour-table th,
+  .colour-table td {
+    text-align: left;
+    padding: var(--space-2) var(--space-2) var(--space-2) 0;
+    border-bottom: var(--hairline) solid var(--rule);
+    vertical-align: middle;
+    font-weight: 400;
+  }
+
+  .swatch-cell {
+    display: flex;
+    align-items: center;
+    gap: var(--space-1) var(--space-2);
+    flex-wrap: wrap;
+  }
+
+  .swatch {
+    width: 2rem;
+    height: 1.25rem;
+    outline: var(--hairline) solid var(--rule);
+  }
+
+  .ratio {
+    color: var(--muted);
+  }
+
+  .ratio--fail {
+    color: var(--accent);
+  }
+
+  /* ---------- Accent ---------- */
+  .accent-compare {
+    display: grid;
+    gap: var(--space-5) var(--gutter);
+  }
+
+  .accent-col {
+    display: grid;
+    gap: var(--space-2);
+  }
+
+  .accent-pair {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+    border: var(--hairline) solid var(--rule);
+  }
+
+  .accent-tile {
+    display: grid;
+    gap: var(--space-2);
+    padding: var(--space-3);
+    align-content: start;
+    min-width: 0;
+  }
+
+  .accent-tile__theme {
+    font-size: var(--text-label);
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-label);
+    opacity: 0.7;
+  }
+
+  .accent-tile__nav {
+    position: relative;
+    font-size: var(--text-small);
+    font-weight: 500;
+    padding-left: var(--space-4);
+  }
+
+  .accent-tile__line {
+    position: absolute;
+    left: 0;
+    top: 50%;
+    width: var(--space-3);
+    height: 1px;
+    background: var(--a);
+  }
+
+  .accent-tile__link {
+    color: var(--a);
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.2em;
+    font-size: var(--text-small);
+    overflow-wrap: anywhere;
+  }
+
+  .accent-tile__focus {
+    justify-self: start;
+    font-size: var(--text-label);
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-label);
+    padding: var(--space-half) var(--space-1);
+    outline: 2px solid var(--a);
+    outline-offset: 3px;
+  }
+
+  .accent-tile__hex {
+    font-size: var(--text-label);
+  }
+
+  @media (min-width: 64rem) {
+    .accent-compare {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  /* ---------- Scale ---------- */
+  .scale__row {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-1) var(--gutter);
+    padding-block: var(--space-3);
+    border-bottom: var(--hairline) solid var(--rule);
+    align-items: baseline;
+  }
+
+  .scale__token,
+  .scale__range {
+    font-size: var(--text-label);
+  }
+
+  .scale__sample {
+    line-height: var(--leading-tight);
+    min-width: 0;
+  }
+
+  .scale__sample.display {
+    font-family: var(--font-display);
+    font-weight: 500;
+    letter-spacing: var(--tracking-tight);
+  }
+
+  .scale__sample.mono-label {
+    font-family: var(--font-mono);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+  }
+
+  @media (min-width: 48rem) {
+    .scale__row {
+      grid-template-columns: 10rem 7rem 1fr;
+    }
+  }
+
+  /* ---------- Space / grid ---------- */
+  .spaces__row {
+    display: grid;
+    grid-template-columns: 8rem minmax(0, 1fr);
+    gap: var(--space-1) var(--space-2);
+    align-items: center;
+    padding-block: var(--space-1);
+    font-size: var(--text-label);
+  }
+
+  .spaces__bar {
+    grid-column: 1 / -1;
+    height: var(--space-1);
+    background: var(--fg);
+  }
+
+  @media (min-width: 48rem) {
+    .spaces__row {
+      grid-template-columns: 8rem 4rem minmax(0, 1fr);
+    }
+    .spaces__bar {
+      grid-column: auto;
+    }
+  }
+
+  .grid-demo {
+    height: 8rem;
+  }
+
+  .grid-demo__col {
+    border-inline: var(--hairline) solid var(--rule);
+    padding: var(--space-1) var(--space-half);
+    font-size: 0.625rem;
+    color: var(--muted);
+  }
+
+  /* ---------- Motion ---------- */
+  .motion-block {
+    border-top: var(--hairline) solid var(--rule);
+    padding-block: var(--space-3) var(--space-6);
+  }
+
+  .motion-block__head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--space-2);
+    margin-bottom: var(--space-4);
+  }
+
+  .replay {
+    font-size: var(--text-label);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    padding: var(--space-half) var(--space-2);
+    border: var(--hairline) solid var(--rule);
+    transition: border-color var(--dur-fast) var(--ease-out);
+  }
+
+  .replay:hover {
+    border-color: var(--accent);
+  }
+
+  .replay:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  .curves {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+    gap: var(--space-5) var(--gutter);
+  }
+
+  .curve {
+    display: grid;
+    gap: var(--space-2);
+  }
+
+  .curve__plot {
+    width: 100%;
+    max-width: 10rem;
+    aspect-ratio: 1;
+    overflow: visible;
+  }
+
+  .curve__box {
+    fill: none;
+    stroke: var(--rule);
+    stroke-width: 1;
+    vector-effect: non-scaling-stroke;
+  }
+
+  .curve__path {
+    fill: none;
+    stroke: var(--fg);
+    stroke-width: 1.5;
+    vector-effect: non-scaling-stroke;
+  }
+
+  .curve__track {
+    position: relative;
+    height: 0.75rem;
+    border-bottom: var(--hairline) solid var(--rule);
+  }
+
+  .curve__dot {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 0.75rem;
+    height: 0.75rem;
+    background: var(--accent);
+  }
+
+  .curve__name {
+    font-size: var(--text-small);
+  }
+
+  .durations li {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-1) var(--gutter);
+    align-items: center;
+    padding-block: var(--space-2);
+    border-bottom: var(--hairline) solid var(--rule);
+    font-size: var(--text-small);
+  }
+
+  .dur-chip {
+    justify-self: start;
+    font-family: var(--font-mono);
+    font-size: var(--text-label);
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-label);
+    padding: var(--space-half) var(--space-1);
+    border: var(--hairline) solid var(--fg);
+  }
+
+  @media (min-width: 48rem) {
+    .durations li {
+      grid-template-columns: 14rem 1fr 8rem;
+    }
+  }
+
+  .hero-demo {
+    container-type: inline-size;
+  }
+
+  .hero-demo__name {
+    white-space: nowrap;
+    font-size: calc(100cqi / var(--hero-fit));
+  }
+
+  .work-demo__row {
+    display: grid;
+    grid-template-columns: 3rem 1fr;
+    gap: var(--space-1) var(--gutter);
+    align-items: baseline;
+    padding-block: var(--space-3);
+    border-bottom: var(--hairline) solid var(--rule);
+  }
+
+  .work-demo__row .label {
+    grid-column: 2;
+  }
+
+  .work-demo__title {
+    font-family: var(--font-display);
+    font-size: var(--text-h3);
+    font-weight: 500;
+    letter-spacing: var(--tracking-tight);
+  }
+
+  @media (min-width: 48rem) {
+    .work-demo__row {
+      grid-template-columns: 4rem 1fr auto;
+    }
+    .work-demo__row .label {
+      grid-column: auto;
+    }
+  }
+</style>

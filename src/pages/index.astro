@@ -1,0 +1,23 @@
+---
+import Base from '../layouts/Base.astro';
+import { withBase } from '../lib/url';
+---
+
+<Base title="Abubakr M. Abdelhalim" noindex>
+  <main id="main" class="page placeholder">
+    <h1>Abubakr M. Abdelhalim</h1>
+    <p class="label">v2 rebuild in progress</p>
+    <p><a class="link" href={withBase('styleguide/')}>Styleguide</a></p>
+  </main>
+</Base>
+
+<style>
+  .placeholder {
+    display: grid;
+    gap: var(--space-2);
+    padding-block: var(--space-8);
+  }
+  h1 {
+    font-size: var(--text-h1);
+  }
+</style>
