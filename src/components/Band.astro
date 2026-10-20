@@ -1,0 +1,118 @@
+---
+/**
+ * Kinetic band: a large single line that drifts sideways, speeds up with scroll velocity
+ * and follows the scroll direction. Static under reduced motion.
+ */
+interface Props {
+  items: string[];
+  label: string;
+}
+const { items, label } = Astro.props;
+---
+
+<div class="band" data-band>
+  <p class="visually-hidden">{label}: {items.join(', ')}.</p>
+  <div class="band__track" aria-hidden="true" data-band-track>
+    {
+      [0, 1].map(() => (
+        <div class="band__group">
+          {items.map((item) => (
+            <>
+              <span class="band__item">{item}</span>
+              <span class="band__mark" />
+            </>
+          ))}
+        </div>
+      ))
+    }
+  </div>
+</div>
+
+<script>
+  import { gsap, prefersReducedMotion } from '../scripts/motion';
+  import { lenis } from '../scripts/smooth';
+
+  let stop: (() => void) | undefined;
+
+  document.addEventListener('astro:page-load', () => {
+    stop?.();
+    const band = document.querySelector<HTMLElement>('[data-band]');
+    const track = band?.querySelector<HTMLElement>('[data-band-track]');
+    if (!band || !track || prefersReducedMotion()) return;
+
+    const setX = gsap.quickSetter(track, 'xPercent');
+    let x = 0;
+    let dir = -1;
+    let visible = false;
+
+    // Two identical groups: wrapping at -50% makes the loop seamless.
+    const tick = (_time: number, deltaMs: number) => {
+      if (!visible) return;
+      const velocity = lenis?.velocity ?? 0;
+      if (velocity > 0.1) dir = -1;
+      else if (velocity < -0.1) dir = 1;
+      const speed = 0.006 + Math.min(Math.abs(velocity) * 0.004, 0.12); // % of track per ms
+      x += dir * speed * deltaMs;
+      if (x <= -50) x += 50;
+      if (x > 0) x -= 50;
+      setX(x);
+    };
+
+    const io = new IntersectionObserver(([entry]) => (visible = entry.isIntersecting));
+    io.observe(band);
+    gsap.ticker.add(tick);
+
+    stop = () => {
+      gsap.ticker.remove(tick);
+      io.disconnect();
+    };
+  });
+
+  document.addEventListener('astro:before-swap', () => stop?.());
+</script>
+
+<style>
+  .band {
+    overflow: clip;
+    padding-block: var(--space-6);
+    border-block: var(--hairline) solid var(--rule);
+    margin-top: var(--section-pad);
+  }
+
+  .band__track {
+    display: flex;
+    width: max-content;
+  }
+
+  .band__group {
+    display: flex;
+    align-items: center;
+    flex: none;
+  }
+
+  .band__item {
+    font-family: var(--font-display);
+    font-size: clamp(3rem, 1rem + 7vw, 8.5rem);
+    font-weight: 500;
+    line-height: 1;
+    letter-spacing: var(--tracking-display);
+    white-space: nowrap;
+  }
+
+  /* Small accent square between items: the only colour in the band. */
+  .band__mark {
+    width: 0.16em;
+    height: 0.16em;
+    margin-inline: 0.45em;
+    font-size: clamp(3rem, 1rem + 7vw, 8.5rem);
+    background: var(--accent);
+    flex: none;
+  }
+
+  /* Reduced motion: no drift, so show the first items in a single static line. */
+  @media (prefers-reduced-motion: reduce) {
+    .band__track {
+      transform: none !important;
+    }
+  }
+</style>

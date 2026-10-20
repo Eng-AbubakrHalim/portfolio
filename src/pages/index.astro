@@ -4,6 +4,8 @@ import SiteHeader from '../components/SiteHeader.astro';
 import Hero from '../components/Hero.astro';
 import SectionHeader from '../components/SectionHeader.astro';
 import WorkList from '../components/WorkList.astro';
+import Facts from '../components/Facts.astro';
+import Band from '../components/Band.astro';
 import { sections, section } from '../data/sections';
 
 const stubs = sections.filter((s) => s.id !== 'work');
@@ -17,8 +19,24 @@ const stubs = sections.filter((s) => s.id !== 'work');
       meta={['Based in Malaysia', 'Graduating Feb 2027', 'Open to roles']}
     />
 
+    <Facts
+      facts={[
+        { value: '04', label: 'Channels on the industrial DAQ module, Pythonium.ai, 2026' },
+        { value: '02', label: 'Awards for Smart Posture Correction: Gold Medal, MIIE 2026, and Industry Award, UTM 2026' },
+        { value: '02', label: 'ABU Robocon cycles as electronics head of UTM Robocon, 2024 and 2025' },
+        { value: '20', suffix: '+', label: 'Robocon members trained in Altium Designer and STM32' },
+      ]}
+    />
+
+    <Band label="Focus" items={['Hardware design', 'Embedded systems', 'Power and signal integrity', 'Power quality']} />
+
     <section class="section page" id="work" aria-labelledby="work-title" data-section="work">
-      <SectionHeader num={section('work').num} title="Selected work" id="work-title" />
+      <SectionHeader
+        num={section('work').num}
+        title="Selected work"
+        id="work-title"
+        intro="Case studies: what had to be built, the decisions behind it, and how it was verified."
+      />
       <WorkList />
     </section>
 
@@ -74,9 +92,10 @@ const stubs = sections.filter((s) => s.id !== 'work');
         trigger: el,
         start: 'top 40%',
         end: i === els.length - 1 ? 'max' : 'bottom 40%',
-        onToggle: (self) => {
-          if (self.isActive) setActive(el.dataset.section!);
-          else if (i === 0 && self.direction < 0) setActive(null);
+        // Recompute from every trigger so instant jumps (Home key, restored scroll) settle correctly.
+        onToggle: () => {
+          const current = triggers.findIndex((t) => t.isActive);
+          setActive(current === -1 ? null : els[current].dataset.section!);
         },
       }),
     );

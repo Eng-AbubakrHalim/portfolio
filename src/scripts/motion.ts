@@ -39,17 +39,19 @@ export function lineReveal(
     tween?.kill();
     tween = gsap.fromTo(
       lines,
-      { yPercent: 110 },
+      { yPercent: 120 },
       { yPercent: 0, duration, stagger, ease: EASE.out, paused: true },
     );
     tween.progress(progress);
     if (requested && !pending && progress < 1) tween.play();
   };
 
+  // Lines-only splits keep words intact, so the text stays readable as-is: no aria rewriting.
   const split = SplitText.create(el, {
     type: 'lines',
     mask: 'lines',
     linesClass: 'split-line',
+    aria: 'none',
     autoSplit: true,
     onSplit: (self) => build(self.lines),
   });

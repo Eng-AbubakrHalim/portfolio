@@ -6,11 +6,14 @@ interface Props {
 const { position, meta } = Astro.props;
 ---
 
-<section class="hero page" id="top" aria-labelledby="hero-name">
+<section class="hero page" id="top" aria-labelledby="hero-name" data-hero>
   <div class="hero__fit">
-    <h1 class="hero__name" id="hero-name" data-hero-name>Abubakr M.<br />Abdelhalim</h1>
+    <h1 class="hero__name" id="hero-name">
+      <span class="hero__line" data-hero-line>Abubakr M.</span>{' '}
+      <span class="hero__line" data-hero-line>Abdelhalim</span>
+    </h1>
   </div>
-  <div class="hero__below">
+  <div class="hero__below" data-hero-below>
     <p class="hero__position" data-hero-fade>{position}</p>
     <p class="hero__meta label" data-hero-fade>
       {
@@ -21,6 +24,11 @@ const { position, meta } = Astro.props;
           </>
         ))
       }
+      <span aria-hidden="true">·</span>
+      <span class="hero__clock">
+        <span class="visually-hidden">Local time in Malaysia:</span>
+        <time data-clock-time>--:--</time> MYT
+      </span>
     </p>
     <a class="hero__cta" href="#work" data-hero-fade>View work</a>
   </div>
@@ -28,25 +36,57 @@ const { position, meta } = Astro.props;
 
 <script>
   import { gsap, lineReveal, DUR, EASE, prefersReducedMotion } from '../scripts/motion';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
-  let reveal: ReturnType<typeof lineReveal> | undefined;
+  gsap.registerPlugin(ScrollTrigger);
+
+  let reveals: ReturnType<typeof lineReveal>[] = [];
+  let exit: ScrollTrigger | undefined;
+  let clockTimer: number | undefined;
+
+  const clockFormat = new Intl.DateTimeFormat('en-GB', {
+    timeZone: 'Asia/Kuala_Lumpur',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  });
+
+  function startClock() {
+    const el = document.querySelector<HTMLTimeElement>('[data-clock-time]');
+    if (!el) return;
+    const tick = () => (el.textContent = clockFormat.format(new Date()));
+    tick();
+    window.clearInterval(clockTimer);
+    clockTimer = window.setInterval(tick, 15_000);
+  }
+
+  function cleanup() {
+    reveals.forEach((r) => r.split.revert());
+    reveals = [];
+    exit?.kill();
+    exit = undefined;
+  }
 
   document.addEventListener('astro:page-load', () => {
-    const name = document.querySelector<HTMLElement>('[data-hero-name]');
-    if (!name) return;
+    const hero = document.querySelector<HTMLElement>('[data-hero]');
+    if (!hero) return;
+    startClock();
     const root = document.documentElement;
-    const fades = document.querySelectorAll<HTMLElement>('[data-hero-fade]');
 
     if (prefersReducedMotion()) {
       root.classList.add('hero-ready');
       return;
     }
 
+    const lines = [...hero.querySelectorAll<HTMLElement>('[data-hero-line]')];
+    const fades = hero.querySelectorAll<HTMLElement>('[data-hero-fade]');
+
     // Split once fonts are in so the masked lines match the final layout; don't wait forever.
     const fontsReady = Promise.race([document.fonts.ready, new Promise((r) => setTimeout(r, 1500))]);
     fontsReady.then(() => {
-      reveal?.split.revert();
-      reveal = lineReveal(name, { duration: DUR.slow, stagger: 0.06 });
+      cleanup();
+      // One reveal per line (60ms apart) so the outer line spans stay stable for the scroll exit below.
+      reveals = lines.map((line, i) => lineReveal(line, { duration: DUR.slow, delay: i * 0.06 }));
       gsap.from(fades, {
         autoAlpha: 0,
         y: 12,
@@ -57,12 +97,25 @@ const { position, meta } = Astro.props;
         clearProps: 'transform,opacity,visibility',
       });
       root.classList.add('hero-ready');
+
+      // Scrolling out of the hero pulls the two lines of the name apart (scrubbed, so linear).
+      exit = ScrollTrigger.create({
+        trigger: hero,
+        start: 'top top',
+        end: 'bottom top',
+        scrub: true,
+        animation: gsap
+          .timeline()
+          .to(lines[0], { xPercent: -14, ease: 'none' }, 0)
+          .to(lines[1], { xPercent: 14, ease: 'none' }, 0)
+          .to(hero.querySelector('[data-hero-below]'), { autoAlpha: 0, y: -24, ease: 'none' }, 0),
+      });
     });
   });
 
   document.addEventListener('astro:before-swap', () => {
-    reveal?.split.revert();
-    reveal = undefined;
+    cleanup();
+    window.clearInterval(clockTimer);
   });
 </script>
 
@@ -73,6 +126,14 @@ const { position, meta } = Astro.props;
     align-content: end;
     padding-top: calc(var(--header-h) + var(--space-5));
     padding-bottom: var(--space-5);
+    overflow: clip;
+  }
+
+  /* Phones: a shorter hero so the facts strip shows at the bottom of the first screen. */
+  @media (max-width: 47.99rem) {
+    .hero {
+      min-height: 80svh;
+    }
   }
 
   /* The name is sized from this box's width: font-size = width / measured em-width of the longest line. */
@@ -89,7 +150,10 @@ const { position, meta } = Astro.props;
     line-height: var(--leading-display);
     letter-spacing: var(--tracking-display);
     white-space: nowrap;
-    text-wrap: nowrap;
+  }
+
+  .hero__line {
+    display: block;
   }
 
   .hero__below {
@@ -110,6 +174,11 @@ const { position, meta } = Astro.props;
     display: flex;
     flex-wrap: wrap;
     gap: var(--space-half) var(--space-1);
+  }
+
+  .hero__clock time {
+    color: var(--fg);
+    font-variant-numeric: tabular-nums;
   }
 
   .hero__cta {
@@ -134,10 +203,10 @@ const { position, meta } = Astro.props;
       align-items: baseline;
     }
     .hero__position {
-      grid-column: 1 / span 5;
+      grid-column: 1 / span 4;
     }
     .hero__meta {
-      grid-column: 6 / span 5;
+      grid-column: 5 / span 6;
     }
     .hero__cta {
       grid-column: 11 / -1;

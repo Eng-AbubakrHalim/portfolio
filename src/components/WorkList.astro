@@ -58,6 +58,9 @@ const rows = projects.map((p, i) => ({
 
 <script>
   import { gsap, DUR, EXIT, EASE, prefersReducedMotion } from '../scripts/motion';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+  gsap.registerPlugin(ScrollTrigger);
 
   const HIDDEN = 'inset(100% 0% 0% 0%)';
   const SHOWN = 'inset(0% 0% 0% 0%)';
@@ -159,8 +162,30 @@ const rows = projects.map((p, i) => ({
     };
   }
 
-  document.addEventListener('astro:page-load', initPreview);
-  document.addEventListener('astro:before-swap', () => cleanup?.());
+  // Rows rise in with a 50ms stagger as the list scrolls into view.
+  let rowsTrigger: ScrollTrigger | undefined;
+  function initRows() {
+    rowsTrigger?.kill();
+    const rows = document.querySelectorAll<HTMLElement>('[data-work-row]');
+    if (!rows.length || prefersReducedMotion()) return;
+    gsap.set(rows, { autoAlpha: 0, y: 24 });
+    rowsTrigger = ScrollTrigger.create({
+      trigger: rows[0],
+      start: 'top 90%',
+      once: true,
+      onEnter: () =>
+        gsap.to(rows, { autoAlpha: 1, y: 0, duration: DUR.slow, stagger: 0.05, ease: EASE.out, clearProps: 'transform' }),
+    });
+  }
+
+  document.addEventListener('astro:page-load', () => {
+    initPreview();
+    initRows();
+  });
+  document.addEventListener('astro:before-swap', () => {
+    cleanup?.();
+    rowsTrigger?.kill();
+  });
 </script>
 
 <style>
@@ -177,6 +202,7 @@ const rows = projects.map((p, i) => ({
   }
 
   .work-row__link {
+    position: relative;
     display: grid;
     grid-template-columns: 2.5rem minmax(0, 1fr);
     gap: var(--space-2) var(--gutter);
@@ -186,11 +212,44 @@ const rows = projects.map((p, i) => ({
     transition: color var(--dur-fast) var(--ease-out);
   }
 
+  /* Accent rule that draws under the active row (exit is faster and eases in). */
+  .work-row__link::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -1px;
+    height: 1px;
+    background: var(--accent);
+    transform: scaleX(0);
+    transform-origin: left center;
+    transition: transform var(--dur-base-exit) var(--ease-in);
+  }
+
+  .work-row__link:is(:hover, :focus-visible)::after {
+    transform: scaleX(1);
+    transition: transform var(--dur-base) var(--ease-out);
+  }
+
+  .work-row__title {
+    transition: transform var(--dur-base-exit) var(--ease-in);
+  }
+
+  .work-row__link:is(:hover, :focus-visible) .work-row__title {
+    transform: translateX(var(--space-2));
+    transition: transform var(--dur-base) var(--ease-out);
+  }
+
+  .work-row__link:is(:hover, :focus-visible) .work-row__num {
+    color: var(--accent);
+  }
+
   .work-row__num {
     font-family: var(--font-mono);
     font-size: var(--text-label);
     color: var(--muted);
     padding-top: 0.6em;
+    transition: color var(--dur-fast) var(--ease-out);
   }
 
   .work-row__main {

@@ -3,19 +3,26 @@ interface Props {
   num: string;
   title: string;
   id?: string;
+  /** Optional one-line intro under the heading. */
+  intro?: string;
   /** Heading level; sections on the home page use h2. */
   as?: 'h2' | 'h3';
   /** Set false when another script drives the animation (styleguide demo). */
   reveal?: boolean;
 }
-const { num, title, id, as: Tag = 'h2', reveal = true } = Astro.props;
+const { num, title, id, intro, as: Tag = 'h2', reveal = true } = Astro.props;
 ---
 
 <header class="section-head" data-section-head={reveal ? '' : undefined}>
   <hr class="rule section-head__rule" data-rule />
   <div class="section-head__row">
-    <span class="section-head__num label" aria-hidden="true">{num}</span>
-    <Tag class="section-head__title" id={id} data-lines>{title}</Tag>
+    <p class="section-head__num" aria-hidden="true">
+      <span class="section-head__num-inner" data-num>{num}</span>
+    </p>
+    <div class="section-head__text">
+      <Tag class="section-head__title" id={id} data-lines>{title}</Tag>
+      {intro && <p class="section-head__intro" data-intro>{intro}</p>}
+    </div>
   </div>
 </header>
 
@@ -25,41 +32,55 @@ const { num, title, id, as: Tag = 'h2', reveal = true } = Astro.props;
 
   gsap.registerPlugin(ScrollTrigger);
 
-  let active: { trigger: ScrollTrigger; split: ReturnType<typeof lineReveal>['split'] }[] = [];
+  let active: { triggers: ScrollTrigger[]; splits: ReturnType<typeof lineReveal>['split'][] }[] = [];
 
   function cleanup() {
-    active.forEach(({ trigger, split }) => {
-      trigger.kill();
-      split.revert();
+    active.forEach(({ triggers, splits }) => {
+      triggers.forEach((t) => t.kill());
+      splits.forEach((s) => s.revert());
     });
     active = [];
   }
 
-  // Same rhythm for every section: rule scales out, number fades up, heading slides up behind its mask.
+  // Same rhythm for every section: rule scales out, the big numeral and the heading slide up
+  // behind their masks, the intro fades in. The numeral then drifts slightly with scroll.
   function initSectionHeads() {
     cleanup();
     if (prefersReducedMotion()) return;
     document.querySelectorAll<HTMLElement>('[data-section-head]').forEach((head) => {
       const rule = head.querySelector<HTMLElement>('[data-rule]');
-      const num = head.querySelector<HTMLElement>('.section-head__num');
+      const num = head.querySelector<HTMLElement>('[data-num]');
       const title = head.querySelector<HTMLElement>('[data-lines]');
+      const intro = head.querySelector<HTMLElement>('[data-intro]');
       if (!rule || !num || !title) return;
 
-      const reveal = lineReveal(title, { duration: DUR.slow, delay: 0.1, paused: true });
+      const numReveal = lineReveal(num, { duration: DUR.slow, paused: true });
+      const titleReveal = lineReveal(title, { duration: DUR.slow, delay: 0.1, paused: true });
       gsap.set(rule, { scaleX: 0 });
-      gsap.set(num, { autoAlpha: 0, y: 12 });
+      if (intro) gsap.set(intro, { autoAlpha: 0, y: 12 });
 
-      const trigger = ScrollTrigger.create({
+      const enter = ScrollTrigger.create({
         trigger: head,
         start: 'top 85%',
         once: true,
         onEnter: () => {
           gsap.to(rule, { scaleX: 1, duration: DUR.slow, ease: EASE.out });
-          gsap.to(num, { autoAlpha: 1, y: 0, duration: DUR.base, delay: 0.1, ease: EASE.out });
-          reveal.play();
+          numReveal.play();
+          titleReveal.play();
+          if (intro) gsap.to(intro, { autoAlpha: 1, y: 0, duration: DUR.base, delay: 0.2, ease: EASE.out });
         },
       });
-      active.push({ trigger, split: reveal.split });
+
+      // Parallax on the numeral's outer box (the inner lines are driven by the reveal).
+      const drift = ScrollTrigger.create({
+        trigger: head,
+        start: 'top bottom',
+        end: 'bottom top',
+        scrub: true,
+        animation: gsap.fromTo(head.querySelector('.section-head__num'), { yPercent: 12 }, { yPercent: -12, ease: 'none' }),
+      });
+
+      active.push({ triggers: [enter, drift], splits: [numReveal.split, titleReveal.split] });
     });
   }
 
@@ -71,7 +92,7 @@ const { num, title, id, as: Tag = 'h2', reveal = true } = Astro.props;
 
 <style>
   .section-head {
-    margin-bottom: var(--space-6);
+    margin-bottom: var(--space-7);
   }
 
   .section-head__rule {
@@ -82,17 +103,33 @@ const { num, title, id, as: Tag = 'h2', reveal = true } = Astro.props;
     display: grid;
     grid-template-columns: repeat(var(--columns), minmax(0, 1fr));
     column-gap: var(--gutter);
-    row-gap: var(--space-2);
-    align-items: baseline;
+    row-gap: var(--space-3);
+    align-items: end;
   }
 
+  /* Chapter numeral: the largest type after the hero name. */
   .section-head__num {
     grid-column: 1 / -1;
-    color: var(--muted);
+    font-family: var(--font-display);
+    font-size: clamp(6rem, 3rem + 16vw, 17rem);
+    font-weight: 500;
+    line-height: 0.8;
+    letter-spacing: -0.06em;
+    font-variant-numeric: tabular-nums;
+    margin-left: -0.04em;
+  }
+
+  .section-head__num-inner {
+    display: block;
+  }
+
+  .section-head__text {
+    grid-column: 1 / -1;
+    display: grid;
+    gap: var(--space-2);
   }
 
   .section-head__title {
-    grid-column: 1 / -1;
     font-family: var(--font-display);
     font-size: var(--text-h2);
     font-weight: 500;
@@ -100,12 +137,18 @@ const { num, title, id, as: Tag = 'h2', reveal = true } = Astro.props;
     letter-spacing: var(--tracking-tight);
   }
 
+  .section-head__intro {
+    max-width: 44ch;
+    color: var(--muted);
+  }
+
   @media (min-width: 48rem) {
     .section-head__num {
-      grid-column: 1 / span 3;
+      grid-column: 1 / span 5;
     }
-    .section-head__title {
-      grid-column: 4 / -1;
+    .section-head__text {
+      grid-column: 6 / -1;
+      padding-bottom: 0.4em;
     }
   }
 </style>

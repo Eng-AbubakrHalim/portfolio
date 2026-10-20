@@ -1,5 +1,6 @@
 // Screenshot pages at the brief's test widths.
-// Usage: node scripts/shoot.mjs <path> [--widths 360,768,1280,1920] [--themes dark,light] [--full] [--reduced]
+// Usage: node scripts/shoot.mjs <path> [--widths 360,768,1280,1920] [--themes dark,light] [--full] [--reduced] [--prescroll]
+// --prescroll scrolls through the page first so once-only scroll reveals have fired.
 import { chromium } from 'playwright';
 import { mkdirSync } from 'node:fs';
 
@@ -16,6 +17,7 @@ const widths = opt('widths', '360,1280').split(',').map(Number);
 const themes = opt('themes', 'dark').split(',');
 const full = args.includes('--full');
 const reduced = args.includes('--reduced');
+const prescroll = args.includes('--prescroll');
 const out = opt('out', 'screenshots');
 mkdirSync(out, { recursive: true });
 
@@ -35,6 +37,16 @@ for (const theme of themes) {
     await page.goto(base + path, { waitUntil: 'networkidle' });
     await page.evaluate(() => document.fonts.ready);
     await page.waitForTimeout(900);
+    if (prescroll) {
+      const height = await page.evaluate(() => document.documentElement.scrollHeight);
+      for (let y = 0; y < height; y += 400) {
+        await page.mouse.wheel(0, 400);
+        await page.waitForTimeout(60);
+      }
+      await page.waitForTimeout(1200);
+      await page.evaluate(() => window.scrollTo(0, 0));
+      await page.waitForTimeout(1200);
+    }
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
     const slug = path.replace(/\W+/g, '-').replace(/^-|-$/g, '') || 'home';
     const file = `${out}/${slug}-${width}-${theme}${reduced ? '-reduced' : ''}.png`;

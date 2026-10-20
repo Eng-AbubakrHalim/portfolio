@@ -196,3 +196,10 @@ a:hover {
 .skip-link:focus-visible {
   transform: none;
 }
+
+/* SplitText line masks: a little room above and below so tight display leading
+   never clips ascenders or descenders (negative margin keeps layout unchanged). */
+.split-line-mask {
+  padding-block: 0.1em;
+  margin-block: -0.1em;
+}
