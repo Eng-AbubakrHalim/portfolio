@@ -1,0 +1,203 @@
+---
+import { profile } from '../data/profile';
+import { withBase } from '../lib/url';
+
+const [local, domain] = profile.email.split('@');
+const links = [
+  { label: 'Phone', text: profile.phone.display, href: profile.phone.href },
+  { label: 'LinkedIn', text: 'abubakr-halim', href: profile.linkedin.href },
+  { label: 'GitHub', text: 'Eng-AbubakrHalim', href: profile.github.href },
+];
+---
+
+<div class="contact">
+  <!-- Email sized to the column like the hero name: one line on wide screens, split at the @ on phones. -->
+  <div class="contact__fit">
+    <a class="contact__email" href={`mailto:${profile.email}`} data-reveal>
+      <span class="contact__local">{local}</span><span class="contact__domain">@{domain}</span>
+    </a>
+  </div>
+
+  <div class="contact__actions" data-reveal>
+    <button class="contact__copy" type="button" data-copy={profile.email}>
+      <span data-copy-label>Copy email</span>
+    </button>
+    <span class="visually-hidden" aria-live="polite" data-copy-status></span>
+    <a class="contact__cv" href={withBase(profile.cv)} download="Abubakr-M-Abdelhalim-CV.pdf" data-astro-reload>
+      Download CV <span class="contact__meta">PDF · 1 page</span>
+    </a>
+  </div>
+
+  <ul class="contact__links" role="list">
+    {
+      links.map((l) => (
+        <li data-reveal>
+          <span class="contact__label">{l.label}</span>
+          <a href={l.href}>{l.text}</a>
+        </li>
+      ))
+    }
+    <li data-reveal>
+      <span class="contact__label">Based in</span>
+      <span>{profile.location}</span>
+    </li>
+  </ul>
+</div>
+
+<script>
+  document.addEventListener('astro:page-load', () => {
+    const button = document.querySelector<HTMLButtonElement>('[data-copy]');
+    const label = button?.querySelector('[data-copy-label]');
+    const status = document.querySelector('[data-copy-status]');
+    if (!button || !label || !status) return;
+    let timer: number | undefined;
+    button.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(button.dataset.copy!);
+        label.textContent = 'Copied';
+        status.textContent = 'Email address copied to clipboard';
+      } catch {
+        label.textContent = 'Copy failed';
+      }
+      window.clearTimeout(timer);
+      timer = window.setTimeout(() => {
+        label.textContent = 'Copy email';
+        status.textContent = '';
+      }, 2000);
+    });
+  });
+</script>
+
+<style>
+  .contact {
+    display: grid;
+    gap: var(--space-5);
+  }
+
+  .contact__fit {
+    container-type: inline-size;
+  }
+
+  /* --email-fit-*: measured em-widths of the full address and of the longer phone line. */
+  .contact__email {
+    position: relative;
+    display: inline-block;
+    font-family: var(--font-display);
+    font-size: calc(100cqi / var(--email-fit-narrow));
+    font-weight: 500;
+    line-height: 1;
+    letter-spacing: var(--tracking-display);
+    text-decoration: none;
+    color: var(--fg);
+    padding-bottom: 0.08em;
+  }
+
+  .contact__local,
+  .contact__domain {
+    display: block;
+  }
+
+  .contact__domain {
+    color: var(--muted);
+    transition: color var(--dur-fast) var(--ease-out);
+  }
+
+  /* Accent rule draws under the address on hover/focus. */
+  .contact__email::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 2px;
+    background: var(--accent);
+    transform: scaleX(0);
+    transform-origin: left center;
+    transition: transform var(--dur-base-exit) var(--ease-in);
+  }
+
+  .contact__email:is(:hover, :focus-visible)::after {
+    transform: scaleX(1);
+    transition: transform var(--dur-base) var(--ease-out);
+  }
+
+  .contact__email:is(:hover, :focus-visible) .contact__domain {
+    color: var(--fg);
+  }
+
+  .contact__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2) var(--space-4);
+    align-items: center;
+  }
+
+  .contact__copy,
+  .contact__cv {
+    font-family: var(--font-mono);
+    font-size: var(--text-label);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    padding: var(--space-1) var(--space-2);
+    border: var(--hairline) solid var(--rule);
+    color: var(--fg);
+    text-decoration: none;
+    transition:
+      border-color var(--dur-fast) var(--ease-out),
+      color var(--dur-fast) var(--ease-out);
+  }
+
+  .contact__copy:hover,
+  .contact__cv:hover {
+    border-color: var(--accent);
+    color: var(--fg);
+  }
+
+  .contact__meta {
+    color: var(--muted);
+    margin-left: var(--space-1);
+  }
+
+  .contact__links {
+    display: grid;
+    gap: 0 var(--gutter);
+    border-top: var(--hairline) solid var(--rule);
+  }
+
+  .contact__links li {
+    display: grid;
+    gap: var(--space-half);
+    padding-block: var(--space-2);
+    border-bottom: var(--hairline) solid var(--rule);
+  }
+
+  .contact__links a {
+    text-decoration: none;
+    width: fit-content;
+  }
+
+  .contact__links a:hover {
+    color: var(--accent);
+  }
+
+  .contact__label {
+    font-family: var(--font-mono);
+    font-size: var(--text-label);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  @media (min-width: 48rem) {
+    .contact__email {
+      font-size: calc(100cqi / var(--email-fit-wide));
+    }
+    .contact__local,
+    .contact__domain {
+      display: inline;
+    }
+    .contact__links {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+  }
+</style>

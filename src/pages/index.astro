@@ -6,9 +6,13 @@ import SectionHeader from '../components/SectionHeader.astro';
 import WorkList from '../components/WorkList.astro';
 import Facts from '../components/Facts.astro';
 import Band from '../components/Band.astro';
-import { sections, section } from '../data/sections';
-
-const stubs = sections.filter((s) => s.id !== 'work');
+import OtherProjects from '../components/OtherProjects.astro';
+import Experience from '../components/Experience.astro';
+import Toolkit from '../components/Toolkit.astro';
+import About from '../components/About.astro';
+import Contact from '../components/Contact.astro';
+import { section } from '../data/sections';
+import { profile } from '../data/profile';
 ---
 
 <Base title="Abubakr M. Abdelhalim — Electrical engineer" noindex>
@@ -41,18 +45,54 @@ const stubs = sections.filter((s) => s.id !== 'work');
       <WorkList />
     </section>
 
-    {
-      stubs.map((s) => (
-        <section class="section section--stub page" id={s.id} aria-labelledby={`${s.id}-title`} data-section={s.id}>
-          <SectionHeader num={s.num} title={s.label} id={`${s.id}-title`} />
-          <p class="label">Draft content arrives in phase 4.</p>
-        </section>
-      ))
-    }
+    <section class="section page" id="projects" aria-labelledby="projects-title" data-section="projects">
+      <SectionHeader
+        num={section('projects').num}
+        title="Other projects"
+        id="projects-title"
+        intro="Competition robots, final-year research and smaller builds. Open a row for details."
+      />
+      <OtherProjects />
+    </section>
+
+    <section class="section page" id="experience" aria-labelledby="experience-title" data-section="experience">
+      <SectionHeader
+        num={section('experience').num}
+        title="Experience"
+        id="experience-title"
+        intro="Internships, part-time work, leadership and teaching, 2023 to now."
+      />
+      <Experience />
+    </section>
+
+    <section class="section page" id="toolkit" aria-labelledby="toolkit-title" data-section="toolkit">
+      <SectionHeader
+        num={section('toolkit').num}
+        title="Toolkit"
+        id="toolkit-title"
+        intro="What I design, simulate and program with, and where I've used it."
+      />
+      <Toolkit />
+    </section>
+
+    <section class="section page" id="about" aria-labelledby="about-title" data-section="about">
+      <SectionHeader num={section('about').num} title="About" id="about-title" />
+      <About />
+    </section>
+
+    <section class="section page" id="contact" aria-labelledby="contact-title" data-section="contact">
+      <SectionHeader
+        num={section('contact').num}
+        title="Contact"
+        id="contact-title"
+        intro="Open to graduate roles in hardware design and embedded systems from February 2027."
+      />
+      <Contact />
+    </section>
   </main>
 
   <footer class="site-footer page">
-    <span class="label">© 2026 Abubakr M. Abdelhalim</span>
+    <span class="label">© 2026 {profile.name}</span>
     <a class="label" href="#top">Back to top</a>
   </footer>
 </Base>
@@ -61,6 +101,7 @@ const stubs = sections.filter((s) => s.id !== 'work');
   import { ScrollTrigger } from 'gsap/ScrollTrigger';
   import { gsap } from '../scripts/motion';
   import '../scripts/smooth';
+  import '../scripts/reveal';
 
   gsap.registerPlugin(ScrollTrigger);
 
@@ -121,10 +162,6 @@ const stubs = sections.filter((s) => s.id !== 'work');
   .section {
     padding-block: var(--section-pad) 0;
     scroll-margin-top: 0;
-  }
-
-  .section--stub {
-    min-height: 70vh;
   }
 
   .site-footer {

@@ -1,0 +1,149 @@
+---
+import { Image } from 'astro:assets';
+import portrait from '../assets/about/portrait.jpg';
+import { profile } from '../data/profile';
+
+const spec = [
+  ['From', 'Khartoum, Sudan'],
+  ['Based in', profile.location],
+  ['Studying', 'BEng (Hons) Electrical Engineering, UTM'],
+  ['Graduating', 'February 2027'],
+  ['Member', 'Saudi Council of Engineers (student)'],
+];
+---
+
+<div class="about">
+  <figure class="about__photo" data-photo>
+    <Image
+      src={portrait}
+      alt="Portrait of Abubakr M. Abdelhalim in a grey blazer against a plain light background."
+      widths={[360, 540, 720]}
+      sizes="(min-width: 64rem) 30vw, (min-width: 48rem) 40vw, 100vw"
+      loading="lazy"
+    />
+  </figure>
+
+  <div class="about__text">
+    <p class="about__lead" data-reveal>
+      I'm an electrical engineer from Khartoum, finishing my degree at Universiti Teknologi Malaysia. I like the part of
+      hardware where a design has to survive contact with the real world: power, signal integrity and getting a board
+      from schematic to bring-up.
+    </p>
+    <p data-reveal>
+      At UTM I led the electronics department of the Robocon team for two ABU Robocon cycles, and our capstone wearable
+      won a gold medal at MIIE 2026. This year I interned at Pythonium.ai, working on an industrial data-acquisition
+      module and a rigid-flex test adapter. My final-year project looks at supraharmonic emissions from PV inverters.
+    </p>
+    <p data-reveal>
+      I'm looking for a graduate role in hardware design or embedded systems from February 2027, somewhere I can ship
+      real hardware from day one.
+    </p>
+
+    <dl class="about__spec" data-reveal>
+      {
+        spec.map(([k, v]) => (
+          <div>
+            <dt>{k}</dt>
+            <dd>{v}</dd>
+          </div>
+        ))
+      }
+    </dl>
+  </div>
+</div>
+
+<script>
+  import { gsap, DUR, EASE, prefersReducedMotion } from '../scripts/motion';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+  gsap.registerPlugin(ScrollTrigger);
+
+  let trigger: ScrollTrigger | undefined;
+
+  // The portrait clips up into view, the same motion as the work previews.
+  document.addEventListener('astro:page-load', () => {
+    trigger?.kill();
+    const photo = document.querySelector<HTMLElement>('[data-photo]');
+    if (!photo || prefersReducedMotion()) return;
+    gsap.set(photo, { clipPath: 'inset(100% 0% 0% 0%)' });
+    trigger = ScrollTrigger.create({
+      trigger: photo,
+      start: 'top 85%',
+      once: true,
+      onEnter: () =>
+        gsap.to(photo, { clipPath: 'inset(0% 0% 0% 0%)', duration: DUR.slow + 0.1, ease: EASE.out, clearProps: 'clipPath' }),
+    });
+  });
+
+  document.addEventListener('astro:before-swap', () => trigger?.kill());
+</script>
+
+<style>
+  .about {
+    display: grid;
+    gap: var(--space-5) var(--gutter);
+  }
+
+  .about__photo {
+    align-self: start;
+    max-width: 26rem;
+    border: var(--hairline) solid var(--rule);
+  }
+
+  .about__photo :global(img) {
+    width: 100%;
+    aspect-ratio: 4 / 5;
+    object-fit: cover;
+  }
+
+  .about__text {
+    display: grid;
+    gap: var(--space-3);
+    align-content: start;
+    max-width: 62ch;
+  }
+
+  .about__lead {
+    font-family: var(--font-display);
+    font-size: var(--text-h3);
+    line-height: 1.35;
+    letter-spacing: -0.01em;
+  }
+
+  .about__spec {
+    display: grid;
+    margin-top: var(--space-3);
+    border-top: var(--hairline) solid var(--rule);
+  }
+
+  .about__spec div {
+    display: grid;
+    grid-template-columns: 8rem minmax(0, 1fr);
+    gap: var(--space-2);
+    padding-block: var(--space-1);
+    border-bottom: var(--hairline) solid var(--rule);
+    font-size: var(--text-small);
+  }
+
+  .about__spec dt {
+    font-family: var(--font-mono);
+    font-size: var(--text-label);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--muted);
+    padding-top: 0.2em;
+  }
+
+  @media (min-width: 48rem) {
+    .about {
+      grid-template-columns: repeat(var(--columns), minmax(0, 1fr));
+    }
+    .about__photo {
+      grid-column: 1 / span 4;
+      max-width: none;
+    }
+    .about__text {
+      grid-column: 6 / -1;
+    }
+  }
+</style>

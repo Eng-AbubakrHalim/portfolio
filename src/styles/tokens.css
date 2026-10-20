@@ -42,6 +42,8 @@
   /* Hero name: em-width of the longest line ("Abubakr M."), measured per font.
      font-size = container width / --hero-fit makes that line fill its container. */
   --hero-fit: 4.76;
+  --email-fit-wide: 13.07; /* contact email, one line */
+  --email-fit-narrow: 8.04; /* contact email split at the @, longer line */
 
   /* ---------- Space: 8px scale ---------- */
   --space-half: 0.25rem; /* 4 */

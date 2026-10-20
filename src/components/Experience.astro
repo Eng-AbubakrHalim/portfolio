@@ -1,0 +1,414 @@
+---
+import { work, leadership, education, awards, timeline, formatRange } from '../data/experience';
+
+// Chart axis: Jan 2023 → Jun 2027, in months.
+const AXIS_START = { y: 2023, m: 1 };
+const AXIS_MONTHS = 54;
+const monthIndex = (ym: string) => {
+  const [y, m] = ym.split('-').map(Number);
+  return (y - AXIS_START.y) * 12 + (m - AXIS_START.m);
+};
+const pct = (months: number) => `${((months / AXIS_MONTHS) * 100).toFixed(3)}%`;
+const years = [2023, 2024, 2025, 2026, 2027];
+
+// "Now" is set at build time and refreshed in the browser.
+const built = new Date();
+const nowIndex = (built.getFullYear() - AXIS_START.y) * 12 + built.getMonth() + built.getDate() / 31;
+
+const bars = timeline.map((t) => {
+  const s = monthIndex(t.start);
+  const e = monthIndex(t.end) + 1;
+  // Finished roles draw full; only bars still running (the degree) show progress to today.
+  const done = nowIndex >= monthIndex(t.end) ? 1 : Math.min(Math.max((nowIndex - s) / (e - s), 0), 1);
+  return { ...t, left: pct(s), width: pct(e - s), done, s, e };
+});
+
+const groups = [
+  { id: '03.1', title: 'Work', items: work },
+  { id: '03.2', title: 'Leadership and teaching', items: leadership },
+];
+---
+
+<div class="xp" data-xp>
+  <figure class="chart" aria-labelledby="chart-caption" data-chart data-axis-months={AXIS_MONTHS}>
+    <figcaption id="chart-caption" class="visually-hidden">
+      Timeline from 2023 to 2027: {bars.map((b) => `${b.label}, ${formatRange(b.start, b.end)}`).join('; ')}.
+    </figcaption>
+    <div class="chart__plot" aria-hidden="true">
+      <!-- Overlays share the tracks' coordinate space: inset by the label column. -->
+      <div class="chart__axis">
+        {
+          years.map((y) => (
+            <span class="chart__year" style={`left:${pct(monthIndex(`${y}-01`))}`}>
+              {y}
+            </span>
+          ))
+        }
+      </div>
+      <ol class="chart__rows" role="list">
+        {
+          bars.map((b) => (
+            <li class="chart__row">
+              <span class="chart__label">{b.label}</span>
+              <span class="chart__track">
+                <span
+                  class={`chart__bar chart__bar--${b.kind}`}
+                  style={`left:${b.left};width:${b.width}`}
+                  data-start={b.s}
+                  data-end={b.e}
+                  data-last={monthIndex(b.end)}
+                >
+                  <span class="chart__fill" style={`transform:scaleX(${b.done})`} data-fill />
+                </span>
+              </span>
+            </li>
+          ))
+        }
+      </ol>
+      <div class="chart__axis chart__axis--front">
+        <span class="chart__now" style={`left:${pct(nowIndex)}`} data-now>
+          <span class="chart__now-label">Now</span>
+        </span>
+      </div>
+    </div>
+  </figure>
+
+  {
+    groups.map((g) => (
+      <div class="xp__group">
+        <h3 class="xp__subhead">
+          <span class="xp__subnum">{g.id}</span> {g.title}
+        </h3>
+        <ol class="xp__list" role="list">
+          {g.items.map((r) => (
+            <li class="xp__item" data-reveal>
+              <p class="xp__when">
+                {formatRange(r.start, r.end)}
+                {r.place && <span class="xp__place">{r.place}</span>}
+              </p>
+              <div class="xp__what">
+                <h4 class="xp__role">
+                  {r.role} <span class="xp__org">· {r.org}</span>
+                </h4>
+                {r.points.length > 0 && (
+                  <ul class="xp__points" role="list">
+                    {r.points.map((p) => (
+                      <li>{p}</li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            </li>
+          ))}
+        </ol>
+      </div>
+    ))
+  }
+
+  <div class="xp__group">
+    <h3 class="xp__subhead"><span class="xp__subnum">03.3</span> Education and awards</h3>
+    <ol class="xp__list" role="list">
+      <li class="xp__item" data-reveal>
+        <p class="xp__when">{formatRange(education.start, education.end)}</p>
+        <div class="xp__what">
+          <h4 class="xp__role">{education.degree} <span class="xp__org">· {education.school}</span></h4>
+          <ul class="xp__points" role="list">
+            {education.notes.map((n) => <li>{n}</li>)}
+          </ul>
+        </div>
+      </li>
+      {
+        awards.map((a) => (
+          <li class="xp__item" data-reveal>
+            <p class="xp__when">
+              {a.when}
+              <span class="xp__place">Award</span>
+            </p>
+            <div class="xp__what">
+              <h4 class="xp__role">
+                {a.title} <span class="xp__org">· {a.event}</span>
+              </h4>
+              <ul class="xp__points" role="list">
+                <li>{a.project}</li>
+              </ul>
+            </div>
+          </li>
+        ))
+      }
+    </ol>
+  </div>
+</div>
+
+<script>
+  import { gsap, DUR, EASE, prefersReducedMotion } from '../scripts/motion';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+  gsap.registerPlugin(ScrollTrigger);
+
+  let trigger: ScrollTrigger | undefined;
+
+  // Move "now" to today's date and recompute how much of each bar is complete.
+  function updateNow(chart: HTMLElement) {
+    const months = Number(chart.dataset.axisMonths);
+    const d = new Date();
+    const now = (d.getFullYear() - 2023) * 12 + d.getMonth() + d.getDate() / 31;
+    const marker = chart.querySelector<HTMLElement>('[data-now]');
+    if (marker) marker.style.left = `${(now / months) * 100}%`;
+    chart.querySelectorAll<HTMLElement>('.chart__bar').forEach((bar) => {
+      const s = Number(bar.dataset.start);
+      const e = Number(bar.dataset.end);
+      const done = now >= Number(bar.dataset.last) ? 1 : Math.min(Math.max((now - s) / (e - s), 0), 1);
+      bar.querySelector<HTMLElement>('[data-fill]')!.dataset.done = String(done);
+    });
+  }
+
+  document.addEventListener('astro:page-load', () => {
+    trigger?.kill();
+    const chart = document.querySelector<HTMLElement>('[data-chart]');
+    if (!chart) return;
+    updateNow(chart);
+    const fills = [...chart.querySelectorAll<HTMLElement>('[data-fill]')];
+    const done = (el: HTMLElement) => Number(el.dataset.done ?? 1);
+
+    if (prefersReducedMotion()) {
+      fills.forEach((f) => (f.style.transform = `scaleX(${done(f)})`));
+      return;
+    }
+
+    // Bars fill left to right, one after another, when the chart scrolls into view.
+    gsap.set(fills, { scaleX: 0 });
+    gsap.set(chart.querySelector('[data-now]'), { autoAlpha: 0 });
+    trigger = ScrollTrigger.create({
+      trigger: chart,
+      start: 'top 80%',
+      once: true,
+      onEnter: () => {
+        fills.forEach((f, i) =>
+          gsap.to(f, { scaleX: done(f), duration: DUR.slow, delay: i * 0.06, ease: EASE.out }),
+        );
+        gsap.to(chart.querySelector('[data-now]'), { autoAlpha: 1, duration: DUR.base, delay: 0.4, ease: EASE.out });
+      },
+    });
+  });
+
+  document.addEventListener('astro:before-swap', () => trigger?.kill());
+</script>
+
+<style>
+  /* ---------- Chart ---------- */
+  .chart {
+    margin-bottom: var(--space-7);
+  }
+
+  .chart__plot {
+    position: relative;
+    --label-w: 0px;
+  }
+
+  .chart__axis {
+    position: absolute;
+    inset: 0 0 0 var(--label-w);
+    pointer-events: none;
+  }
+
+  .chart__axis--front {
+    z-index: 1;
+  }
+
+  .chart__year {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    border-left: var(--hairline) solid var(--rule);
+    padding-left: var(--space-1);
+    font-family: var(--font-mono);
+    font-size: var(--text-label);
+    letter-spacing: var(--tracking-label);
+    color: var(--muted);
+  }
+
+  .chart__rows {
+    position: relative;
+    display: grid;
+    gap: var(--space-3);
+    padding-block: var(--space-6) var(--space-5);
+  }
+
+  .chart__row {
+    display: grid;
+    gap: var(--space-1);
+  }
+
+  .chart__label {
+    font-family: var(--font-mono);
+    font-size: var(--text-label);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+  }
+
+  .chart__track {
+    position: relative;
+    display: block;
+    height: 0.625rem;
+  }
+
+  .chart__bar {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    border: var(--hairline) solid var(--fg);
+  }
+
+  .chart__fill {
+    position: absolute;
+    inset: 0;
+    background: var(--fg);
+    transform-origin: left center;
+  }
+
+  /* The degree is the long line everything else sits on: grey, filled up to today. */
+  .chart__bar--study {
+    border-color: var(--muted);
+  }
+
+  .chart__bar--study .chart__fill {
+    background: var(--muted);
+  }
+
+  /* 2px so it stays a crisp orange at fractional positions. */
+  .chart__now {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    margin-left: -1px;
+    background: var(--accent);
+  }
+
+  /* Label sits at the foot of the plot so it never collides with the year labels on top. */
+  .chart__now-label {
+    position: absolute;
+    bottom: 0;
+    left: var(--space-1);
+    padding-inline: var(--space-half);
+    background: var(--bg);
+    font-family: var(--font-mono);
+    font-size: var(--text-label);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--accent);
+    white-space: nowrap;
+  }
+
+  @media (min-width: 48rem) {
+    .chart__plot {
+      --label-w: 11rem;
+    }
+    .chart__row {
+      grid-template-columns: var(--label-w) 1fr;
+      align-items: center;
+      gap: 0;
+    }
+  }
+
+  /* ---------- Entries ---------- */
+  .xp__group + .xp__group {
+    margin-top: var(--space-7);
+  }
+
+  .xp__subhead {
+    display: flex;
+    gap: var(--space-2);
+    align-items: baseline;
+    padding-bottom: var(--space-2);
+    border-bottom: var(--hairline) solid var(--rule);
+    font-family: var(--font-mono);
+    font-size: var(--text-label);
+    font-weight: 500;
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+  }
+
+  .xp__subnum {
+    color: var(--accent);
+  }
+
+  .xp__item {
+    display: grid;
+    gap: var(--space-1) var(--gutter);
+    padding-block: var(--space-4);
+    border-bottom: var(--hairline) solid var(--rule);
+  }
+
+  .xp__when {
+    display: grid;
+    gap: var(--space-half);
+    font-family: var(--font-mono);
+    font-size: var(--text-label);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--fg);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .xp__place {
+    color: var(--muted);
+    text-transform: none;
+    letter-spacing: 0;
+    font-family: var(--font-body);
+    font-size: var(--text-small);
+  }
+
+  .xp__what {
+    display: grid;
+    gap: var(--space-2);
+  }
+
+  .xp__role {
+    font-family: var(--font-display);
+    font-size: var(--text-h3);
+    font-weight: 500;
+    line-height: 1.2;
+    letter-spacing: var(--tracking-tight);
+  }
+
+  .xp__org {
+    color: var(--muted);
+    font-weight: 400;
+  }
+
+  .xp__points {
+    display: grid;
+    gap: var(--space-1);
+    max-width: 64ch;
+  }
+
+  .xp__points li {
+    position: relative;
+    padding-left: var(--space-3);
+  }
+
+  /* Small accent squares, the same mark as the band separators. */
+  .xp__points li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.6em;
+    width: 0.3em;
+    height: 0.3em;
+    background: var(--accent);
+  }
+
+  @media (min-width: 48rem) {
+    .xp__item {
+      grid-template-columns: repeat(var(--columns), minmax(0, 1fr));
+      align-items: baseline;
+    }
+    .xp__when {
+      grid-column: 1 / span 3;
+    }
+    .xp__what {
+      grid-column: 4 / -1;
+    }
+  }
+</style>
