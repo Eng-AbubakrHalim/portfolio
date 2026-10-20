@@ -1,0 +1,68 @@
+---
+import { getCollection, render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import SiteHeader from '../../components/SiteHeader.astro';
+import { withBase } from '../../lib/url';
+
+export async function getStaticPaths() {
+  const projects = await getCollection('projects');
+  return projects.map((p) => ({ params: { slug: p.id }, props: { project: p } }));
+}
+
+const { project } = Astro.props;
+const { Content } = await render(project);
+const d = project.data;
+---
+
+<Base title={`${d.title} — Abubakr M. Abdelhalim`} description={d.summary} noindex>
+  <SiteHeader />
+  <main id="main" class="page case">
+    <p class="label"><a href={withBase('#work')}>Work</a> / {d.year}</p>
+    <h1 class="case__title">{d.title}</h1>
+    <p class="case__summary">{d.summary}</p>
+    <dl class="case__meta">
+      <div><dt class="label">Role</dt><dd>{d.role}</dd></div>
+      <div><dt class="label">Year</dt><dd>{d.year}</dd></div>
+      <div><dt class="label">Tools</dt><dd>{d.tools.join(', ')}</dd></div>
+    </dl>
+    <div class="case__body measure"><Content /></div>
+  </main>
+</Base>
+
+<script>
+  import '../../scripts/smooth';
+</script>
+
+<style>
+  .case {
+    padding-top: calc(var(--header-h) + var(--space-7));
+    padding-bottom: var(--section-pad);
+    display: grid;
+    gap: var(--space-4);
+  }
+
+  .case__title {
+    font-size: var(--text-h1);
+    font-weight: 500;
+    line-height: 1;
+    letter-spacing: var(--tracking-tight);
+    max-width: 18ch;
+  }
+
+  .case__summary {
+    font-size: var(--text-lead);
+    max-width: 40ch;
+  }
+
+  .case__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2) var(--space-5);
+    padding-block: var(--space-3);
+    border-block: var(--hairline) solid var(--rule);
+  }
+
+  .case__meta dd {
+    margin-top: var(--space-half);
+  }
+</style>

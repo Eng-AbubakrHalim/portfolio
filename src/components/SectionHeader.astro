@@ -5,17 +5,69 @@ interface Props {
   id?: string;
   /** Heading level; sections on the home page use h2. */
   as?: 'h2' | 'h3';
+  /** Set false when another script drives the animation (styleguide demo). */
+  reveal?: boolean;
 }
-const { num, title, id, as: Tag = 'h2' } = Astro.props;
+const { num, title, id, as: Tag = 'h2', reveal = true } = Astro.props;
 ---
 
-<header class="section-head" data-section-head>
+<header class="section-head" data-section-head={reveal ? '' : undefined}>
   <hr class="rule section-head__rule" data-rule />
   <div class="section-head__row">
     <span class="section-head__num label" aria-hidden="true">{num}</span>
     <Tag class="section-head__title" id={id} data-lines>{title}</Tag>
   </div>
 </header>
+
+<script>
+  import { gsap, lineReveal, DUR, EASE, prefersReducedMotion } from '../scripts/motion';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+  gsap.registerPlugin(ScrollTrigger);
+
+  let active: { trigger: ScrollTrigger; split: ReturnType<typeof lineReveal>['split'] }[] = [];
+
+  function cleanup() {
+    active.forEach(({ trigger, split }) => {
+      trigger.kill();
+      split.revert();
+    });
+    active = [];
+  }
+
+  // Same rhythm for every section: rule scales out, number fades up, heading slides up behind its mask.
+  function initSectionHeads() {
+    cleanup();
+    if (prefersReducedMotion()) return;
+    document.querySelectorAll<HTMLElement>('[data-section-head]').forEach((head) => {
+      const rule = head.querySelector<HTMLElement>('[data-rule]');
+      const num = head.querySelector<HTMLElement>('.section-head__num');
+      const title = head.querySelector<HTMLElement>('[data-lines]');
+      if (!rule || !num || !title) return;
+
+      const reveal = lineReveal(title, { duration: DUR.slow, delay: 0.1, paused: true });
+      gsap.set(rule, { scaleX: 0 });
+      gsap.set(num, { autoAlpha: 0, y: 12 });
+
+      const trigger = ScrollTrigger.create({
+        trigger: head,
+        start: 'top 85%',
+        once: true,
+        onEnter: () => {
+          gsap.to(rule, { scaleX: 1, duration: DUR.slow, ease: EASE.out });
+          gsap.to(num, { autoAlpha: 1, y: 0, duration: DUR.base, delay: 0.1, ease: EASE.out });
+          reveal.play();
+        },
+      });
+      active.push({ trigger, split: reveal.split });
+    });
+  }
+
+  document.addEventListener('astro:page-load', () => {
+    document.fonts.ready.then(initSectionHeads);
+  });
+  document.addEventListener('astro:before-swap', cleanup);
+</script>
 
 <style>
   .section-head {

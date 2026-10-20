@@ -1,23 +1,122 @@
 ---
 import Base from '../layouts/Base.astro';
-import { withBase } from '../lib/url';
+import SiteHeader from '../components/SiteHeader.astro';
+import Hero from '../components/Hero.astro';
+import SectionHeader from '../components/SectionHeader.astro';
+import WorkList from '../components/WorkList.astro';
+import { sections, section } from '../data/sections';
+
+const stubs = sections.filter((s) => s.id !== 'work');
 ---
 
-<Base title="Abubakr M. Abdelhalim" noindex>
-  <main id="main" class="page placeholder">
-    <h1>Abubakr M. Abdelhalim</h1>
-    <p class="label">v2 rebuild in progress</p>
-    <p><a class="link" href={withBase('styleguide/')}>Styleguide</a></p>
+<Base title="Abubakr M. Abdelhalim — Electrical engineer" noindex>
+  <SiteHeader home />
+  <main id="main">
+    <Hero
+      position="Electrical engineer designing industrial measurement hardware."
+      meta={['Based in Malaysia', 'Graduating Feb 2027', 'Open to roles']}
+    />
+
+    <section class="section page" id="work" aria-labelledby="work-title" data-section="work">
+      <SectionHeader num={section('work').num} title="Selected work" id="work-title" />
+      <WorkList />
+    </section>
+
+    {
+      stubs.map((s) => (
+        <section class="section section--stub page" id={s.id} aria-labelledby={`${s.id}-title`} data-section={s.id}>
+          <SectionHeader num={s.num} title={s.label} id={`${s.id}-title`} />
+          <p class="label">Draft content arrives in phase 4.</p>
+        </section>
+      ))
+    }
   </main>
+
+  <footer class="site-footer page">
+    <span class="label">© 2026 Abubakr M. Abdelhalim</span>
+    <a class="label" href="#top">Back to top</a>
+  </footer>
 </Base>
 
-<style>
-  .placeholder {
-    display: grid;
-    gap: var(--space-2);
-    padding-block: var(--space-8);
+<script>
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+  import { gsap } from '../scripts/motion';
+  import '../scripts/smooth';
+
+  gsap.registerPlugin(ScrollTrigger);
+
+  let triggers: ScrollTrigger[] = [];
+
+  // Index nav: mark the section crossing 40% of the viewport and slide the accent line under it.
+  function setActive(id: string | null) {
+    document.querySelectorAll<HTMLAnchorElement>('[data-nav-link]').forEach((a) => {
+      if (a.dataset.navLink === id) a.setAttribute('aria-current', 'true');
+      else a.removeAttribute('aria-current');
+    });
+    const indicator = document.querySelector<HTMLElement>('[data-nav-indicator]');
+    const link = id && document.querySelector<HTMLElement>(`.index-nav [data-nav-link="${id}"] .index-nav__label`);
+    if (!indicator) return;
+    if (!link) {
+      indicator.style.opacity = '0';
+      return;
+    }
+    const nav = indicator.parentElement!.getBoundingClientRect();
+    const box = link.getBoundingClientRect();
+    indicator.style.transform = `translateX(${box.left - nav.left}px) scaleX(${box.width})`;
+    indicator.style.opacity = '1';
   }
-  h1 {
-    font-size: var(--text-h1);
+
+  function initNav() {
+    triggers.forEach((t) => t.kill());
+    const els = [...document.querySelectorAll<HTMLElement>('[data-section]')];
+    triggers = els.map((el, i) =>
+      ScrollTrigger.create({
+        trigger: el,
+        start: 'top 40%',
+        end: i === els.length - 1 ? 'max' : 'bottom 40%',
+        onToggle: (self) => {
+          if (self.isActive) setActive(el.dataset.section!);
+          else if (i === 0 && self.direction < 0) setActive(null);
+        },
+      }),
+    );
+  }
+
+  // Re-measure the indicator after layout changes (resize, font swap).
+  ScrollTrigger.addEventListener('refresh', () => {
+    const current = document.querySelector<HTMLElement>('.index-nav [aria-current="true"]');
+    setActive(current?.dataset.navLink ?? null);
+  });
+
+  document.addEventListener('astro:page-load', () => {
+    if (document.querySelector('[data-section]')) document.fonts.ready.then(initNav);
+  });
+  document.addEventListener('astro:before-swap', () => {
+    triggers.forEach((t) => t.kill());
+    triggers = [];
+  });
+</script>
+
+<style>
+  .section {
+    padding-block: var(--section-pad) 0;
+    scroll-margin-top: 0;
+  }
+
+  .section--stub {
+    min-height: 70vh;
+  }
+
+  .site-footer {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--space-2);
+    margin-top: var(--section-pad);
+    padding-block: var(--space-4);
+    border-top: var(--hairline) solid var(--rule);
+  }
+
+  .site-footer a {
+    text-decoration: none;
   }
 </style>

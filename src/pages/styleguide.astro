@@ -382,7 +382,7 @@ const workRows = [
           <button type="button" class="replay mono" data-play="section">Replay</button>
         </div>
         <div data-section-demo>
-          <SectionHeader num="01" title="Work" as="h3" />
+          <SectionHeader num="01" title="Work" as="h3" reveal={false} />
         </div>
       </div>
 
@@ -473,8 +473,8 @@ const workRows = [
       hero: (() => {
         const el = document.querySelector<HTMLElement>('[data-hero-demo]')!;
         const reveal = reduced ? null : lineReveal(el, { duration: DUR.slow, stagger: 0.06, paused: true });
-        reveal?.tween?.progress(1);
-        return () => reveal?.tween?.restart();
+        reveal?.finish();
+        return () => reveal?.restart();
       })(),
       section: (() => {
         const wrap = document.querySelector<HTMLElement>('[data-section-demo]')!;
@@ -482,11 +482,11 @@ const workRows = [
         const num = wrap.querySelector<HTMLElement>('.section-head__num')!;
         const title = wrap.querySelector<HTMLElement>('[data-lines]')!;
         const reveal = reduced ? null : lineReveal(title, { duration: DUR.slow, delay: 0.1, paused: true });
-        reveal?.tween?.progress(1);
+        reveal?.finish();
         return () => {
           gsap.fromTo(rule, { scaleX: 0 }, { scaleX: 1, duration: DUR.slow, ease: EASE.out, overwrite: true });
           gsap.fromTo(num, { autoAlpha: 0, y: 12 }, { autoAlpha: 1, y: 0, duration: DUR.base, delay: 0.1, ease: EASE.out, overwrite: true });
-          reveal?.tween?.restart(true);
+          reveal?.restart();
         };
       })(),
       stagger() {

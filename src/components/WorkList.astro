@@ -1,0 +1,296 @@
+---
+import { getCollection } from 'astro:content';
+import { Image } from 'astro:assets';
+import Cover from './Cover.astro';
+import { withBase } from '../lib/url';
+
+const projects = (await getCollection('projects')).sort((a, b) => a.data.order - b.data.order);
+const rows = projects.map((p, i) => ({
+  id: p.id,
+  num: String(i + 1).padStart(2, '0'),
+  href: withBase(`work/${p.id}/`),
+  ...p.data,
+}));
+---
+
+<div class="work" data-work>
+  <ol class="work-list" role="list">
+    {
+      rows.map((r) => (
+        <li class="work-row" data-work-row={r.id}>
+          <a class="work-row__link" href={r.href}>
+            <span class="work-row__num">{r.num}</span>{' '}
+            <div class="work-row__main">
+              <h3 class="work-row__title">{r.title}</h3>{' '}
+              <p class="work-row__summary">{r.summary}</p>
+            </div>
+            <span class="work-row__tags">
+              {r.tags.map((t) => (
+                <span>{t} </span>
+              ))}
+            </span>
+            {r.cover && (
+              <div class="work-row__thumb">
+                <Image src={r.cover} alt="" widths={[480, 800]} sizes="(min-width: 48rem) 50vw, 100vw" />
+              </div>
+            )}
+          </a>
+        </li>
+      ))
+    }
+  </ol>
+
+  <!-- Cursor-following preview (fine pointers only). One layer per project, stacked. -->
+  <div class="work-preview" aria-hidden="true" data-work-preview>
+    {
+      rows.map((r) => (
+        <div class="work-preview__item" data-preview-item={r.id}>
+          {r.cover ? (
+            <Image src={r.cover} alt="" widths={[600, 900]} sizes="30vw" loading="lazy" />
+          ) : (
+            <Cover num={r.num} title={r.title} meta={`${r.year} · ${r.tags[0]}`} />
+          )}
+        </div>
+      ))
+    }
+  </div>
+</div>
+
+<script>
+  import { gsap, DUR, EXIT, EASE, prefersReducedMotion } from '../scripts/motion';
+
+  const HIDDEN = 'inset(100% 0% 0% 0%)';
+  const SHOWN = 'inset(0% 0% 0% 0%)';
+  const GONE = 'inset(0% 0% 100% 0%)';
+
+  let cleanup: (() => void) | undefined;
+
+  function initPreview() {
+    cleanup?.();
+    cleanup = undefined;
+    const work = document.querySelector<HTMLElement>('[data-work]');
+    const preview = work?.querySelector<HTMLElement>('[data-work-preview]');
+    if (!work || !preview) return;
+    const canHover = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+    if (!canHover || prefersReducedMotion()) return;
+
+    const items = new Map(
+      [...preview.querySelectorAll<HTMLElement>('[data-preview-item]')].map((el) => [el.dataset.previewItem!, el]),
+    );
+    gsap.set(preview, { clipPath: HIDDEN, scale: 0.94, autoAlpha: 1 });
+    gsap.set([...items.values()], { clipPath: HIDDEN });
+
+    const xTo = gsap.quickTo(preview, 'x', { duration: 0.6, ease: 'power3.out' });
+    const yTo = gsap.quickTo(preview, 'y', { duration: 0.6, ease: 'power3.out' });
+    let current: string | null = null;
+    let visible = false;
+    let z = 1;
+
+    // Keep the card beside the cursor and inside the viewport.
+    const place = (e: PointerEvent, immediate = false) => {
+      const w = preview.offsetWidth;
+      const h = preview.offsetHeight;
+      const gap = 32;
+      let x = e.clientX + gap;
+      if (x + w > window.innerWidth - gap) x = e.clientX - w - gap;
+      const y = Math.min(Math.max(e.clientY - h / 2, gap), window.innerHeight - h - gap);
+      if (immediate) {
+        gsap.set(preview, { x, y });
+        xTo(x, x);
+        yTo(y, y);
+      } else {
+        xTo(x);
+        yTo(y);
+      }
+    };
+
+    const show = (id: string, e: PointerEvent) => {
+      const item = items.get(id);
+      if (!item || id === current) return;
+      if (!visible) {
+        place(e, true);
+        preview.style.willChange = 'transform, clip-path';
+        gsap.to(preview, { clipPath: SHOWN, scale: 1, duration: DUR.base, ease: EASE.out, overwrite: true });
+        gsap.set(item, { clipPath: SHOWN, zIndex: ++z });
+        visible = true;
+      } else {
+        // Next project clips in over the previous one.
+        gsap.fromTo(item, { clipPath: HIDDEN, zIndex: ++z }, { clipPath: SHOWN, duration: DUR.base, ease: EASE.out, overwrite: true });
+      }
+      current = id;
+    };
+
+    const hide = () => {
+      if (!visible) return;
+      visible = false;
+      current = null;
+      gsap.to(preview, {
+        clipPath: GONE,
+        scale: 0.97,
+        duration: DUR.base * EXIT,
+        ease: EASE.in,
+        overwrite: true,
+        onComplete: () => {
+          gsap.set(preview, { clipPath: HIDDEN, scale: 0.94 });
+          gsap.set([...items.values()], { clipPath: HIDDEN });
+          preview.style.willChange = '';
+        },
+      });
+    };
+
+    const onMove = (e: PointerEvent) => {
+      const row = (e.target as Element).closest<HTMLElement>('[data-work-row]');
+      if (row) {
+        show(row.dataset.workRow!, e);
+        place(e);
+      }
+    };
+
+    const list = work.querySelector<HTMLElement>('.work-list')!;
+    list.addEventListener('pointermove', onMove);
+    list.addEventListener('pointerleave', hide);
+    window.addEventListener('scroll', hide, { passive: true });
+
+    cleanup = () => {
+      list.removeEventListener('pointermove', onMove);
+      list.removeEventListener('pointerleave', hide);
+      window.removeEventListener('scroll', hide);
+      gsap.killTweensOf(preview);
+    };
+  }
+
+  document.addEventListener('astro:page-load', initPreview);
+  document.addEventListener('astro:before-swap', () => cleanup?.());
+</script>
+
+<style>
+  .work {
+    position: relative;
+  }
+
+  .work-row {
+    border-top: var(--hairline) solid var(--rule);
+  }
+
+  .work-row:last-child {
+    border-bottom: var(--hairline) solid var(--rule);
+  }
+
+  .work-row__link {
+    display: grid;
+    grid-template-columns: 2.5rem minmax(0, 1fr);
+    gap: var(--space-2) var(--gutter);
+    padding-block: var(--space-4);
+    text-decoration: none;
+    color: var(--fg);
+    transition: color var(--dur-fast) var(--ease-out);
+  }
+
+  .work-row__num {
+    font-family: var(--font-mono);
+    font-size: var(--text-label);
+    color: var(--muted);
+    padding-top: 0.6em;
+  }
+
+  .work-row__main {
+    display: grid;
+    gap: var(--space-1);
+  }
+
+  .work-row__title {
+    font-family: var(--font-display);
+    font-size: var(--text-h2);
+    font-weight: 500;
+    line-height: 1.05;
+    letter-spacing: var(--tracking-tight);
+  }
+
+  .work-row__summary {
+    max-width: 52ch;
+    color: var(--muted);
+    transition: color var(--dur-fast) var(--ease-out);
+  }
+
+  .work-row__tags {
+    grid-column: 2;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-half) var(--space-2);
+    font-family: var(--font-mono);
+    font-size: var(--text-label);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .work-row__thumb {
+    grid-column: 2;
+    display: block;
+    margin-top: var(--space-1);
+  }
+
+  /* Hover/focus: the active row stays, the rest drop to muted. */
+  .work-list:has(.work-row__link:hover, .work-row__link:focus-visible) .work-row__link:not(:hover, :focus-visible) {
+    color: var(--muted);
+  }
+
+  @media (min-width: 48rem) {
+    .work-row__link {
+      grid-template-columns: repeat(var(--columns), minmax(0, 1fr));
+      align-items: baseline;
+    }
+    .work-row__num {
+      grid-column: 1;
+    }
+    .work-row__main {
+      grid-column: 2 / span 8;
+    }
+    .work-row__tags {
+      grid-column: 10 / -1;
+      justify-content: flex-end;
+    }
+    .work-row__thumb {
+      grid-column: 2 / span 6;
+    }
+  }
+
+  /* Fine pointer + motion allowed: the cursor preview replaces inline thumbnails. */
+  .work-preview {
+    display: none;
+  }
+
+  @media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+    .work-row__thumb {
+      display: none;
+    }
+
+    .work-row__link {
+      padding-block: var(--space-5);
+    }
+
+    .work-preview {
+      display: block;
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 40;
+      width: clamp(18rem, 26vw, 30rem);
+      aspect-ratio: 16 / 10;
+      pointer-events: none;
+      visibility: hidden;
+    }
+
+    .work-preview__item {
+      position: absolute;
+      inset: 0;
+    }
+
+    .work-preview__item :global(img) {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border: var(--hairline) solid var(--rule);
+    }
+  }
+</style>

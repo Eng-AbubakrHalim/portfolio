@@ -62,6 +62,7 @@
   --page-margin: clamp(1rem, 0.4231rem + 2.5641vw, 3.5rem); /* 16 → 56 */
   --gutter: clamp(1rem, 0.7692rem + 1.0256vw, 2rem);        /* 16 → 32 */
   --hairline: 1px;
+  --header-h: 3.5rem;
 
   /* ---------- Motion ---------- */
   --dur-fast: 150ms;   /* hover, press */

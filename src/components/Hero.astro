@@ -1,0 +1,153 @@
+---
+interface Props {
+  position: string;
+  meta: string[];
+}
+const { position, meta } = Astro.props;
+---
+
+<section class="hero page" id="top" aria-labelledby="hero-name">
+  <div class="hero__fit">
+    <h1 class="hero__name" id="hero-name" data-hero-name>Abubakr M.<br />Abdelhalim</h1>
+  </div>
+  <div class="hero__below">
+    <p class="hero__position" data-hero-fade>{position}</p>
+    <p class="hero__meta label" data-hero-fade>
+      {
+        meta.map((m, i) => (
+          <>
+            {i > 0 && <span aria-hidden="true">·</span>}
+            <span>{m}</span>
+          </>
+        ))
+      }
+    </p>
+    <a class="hero__cta" href="#work" data-hero-fade>View work</a>
+  </div>
+</section>
+
+<script>
+  import { gsap, lineReveal, DUR, EASE, prefersReducedMotion } from '../scripts/motion';
+
+  let reveal: ReturnType<typeof lineReveal> | undefined;
+
+  document.addEventListener('astro:page-load', () => {
+    const name = document.querySelector<HTMLElement>('[data-hero-name]');
+    if (!name) return;
+    const root = document.documentElement;
+    const fades = document.querySelectorAll<HTMLElement>('[data-hero-fade]');
+
+    if (prefersReducedMotion()) {
+      root.classList.add('hero-ready');
+      return;
+    }
+
+    // Split once fonts are in so the masked lines match the final layout; don't wait forever.
+    const fontsReady = Promise.race([document.fonts.ready, new Promise((r) => setTimeout(r, 1500))]);
+    fontsReady.then(() => {
+      reveal?.split.revert();
+      reveal = lineReveal(name, { duration: DUR.slow, stagger: 0.06 });
+      gsap.from(fades, {
+        autoAlpha: 0,
+        y: 12,
+        duration: DUR.base,
+        delay: 0.3,
+        stagger: 0.05,
+        ease: EASE.out,
+        clearProps: 'transform,opacity,visibility',
+      });
+      root.classList.add('hero-ready');
+    });
+  });
+
+  document.addEventListener('astro:before-swap', () => {
+    reveal?.split.revert();
+    reveal = undefined;
+  });
+</script>
+
+<style>
+  .hero {
+    min-height: 100svh;
+    display: grid;
+    align-content: end;
+    padding-top: calc(var(--header-h) + var(--space-5));
+    padding-bottom: var(--space-5);
+  }
+
+  /* The name is sized from this box's width: font-size = width / measured em-width of the longest line. */
+  .hero__fit {
+    container-type: inline-size;
+  }
+
+  /* Width-fit, but on short wide screens cap by height so the line below stays above the fold
+     (19rem ≈ header + paddings + the row below; 1.84 = two lines at 0.92 leading). */
+  .hero__name {
+    font-family: var(--font-display);
+    font-size: min(calc(100cqi / var(--hero-fit)), calc((100svh - 19rem) / 1.84));
+    font-weight: 500;
+    line-height: var(--leading-display);
+    letter-spacing: var(--tracking-display);
+    white-space: nowrap;
+    text-wrap: nowrap;
+  }
+
+  .hero__below {
+    display: grid;
+    gap: var(--space-3);
+    margin-top: var(--space-5);
+    padding-top: var(--space-3);
+    border-top: var(--hairline) solid var(--rule);
+  }
+
+  .hero__position {
+    font-size: var(--text-lead);
+    line-height: 1.35;
+    max-width: 28ch;
+  }
+
+  .hero__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-half) var(--space-1);
+  }
+
+  .hero__cta {
+    justify-self: start;
+    font-family: var(--font-mono);
+    font-size: var(--text-label);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--fg);
+    padding-block: var(--space-1);
+    text-underline-offset: 0.35em;
+  }
+
+  .hero__cta:hover {
+    color: var(--accent);
+  }
+
+  @media (min-width: 64rem) {
+    .hero__below {
+      grid-template-columns: repeat(var(--columns), minmax(0, 1fr));
+      column-gap: var(--gutter);
+      align-items: baseline;
+    }
+    .hero__position {
+      grid-column: 1 / span 5;
+    }
+    .hero__meta {
+      grid-column: 6 / span 5;
+    }
+    .hero__cta {
+      grid-column: 11 / -1;
+      justify-self: end;
+    }
+  }
+
+  /* Hold the hero hidden until the reveal starts (html.js is set before paint; a timeout clears it). */
+  :global(html.js:not(.hero-ready)) .hero__name,
+  :global(html.js:not(.hero-ready)) [data-hero-fade] {
+    visibility: hidden;
+  }
+</style>

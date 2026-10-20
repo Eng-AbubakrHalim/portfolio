@@ -23,33 +23,67 @@ export const prefersReducedMotion = () =>
 
 /**
  * Masked line reveal: each line slides up from behind its own clip mask.
- * Re-splits on resize/font load (autoSplit) without layout jumps.
+ * Re-splits on resize/font load (autoSplit) without layout jumps: the new lines pick up
+ * the old progress, and keep playing if a reveal was already requested (even mid-delay).
  */
 export function lineReveal(
   el: HTMLElement,
   { duration = DUR.slow, stagger = 0.06, delay = 0, paused = false } = {},
 ) {
   let tween: gsap.core.Tween | undefined;
+  let requested = false;
+  let pending: gsap.core.Tween | undefined;
+
+  const build = (lines: Element[]) => {
+    const progress = tween?.progress() ?? 0;
+    tween?.kill();
+    tween = gsap.fromTo(
+      lines,
+      { yPercent: 110 },
+      { yPercent: 0, duration, stagger, ease: EASE.out, paused: true },
+    );
+    tween.progress(progress);
+    if (requested && !pending && progress < 1) tween.play();
+  };
+
   const split = SplitText.create(el, {
     type: 'lines',
     mask: 'lines',
     linesClass: 'split-line',
     autoSplit: true,
-    onSplit(self) {
-      const progress = tween?.progress() ?? 0;
-      tween = gsap.from(self.lines, {
-        yPercent: 110,
-        duration,
-        stagger,
-        delay,
-        ease: EASE.out,
-        paused,
-      });
-      if (progress) tween.progress(progress);
-      return tween;
-    },
+    onSplit: (self) => build(self.lines),
   });
-  return { split, get tween() { return tween; } };
+
+  const play = () => {
+    requested = true;
+    pending?.kill();
+    pending = undefined;
+    if (delay) {
+      pending = gsap.delayedCall(delay, () => {
+        pending = undefined;
+        tween?.play();
+      });
+    } else {
+      tween?.play();
+    }
+  };
+
+  const restart = () => {
+    requested = true;
+    pending?.kill();
+    pending = undefined;
+    tween?.restart();
+  };
+
+  if (!paused) play();
+
+  return {
+    split,
+    play,
+    restart,
+    /** Jump to the end state (no animation). */
+    finish: () => tween?.progress(1),
+  };
 }
 
 export { gsap, SplitText };
