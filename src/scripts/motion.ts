@@ -21,6 +21,20 @@ export const EASE = {
 export const prefersReducedMotion = () =>
   window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+// When a page opens mid-scroll (back/forward, or a link to a section), reveals skip whatever is
+// already on screen, so visible content never blinks out and plays again after the transition.
+let restoring = !!location.hash;
+document.addEventListener('astro:before-preparation', (e) => {
+  const ev = e as Event & { navigationType?: string; to?: URL };
+  restoring = ev.navigationType === 'traverse' || !!ev.to?.hash;
+});
+
+export function alreadyInView(el: Element) {
+  if (!restoring) return false;
+  const r = el.getBoundingClientRect();
+  return r.top < window.innerHeight && r.bottom > 0;
+}
+
 /**
  * Masked line reveal: each line slides up from behind its own clip mask.
  * Re-splits on resize/font load (autoSplit) without layout jumps: the new lines pick up

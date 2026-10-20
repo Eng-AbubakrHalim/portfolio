@@ -49,7 +49,7 @@ const finalShift = (d: string) => -((10 + Number(d)) * 100) / STRIP.length;
 </section>
 
 <script>
-  import { gsap, DUR, EASE, prefersReducedMotion } from '../scripts/motion';
+  import { gsap, DUR, EASE, prefersReducedMotion, alreadyInView } from '../scripts/motion';
   import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
   gsap.registerPlugin(ScrollTrigger);
@@ -59,7 +59,7 @@ const finalShift = (d: string) => -((10 + Number(d)) * 100) / STRIP.length;
   document.addEventListener('astro:page-load', () => {
     trigger?.kill();
     const root = document.querySelector<HTMLElement>('[data-facts]');
-    if (!root || prefersReducedMotion()) return;
+    if (!root || prefersReducedMotion() || alreadyInView(root)) return;
 
     const strips = [...root.querySelectorAll<HTMLElement>('[data-odo-strip]')];
     const labels = root.querySelectorAll<HTMLElement>('.fact__label');

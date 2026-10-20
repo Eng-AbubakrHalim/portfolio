@@ -53,7 +53,7 @@ const spec = [
 </div>
 
 <script>
-  import { gsap, DUR, EASE, prefersReducedMotion } from '../scripts/motion';
+  import { gsap, DUR, EASE, prefersReducedMotion, alreadyInView } from '../scripts/motion';
   import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
   gsap.registerPlugin(ScrollTrigger);
@@ -64,7 +64,7 @@ const spec = [
   document.addEventListener('astro:page-load', () => {
     trigger?.kill();
     const photo = document.querySelector<HTMLElement>('[data-photo]');
-    if (!photo || prefersReducedMotion()) return;
+    if (!photo || prefersReducedMotion() || alreadyInView(photo)) return;
     gsap.set(photo, { clipPath: 'inset(100% 0% 0% 0%)' });
     trigger = ScrollTrigger.create({
       trigger: photo,

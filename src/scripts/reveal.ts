@@ -2,7 +2,7 @@
  * Generic scroll reveal for [data-reveal] blocks: 16px rise + fade, batched so
  * items entering together stagger by 50ms. Skipped under reduced motion.
  */
-import { gsap, DUR, EASE, prefersReducedMotion } from './motion';
+import { gsap, DUR, EASE, prefersReducedMotion, alreadyInView } from './motion';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
 gsap.registerPlugin(ScrollTrigger);
@@ -17,7 +17,7 @@ function kill() {
 function initReveals() {
   kill();
   if (prefersReducedMotion()) return;
-  const els = gsap.utils.toArray<HTMLElement>('[data-reveal]');
+  const els = gsap.utils.toArray<HTMLElement>('[data-reveal]').filter((el) => !alreadyInView(el));
   if (!els.length) return;
   gsap.set(els, { autoAlpha: 0, y: 16 });
   triggers = ScrollTrigger.batch(els, {

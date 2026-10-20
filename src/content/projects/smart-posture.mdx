@@ -2,10 +2,66 @@
 title: Smart Posture Correction
 summary: Wearable and computer-vision system with haptic feedback in under 200 ms. Gold Medal, MIIE 2026.
 year: '2026'
-role: Capstone team, Universiti Teknologi Malaysia
-tools: [KiCad, ESP32-C3, Python, OpenCV, SolidWorks]
+role: PCB, firmware and enclosure, capstone team of four
+tools: [KiCad, ESP32-C3, C++, Python, OpenCV, SolidWorks]
 tags: [KiCad, ESP32, OpenCV]
+status: Built and tested, Gold Medal MIIE 2026, Industry Award UTM 2026
+cover: ../../assets/projects/smart-posture/posture-cover.jpg
+coverAlt: KiCad 3D render of the capstone PCB with a microcontroller module footprint, an IMU header, push buttons, red LEDs, a regulator and electrolytic capacitors.
 order: 2
 ---
 
-Case study in progress.
+import CaseSection from '../../components/case/CaseSection.astro';
+import Figure from '../../components/case/Figure.astro';
+import Decisions from '../../components/case/Decisions.astro';
+import Decision from '../../components/case/Decision.astro';
+import PostureSystem from '../../components/diagrams/PostureSystem.astro';
+import enclosure from '../../assets/projects/smart-posture/posture-enclosure.jpg';
+import award from '../../assets/projects/smart-posture/posture-award.jpg';
+
+<CaseSection num="01" title="Problem">
+
+Detect bad sitting posture in real time and correct it straight away, with haptic feedback on a wearable.
+
+</CaseSection>
+
+<CaseSection num="02" title="Architecture">
+
+A camera and the host PC classify posture with a Python, OpenCV and dlib face-pose pipeline, fused with IMU data from the wearable. The result goes over UDP to a XIAO ESP32-C3 on a custom PCB, which drives a vibration motor. Blynk carries monitoring and alerts to a phone.
+
+<PostureSystem />
+
+<Figure src={enclosure} alt="SolidWorks exploded view of the wearable enclosure: the lid with button cut-outs lifted above the base, which holds the battery and the green PCB." caption="Wearable enclosure in SolidWorks, exploded view." plate="light" maxWidth={780} />
+
+</CaseSection>
+
+<CaseSection num="03" title="Key decisions">
+
+<Decisions>
+  <Decision title="Where the vision runs" options={['On the wearable', 'On the host PC']} choice="Host PC; the wearable receives only the result">
+    Face-pose estimation needs far more compute than a small microcontroller has. Keeping it on the PC lets the wearable stay a small board with a module, an IMU and a motor driver.
+  </Decision>
+  <Decision title="Camera plus IMU" options={['Camera only', 'IMU only', 'Camera fused with the IMU']} choice="Fuse face pose from the camera with IMU data" draft>
+    Each source covers what the other misses: the camera sees head and face position, the IMU measures the back directly.
+  </Decision>
+  <Decision title="Monitoring without writing an app" options={['A custom phone app', 'Blynk IoT platform']} choice="Blynk dashboard and push notifications" draft>
+    It gave a live dashboard and phone alerts from the ESP32 firmware, so the team's time went into the hardware and the vision pipeline.
+  </Decision>
+</Decisions>
+
+</CaseSection>
+
+<CaseSection num="04" title="Verification">
+
+- The PCB was fabricated, assembled and tested with the firmware and the vision pipeline running end to end.
+- Haptic feedback reaches the wearer in under 200 ms.
+
+</CaseSection>
+
+<CaseSection num="05" title="Result">
+
+Gold Medal (University Student Innovator) at the Malaysia Invention & Innovation Expo 2026, and the Industry Award at UTM's 9th EE Capstone Showcase in January 2026.
+
+<Figure src={award} alt="Abubakr and his capstone team holding their award medals at the UTM capstone showcase." caption="Industry Award, UTM 9th EE Capstone Showcase, January 2026." maxWidth={900} />
+
+</CaseSection>

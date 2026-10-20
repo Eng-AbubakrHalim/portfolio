@@ -21,20 +21,15 @@ const id = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
     padding-top: var(--space-8);
   }
 
-  .case-section__body {
-    display: grid;
+  /* Block flow: running text keeps to the reading measure, diagrams and wide figures use the full width. */
+  .case-section__body > :global(p),
+  .case-section__body > :global(ul),
+  .case-section__body > :global(.fig:not(.fig--wide)) {
     max-width: var(--measure);
   }
 
   .case-section__body > :global(p) {
     margin-block: 0 var(--space-2);
-  }
-
-  .case-section__body :global(.diagram),
-  .case-section__body :global(.fig--wide),
-  .case-section__body :global(.decisions) {
-    max-width: none;
-    width: min(100vw - 2 * var(--page-margin), 75rem);
   }
 
   .case-section__body :global(ul:not([role='list'])) {

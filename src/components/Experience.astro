@@ -1,5 +1,6 @@
 ---
 import { work, leadership, education, awards, timeline, formatRange } from '../data/experience';
+import Thumbs from './Thumbs.astro';
 
 // Chart axis: Jan 2023 → Jun 2027, in months.
 const AXIS_START = { y: 2023, m: 1 };
@@ -97,6 +98,7 @@ const groups = [
                     ))}
                   </ul>
                 )}
+                {r.images && <Thumbs images={r.images} height="9rem" />}
               </div>
             </li>
           ))}
@@ -140,7 +142,7 @@ const groups = [
 </div>
 
 <script>
-  import { gsap, DUR, EASE, prefersReducedMotion } from '../scripts/motion';
+  import { gsap, DUR, EASE, prefersReducedMotion, alreadyInView } from '../scripts/motion';
   import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
   gsap.registerPlugin(ScrollTrigger);
@@ -170,7 +172,7 @@ const groups = [
     const fills = [...chart.querySelectorAll<HTMLElement>('[data-fill]')];
     const done = (el: HTMLElement) => Number(el.dataset.done ?? 1);
 
-    if (prefersReducedMotion()) {
+    if (prefersReducedMotion() || alreadyInView(chart)) {
       fills.forEach((f) => (f.style.transform = `scaleX(${done(f)})`));
       return;
     }

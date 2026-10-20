@@ -1,5 +1,6 @@
 ---
 import { otherProjects } from '../data/other-projects';
+import Thumbs from './Thumbs.astro';
 ---
 
 <ol class="other" role="list" data-other>
@@ -27,6 +28,7 @@ import { otherProjects } from '../data/other-projects';
                 <span>{t} </span>
               ))}
             </p>
+            {p.images && <Thumbs images={p.images} />}
           </div>
         </details>
       </li>

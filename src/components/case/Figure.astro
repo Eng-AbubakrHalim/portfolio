@@ -48,6 +48,16 @@ const cap = Math.min(maxWidth ?? src.width, src.width);
     border: var(--hairline) solid var(--rule);
   }
 
+  /* No plate: the border hugs the image instead of framing empty space. */
+  .fig--none .fig__plate {
+    justify-items: start;
+    border: 0;
+  }
+
+  .fig--none :global(img) {
+    border: var(--hairline) solid var(--rule);
+  }
+
   .fig--dark .fig__plate {
     background: var(--frame);
     padding: var(--space-3);

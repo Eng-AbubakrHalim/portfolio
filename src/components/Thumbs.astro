@@ -1,0 +1,77 @@
+---
+/** A row of small captioned images at a shared height (used in Other projects and Experience). */
+import { Picture } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+
+export interface Thumb {
+  src: ImageMetadata;
+  alt: string;
+  caption?: string;
+}
+
+interface Props {
+  images: Thumb[];
+  /** Row height on desktop. */
+  height?: string;
+}
+const { images, height = '11rem' } = Astro.props;
+---
+
+<div class="thumbs" style={`--thumb-h: ${height}`}>
+  {
+    images.map((img) => (
+      <figure class="thumb">
+        <Picture
+          src={img.src}
+          alt={img.alt}
+          formats={['avif', 'webp']}
+          widths={[320, 640]}
+          sizes="(min-width: 48rem) 20rem, 80vw"
+          loading="lazy"
+        />
+        {img.caption && <figcaption>{img.caption}</figcaption>}
+      </figure>
+    ))
+  }
+</div>
+
+<style>
+  .thumbs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+
+  .thumb {
+    display: grid;
+    gap: var(--space-half);
+    max-width: 100%;
+  }
+
+  .thumb :global(img) {
+    height: var(--thumb-h);
+    width: auto;
+    max-width: 100%;
+    object-fit: cover;
+    border: var(--hairline) solid var(--rule);
+  }
+
+  .thumb figcaption {
+    max-width: 24ch;
+    font-family: var(--font-mono);
+    font-size: var(--text-label);
+    color: var(--muted);
+  }
+
+  /* Phones: full-width images. The figure gets a definite width so the img's width/height
+     attributes reserve its space before it loads (no layout shift under a scroll). */
+  @media (max-width: 47.99rem) {
+    .thumb {
+      flex: 1 1 100%;
+    }
+    .thumb :global(img) {
+      height: auto;
+      width: 100%;
+    }
+  }
+</style>

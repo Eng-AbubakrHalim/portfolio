@@ -1,12 +1,85 @@
 ---
 title: M.2-to-EDSFF SSD tester adapter
-summary: Passive adapter between an SSD tester and an on-board diagnostic card, reworked as rigid-flex.
+summary: Passive adapter between an SSD tester and an on-board diagnostic card, reworked as rigid-flex to IPC-2223.
 year: '2026'
 role: Hardware design intern, Pythonium.ai
 tools: [Altium Designer]
-tags: [Footprints, Rigid-flex, '2026']
+tags: [Rigid-flex, IPC-2223, '2026']
+status: Company design, shown in part
+cover: ../../assets/projects/ssd-adapter/adapter-cover.png
+coverAlt: Layer-stack view of the adapter. Two thick rigid sections, labelled EDSFF end and M.2 end, joined by a thin flex section.
 order: 3
 confidential: true
 ---
 
-Case study in progress.
+import CaseSection from '../../components/case/CaseSection.astro';
+import Figure from '../../components/case/Figure.astro';
+import Decisions from '../../components/case/Decisions.astro';
+import Decision from '../../components/case/Decision.astro';
+import AdapterChain from '../../components/diagrams/AdapterChain.astro';
+import bottom from '../../assets/projects/ssd-adapter/adapter-3d-bottom.png';
+import section from '../../assets/projects/ssd-adapter/adapter-section.png';
+import m2 from '../../assets/projects/ssd-adapter/adapter-m2-footprint.png';
+import stacked from '../../assets/projects/ssd-adapter/adapter-stacked-footprint.png';
+
+<CaseSection num="01" title="Problem">
+
+An SSD tester with an M.2 socket had to reach an on-board diagnostic card that takes EDSFF. Neither side could change, so the adapter has to be a card at both ends: M.2 Key M gold fingers on one edge, EDSFF gold fingers on the other.
+
+The signal path is passive. The board also carries temperature sensors and an ID EEPROM on I²C.
+
+</CaseSection>
+
+<CaseSection num="02" title="Architecture">
+
+Two rigid ends joined by a flex section. Each rigid end has its own stack-up, because each edge must match its own connector's thickness.
+
+<AdapterChain />
+
+<Figure src={bottom} alt="3D render of the rigid-flex adapter, bottom side: EDSFF gold fingers on the left, M.2 Key M fingers on the right, a teal flex section between them and test points along both rigid ends." caption="Bottom side: EDSFF edge on the left, M.2 edge on the right." wide />
+
+</CaseSection>
+
+<CaseSection num="03" title="Key decisions">
+
+<Decisions>
+  <Decision title="Edge footprints from the specs" options={['Library footprints', 'Build from the connector specifications']} choice="Built both gold-finger footprints by hand from the spec dimensions">
+    On an edge connector the board itself is the plug. Pad pitch, key position, finger length and the bevelled edge all have to match the mating socket, so they came straight from the spec drawings.
+  </Decision>
+  <Decision title="Rigid-flex instead of one rigid board" options={['One rigid board', 'Rigid ends joined by flex']} choice="Rigid-flex: 4-layer M.2 end, 2-layer flex, 6-layer EDSFF end">
+    The M.2 edge has to be 0.8 mm thick at the fingers and the EDSFF edge 1.57 mm. A single rigid board can only be one thickness. Separate rigid ends let each match its socket.
+  </Decision>
+  <Decision title="Flex zone to IPC-2223" options={['Treat the flex like a thin rigid section', 'Apply IPC-2223 flex rules']} choice="Minimum 4 mm bend radius, vias at least 3.2 mm from each rigid-flex transition, strain-relief fillets on inside corners, coverlay extending 1.27–2.54 mm into the rigid areas">
+    The transition is where a rigid-flex board cracks. Keeping plated holes out of it and filleting the corners keeps bending stress off the copper.
+  </Decision>
+  <Decision title="Controlled impedance through three stack-ups" options={['One trace width everywhere', 'A profile per section and layer']} choice="Five impedance profiles: microstrip and offset stripline on each rigid end, microstrip on the flex">
+    The differential pairs cross three different stack-ups. Each needs its own width and gap to stay at 100 Ω ±10%.
+  </Decision>
+  <Decision title="One site, three packages" options={['One package option per sensor', 'Stacked footprint for three packages']} choice="Overlaid WSON, SOIC and VSSOP footprints on one site" draft>
+    Any of the three packages can be fitted to the same pads without changing the board.
+  </Decision>
+</Decisions>
+
+<Figure src={m2} alt="Footprint of the M.2 edge connector: two groups of gold-finger pads either side of the key gap, on a chamfered board edge." caption="M.2 gold-finger footprint, built from the connector spec dimensions." plate="dark" />
+
+<Figure src={stacked} alt="One footprint that overlays three 8-pin package outlines of different sizes, nested inside each other, so any one of the three packages can be fitted to the same site." caption="Stacked footprint: three package options for the same 8-pin sensor share one site." plate="dark" maxWidth={560} />
+
+</CaseSection>
+
+<CaseSection num="04" title="Verification">
+
+- Every impedance profile was calculated within 100 Ω ±10% in Altium's layer stack manager.
+- Rigid-flex board regions, bending lines and via spans were checked in the 3D and section views.
+- Fabrication notes specify IPC-6013 Class 2 rigid-flex, selective hard gold on the fingers, ENIG elsewhere and bevelled edges on both connectors.
+
+<Figure src={section} alt="Section view of the build: the rigid EDSFF end, a thin flex section and the rigid M.2 end, with plated vias through each rigid section." caption="Section view: the flex layers run continuously into both rigid ends." plate="dark" />
+
+</CaseSection>
+
+<CaseSection num="05" title="Result and next">
+
+A rigid-flex adapter with matched edge thicknesses and defined impedance on every section, documented for fabrication with a stack-up drawing, an impedance table and fabrication notes.
+
+Next is a first-article check: fit in both sockets, then the differential pairs measured against the calculated impedance.
+
+</CaseSection>

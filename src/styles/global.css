@@ -213,7 +213,8 @@ a:hover {
 
 .diagram__scroll {
   overflow-x: auto;
-  padding-block: var(--space-3);
+  /* 1px inline room so the outer box strokes at the viewBox edges aren't clipped. */
+  padding: var(--space-3) 1px;
   border-block: var(--hairline) solid var(--rule);
 }
 
@@ -301,4 +302,19 @@ a:hover {
   font-size: 11px;
   letter-spacing: 0.05em;
   fill: var(--accent);
+}
+
+/* ---------- Page transitions ---------- */
+/* The work-list title and image move into the case-study header (a move, so ease-in-out). */
+::view-transition-group(project-title),
+::view-transition-group(project-cover) {
+  animation-duration: 500ms;
+  animation-timing-function: cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+/* Keep the title's text proportions while its box changes shape. */
+::view-transition-old(project-title),
+::view-transition-new(project-title) {
+  width: auto;
+  height: 100%;
 }

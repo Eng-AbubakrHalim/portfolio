@@ -213,4 +213,12 @@ export const images = [
     alt: 'A green perfboard prototype with a blue STM32 development module, an 8-pin IC, trimmers and push buttons, held in front of a laptop showing its schematic.',
     caption: 'An STM32 perfboard prototype, with its schematic on screen.',
   },
+  {
+    slug: 'tsh',
+    name: 'tsh-control-cabinet',
+    src: 'legacy/portfolio-pics/WhatsApp Image 2026-05-14 at 16.25.14 (1).jpeg',
+    crop: { left: 0, top: 80, width: 810, height: 1000 },
+    alt: 'Abubakr checking an open industrial control cabinet with drive modules and wiring, taking notes on a tablet.',
+    caption: 'Checking an industrial control cabinet.',
+  },
 ];

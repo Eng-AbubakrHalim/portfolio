@@ -12,7 +12,7 @@ import Toolkit from '../components/Toolkit.astro';
 import About from '../components/About.astro';
 import Contact from '../components/Contact.astro';
 import { section } from '../data/sections';
-import { profile } from '../data/profile';
+import SiteFooter from '../components/SiteFooter.astro';
 ---
 
 <Base title="Abubakr M. Abdelhalim — Electrical engineer" noindex>
@@ -91,10 +91,7 @@ import { profile } from '../data/profile';
     </section>
   </main>
 
-  <footer class="site-footer page">
-    <span class="label">© 2026 {profile.name}</span>
-    <a class="label" href="#top">Back to top</a>
-  </footer>
+  <SiteFooter />
 </Base>
 
 <script>
@@ -164,16 +161,4 @@ import { profile } from '../data/profile';
     scroll-margin-top: 0;
   }
 
-  .site-footer {
-    display: flex;
-    justify-content: space-between;
-    gap: var(--space-2);
-    margin-top: var(--section-pad);
-    padding-block: var(--space-4);
-    border-top: var(--hairline) solid var(--rule);
-  }
-
-  .site-footer a {
-    text-decoration: none;
-  }
 </style>

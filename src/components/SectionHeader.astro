@@ -35,7 +35,7 @@ const rest = lead ? num.slice(1) : num;
 </header>
 
 <script>
-  import { gsap, lineReveal, DUR, EASE, prefersReducedMotion } from '../scripts/motion';
+  import { gsap, lineReveal, DUR, EASE, prefersReducedMotion, alreadyInView } from '../scripts/motion';
   import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
   gsap.registerPlugin(ScrollTrigger);
@@ -61,7 +61,7 @@ const rest = lead ? num.slice(1) : num;
       const num = head.querySelector<HTMLElement>('[data-num]');
       const title = head.querySelector<HTMLElement>('[data-lines]');
       const intro = head.querySelector<HTMLElement>('[data-intro]');
-      if (!rule || !num || !title) return;
+      if (!rule || !num || !title || alreadyInView(head)) return;
 
       const numReveal = lineReveal(num, { duration: DUR.slow, paused: true });
       const titleReveal = lineReveal(title, { duration: DUR.slow, delay: 0.1, paused: true });

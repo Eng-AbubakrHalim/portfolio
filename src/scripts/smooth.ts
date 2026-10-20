@@ -29,12 +29,20 @@ export function scrollToSection(target: HTMLElement) {
     target.focus({ preventScroll: true });
   };
   if (lenis) {
-    lenis.scrollTo(target, { onComplete: focus });
+    // If content above moved while scrolling (late images, fonts), finish with a short correction.
+    const offset = () => target.getBoundingClientRect().top - parseFloat(getComputedStyle(document.documentElement).scrollPaddingTop || '0');
+    lenis.scrollTo(target, {
+      onComplete: () => {
+        if (Math.abs(offset()) > 4) lenis.scrollTo(target, { duration: 0.4, onComplete: focus });
+        else focus();
+      },
+    });
   } else {
     target.scrollIntoView();
     focus();
   }
-  history.replaceState(null, '', `#${target.id}`);
+  // Keep the router's state on this entry; replacing it with null breaks Back to this page.
+  history.replaceState(history.state, '', `#${target.id}`);
 }
 
 // Same-page hash links. Runs in the capture phase on window so it sees the click before

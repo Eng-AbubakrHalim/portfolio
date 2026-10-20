@@ -1,3 +1,10 @@
+import type { Thumb } from '../components/Thumbs.astro';
+import cabinet from '../assets/projects/tsh/tsh-control-cabinet.jpg';
+import training from '../assets/projects/robocon/robocon-training.jpg';
+import mentoring from '../assets/projects/workshop/workshop-mentoring.jpg';
+import presenting from '../assets/projects/workshop/workshop-presenting.jpg';
+import referee from '../assets/projects/iyrc/iyrc-referee.jpg';
+
 /** 03 — Experience. Dates are 'YYYY-MM'; `end` omitted means a single month. */
 export interface Role {
   role: string;
@@ -6,6 +13,7 @@ export interface Role {
   start: string;
   end?: string;
   points: string[];
+  images?: Thumb[];
 }
 
 export const work: Role[] = [
@@ -31,6 +39,9 @@ export const work: Role[] = [
       'PLC testing and industrial wiring for factory automation systems.',
       'Wrote the work instructions for MTC machine testing.',
       'Designed and built a DI/DO testing kit for field signal verification.',
+    ],
+    images: [
+      { src: cabinet, alt: 'Abubakr checking an open industrial control cabinet with drive modules and wiring, taking notes on a tablet.', caption: 'Checking a control cabinet' },
     ],
   },
   {
@@ -61,12 +72,17 @@ export const leadership: Role[] = [
     place: 'Johor',
     start: '2025-06',
     points: ['Refereed matches for teams from across Southeast Asia.'],
+    images: [{ src: referee, alt: 'Abubakr in a blue referee vest on the IYRC competition floor, giving a thumbs up.', caption: 'IYRC ASEAN 2025' }],
   },
   {
     role: 'Presenter and mentor',
     org: 'Self-Balancing Robot Workshop',
     start: '2025-05',
     points: ['Month-long programme from zero to a working robot: delivered the embedded systems and PCB design sessions and mentored students one to one.'],
+    images: [
+      { src: mentoring, alt: "Abubakr pointing at a student's laptop screen during the self-balancing robot workshop.", caption: 'Mentoring' },
+      { src: presenting, alt: 'Abubakr speaking into a microphone at a laptop during the workshop.', caption: 'Presenting' },
+    ],
   },
   {
     role: 'Trainer',
@@ -74,6 +90,7 @@ export const leadership: Role[] = [
     start: '2024-01',
     end: '2025-04',
     points: ['Trained 20+ junior members in Altium Designer, STM32 programming and circuit analysis.'],
+    images: [{ src: training, alt: 'Abubakr speaking at a lectern during a Robocon training session at UTM.', caption: 'Training session at UTM' }],
   },
 ];
 

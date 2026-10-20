@@ -57,7 +57,7 @@ const rows = projects.map((p, i) => ({
 </div>
 
 <script>
-  import { gsap, DUR, EXIT, EASE, prefersReducedMotion } from '../scripts/motion';
+  import { gsap, DUR, EXIT, EASE, prefersReducedMotion, alreadyInView } from '../scripts/motion';
   import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
   gsap.registerPlugin(ScrollTrigger);
@@ -121,12 +121,14 @@ const rows = projects.map((p, i) => ({
         gsap.fromTo(item, { clipPath: HIDDEN, zIndex: ++z }, { clipPath: SHOWN, duration: DUR.base, ease: EASE.out, overwrite: true });
       }
       current = id;
+      preview.dataset.current = id;
     };
 
     const hide = () => {
       if (!visible) return;
       visible = false;
       current = null;
+      delete preview.dataset.current;
       gsap.to(preview, {
         clipPath: GONE,
         scale: 0.97,
@@ -166,7 +168,7 @@ const rows = projects.map((p, i) => ({
   let rowsTrigger: ScrollTrigger | undefined;
   function initRows() {
     rowsTrigger?.kill();
-    const rows = document.querySelectorAll<HTMLElement>('[data-work-row]');
+    const rows = [...document.querySelectorAll<HTMLElement>('[data-work-row]')].filter((r) => !alreadyInView(r));
     if (!rows.length || prefersReducedMotion()) return;
     gsap.set(rows, { autoAlpha: 0, y: 24 });
     rowsTrigger = ScrollTrigger.create({
@@ -178,6 +180,46 @@ const rows = projects.map((p, i) => ({
     });
   }
 
+  // Shared-element transition into the case study. Only the clicked row carries the names, so
+  // each name exists once per page: the title, and whichever image is on screen (the cursor
+  // preview on desktop, the inline thumbnail on touch). Case pages set the same names statically.
+  function nameRow(id: string) {
+    const row = document.querySelector<HTMLElement>(`[data-work-row="${id}"]`);
+    if (!row) return;
+    row.querySelector<HTMLElement>('.work-row__title')!.style.viewTransitionName = 'project-title';
+    const preview = document.querySelector<HTMLElement>('[data-work-preview]');
+    const item = preview?.querySelector<HTMLElement>(`[data-preview-item="${id}"]`);
+    const thumb = row.querySelector<HTMLElement>('.work-row__thumb');
+    if (item && preview?.dataset.current === id) item.style.viewTransitionName = 'project-cover';
+    else if (thumb && thumb.offsetParent !== null) thumb.style.viewTransitionName = 'project-cover';
+  }
+
+  function clearNames() {
+    document.querySelectorAll<HTMLElement>('[data-work] [style*="view-transition-name"]').forEach((el) => {
+      el.style.viewTransitionName = '';
+    });
+  }
+
+  document.addEventListener('click', (e) => {
+    const link = (e.target as Element).closest?.('[data-work-row] a');
+    const row = link?.closest<HTMLElement>('[data-work-row]');
+    if (!row || (e as MouseEvent).metaKey || (e as MouseEvent).ctrlKey) return;
+    clearNames(); // a row named on the way back from another case study
+    nameRow(row.dataset.workRow!);
+  });
+
+  // Coming back from a case study: name the matching row in the new page before it is captured.
+  let fromProject: string | null = null;
+  document.addEventListener('astro:before-preparation', (e) => {
+    const from = (e as Event & { from?: URL }).from;
+    fromProject = from?.pathname.match(/\/work\/([^/]+)\/?$/)?.[1] ?? null;
+  });
+  document.addEventListener('astro:after-swap', () => {
+    if (fromProject) nameRow(fromProject);
+  });
+
+  // Names stay until the next click: clearing on page-load could run before the browser has
+  // captured the new page, which would cancel the morph on the way back.
   document.addEventListener('astro:page-load', () => {
     initPreview();
     initRows();
