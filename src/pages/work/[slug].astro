@@ -27,7 +27,13 @@ const spec = [
 ].filter(([, v]) => v) as [string, string][];
 ---
 
-<Base title={`${d.title} — Abubakr M. Abdelhalim`} description={d.summary} noindex>
+<Base
+  title={`${d.title} — Abubakr M. Abdelhalim`}
+  description={d.summary}
+  ogImage={`og/work-${project.id}.png`}
+  ogImageAlt={`Case study: ${d.title}`}
+  ogType="article"
+>
   <SiteHeader />
   <main id="main" class="case page">
     <header class="case-head" id="top">

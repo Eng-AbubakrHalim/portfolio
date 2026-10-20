@@ -170,13 +170,13 @@ const rows = projects.map((p, i) => ({
     rowsTrigger?.kill();
     const rows = [...document.querySelectorAll<HTMLElement>('[data-work-row]')].filter((r) => !alreadyInView(r));
     if (!rows.length || prefersReducedMotion()) return;
-    gsap.set(rows, { autoAlpha: 0, y: 24 });
+    gsap.set(rows, { opacity: 0, y: 24 });
     rowsTrigger = ScrollTrigger.create({
       trigger: rows[0],
       start: 'top 90%',
       once: true,
       onEnter: () =>
-        gsap.to(rows, { autoAlpha: 1, y: 0, duration: DUR.slow, stagger: 0.05, ease: EASE.out, clearProps: 'transform' }),
+        gsap.to(rows, { opacity: 1, y: 0, duration: DUR.slow, stagger: 0.05, ease: EASE.out, clearProps: 'transform' }),
     });
   }
 

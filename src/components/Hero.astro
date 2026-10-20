@@ -11,8 +11,12 @@ const { position, meta, status } = Astro.props;
 <section class="hero page" id="top" aria-labelledby="hero-name" data-hero>
   <div class="hero__fit">
     <h1 class="hero__name" id="hero-name">
-      <span class="hero__line" data-hero-line>Abubakr M<span class="hero__dot">.</span></span>{' '}
-      <span class="hero__line" data-hero-line>Abdelhalim</span>
+      <span class="hero__line" data-hero-line
+        ><span class="hero__mask"><span class="hero__rise">Abubakr M<span class="hero__dot">.</span></span></span></span
+      >{' '}
+      <span class="hero__line" data-hero-line
+        ><span class="hero__mask"><span class="hero__rise" style="--i: 1">Abdelhalim</span></span></span
+      >
     </h1>
   </div>
   <!-- Drafting-style dimension line: ticks mark the name's extents, label gives its rendered width. -->
@@ -23,7 +27,7 @@ const { position, meta, status } = Astro.props;
   </div>
   <div class="hero__below" data-hero-below>
     <p class="hero__position" data-hero-fade>{position}</p>
-    <p class="hero__meta label" data-hero-fade>
+    <p class="hero__meta label" data-hero-fade style="--i: 1">
       {
         meta.map((m, i) => (
           <>
@@ -49,17 +53,16 @@ const { position, meta, status } = Astro.props;
         <time data-clock-time>--:--</time> MYT
       </span>
     </p>
-    <a class="hero__cta" href="#work" data-hero-fade>View work</a>
+    <a class="hero__cta" href="#work" data-hero-fade style="--i: 2">View work</a>
   </div>
 </section>
 
 <script>
-  import { gsap, lineReveal, DUR, EASE, prefersReducedMotion } from '../scripts/motion';
+  import { gsap, prefersReducedMotion } from '../scripts/motion';
   import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
   gsap.registerPlugin(ScrollTrigger);
 
-  let reveals: ReturnType<typeof lineReveal>[] = [];
   let exit: ScrollTrigger | undefined;
   let clockTimer: number | undefined;
 
@@ -86,7 +89,8 @@ const { position, meta, status } = Astro.props;
     const dim = hero.querySelector<HTMLElement>('[data-dim]');
     const label = hero.querySelector<HTMLElement>('[data-dim-label]');
     if (!dim || !label) return;
-    const widths = [...hero.querySelectorAll<HTMLElement>('[data-hero-line]')].map((line) => {
+    // Measure the text runs inside the rise spans; the line wrappers themselves are full-width blocks.
+    const widths = [...hero.querySelectorAll<HTMLElement>('.hero__rise')].map((line) => {
       const range = document.createRange();
       range.selectNodeContents(line);
       return range.getBoundingClientRect().width;
@@ -98,8 +102,6 @@ const { position, meta, status } = Astro.props;
 
   function cleanup() {
     dimObserver?.disconnect();
-    reveals.forEach((r) => r.split.revert());
-    reveals = [];
     exit?.kill();
     exit = undefined;
   }
@@ -108,7 +110,6 @@ const { position, meta, status } = Astro.props;
     const hero = document.querySelector<HTMLElement>('[data-hero]');
     if (!hero) return;
     startClock();
-    const root = document.documentElement;
     document.fonts.ready.then(() => {
       measureName(hero);
       dimObserver?.disconnect();
@@ -116,43 +117,22 @@ const { position, meta, status } = Astro.props;
       dimObserver.observe(hero.querySelector('.hero__fit')!);
     });
 
-    if (prefersReducedMotion()) {
-      root.classList.add('hero-ready');
-      return;
-    }
+    if (prefersReducedMotion()) return;
 
+    // The entrance is pure CSS (below), so the name paints without waiting for this script.
+    // Scrolling out of the hero pulls the two lines apart (scrubbed, so linear).
     const lines = [...hero.querySelectorAll<HTMLElement>('[data-hero-line]')];
-    const fades = hero.querySelectorAll<HTMLElement>('[data-hero-fade]');
-
-    // Split once fonts are in so the masked lines match the final layout; don't wait forever.
-    const fontsReady = Promise.race([document.fonts.ready, new Promise((r) => setTimeout(r, 1500))]);
-    fontsReady.then(() => {
-      cleanup();
-      // One reveal per line (60ms apart) so the outer line spans stay stable for the scroll exit below.
-      reveals = lines.map((line, i) => lineReveal(line, { duration: DUR.slow, delay: i * 0.06 }));
-      gsap.from(fades, {
-        autoAlpha: 0,
-        y: 12,
-        duration: DUR.base,
-        delay: 0.3,
-        stagger: 0.05,
-        ease: EASE.out,
-        clearProps: 'transform,opacity,visibility',
-      });
-      root.classList.add('hero-ready');
-
-      // Scrolling out of the hero pulls the two lines of the name apart (scrubbed, so linear).
-      exit = ScrollTrigger.create({
-        trigger: hero,
-        start: 'top top',
-        end: 'bottom top',
-        scrub: true,
-        animation: gsap
-          .timeline()
-          .to(lines[0], { xPercent: -14, ease: 'none' }, 0)
-          .to(lines[1], { xPercent: 14, ease: 'none' }, 0)
-          .to([hero.querySelector('[data-dim]'), hero.querySelector('[data-hero-below]')], { autoAlpha: 0, y: -24, ease: 'none' }, 0),
-      });
+    exit?.kill();
+    exit = ScrollTrigger.create({
+      trigger: hero,
+      start: 'top top',
+      end: 'bottom top',
+      scrub: true,
+      animation: gsap
+        .timeline()
+        .to(lines[0], { xPercent: -14, ease: 'none' }, 0)
+        .to(lines[1], { xPercent: 14, ease: 'none' }, 0)
+        .to([hero.querySelector('[data-dim]'), hero.querySelector('[data-hero-below]')], { opacity: 0, y: -24, ease: 'none' }, 0),
     });
   });
 
@@ -197,6 +177,46 @@ const { position, meta, status } = Astro.props;
 
   .hero__line {
     display: block;
+  }
+
+  /* Masked line reveal in CSS: each line rises from behind its own clip, 60 ms apart.
+     The mask is padded so the tight display leading never clips glyphs. */
+  .hero__mask {
+    display: block;
+    overflow: clip;
+    padding-block: 0.1em;
+    margin-block: -0.1em;
+  }
+
+  .hero__rise {
+    display: block;
+    animation: hero-rise var(--dur-slow) var(--ease-out) both;
+    animation-delay: calc(80ms + var(--i, 0) * 60ms);
+  }
+
+  [data-hero-fade] {
+    animation: hero-fade var(--dur-base) var(--ease-out) both;
+    animation-delay: calc(320ms + var(--i, 0) * 50ms);
+  }
+
+  @keyframes hero-rise {
+    from {
+      transform: translateY(120%);
+    }
+  }
+
+  @keyframes hero-fade {
+    from {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero__rise,
+    [data-hero-fade] {
+      animation: none;
+    }
   }
 
   .hero__dot {
@@ -329,9 +349,4 @@ const { position, meta, status } = Astro.props;
     }
   }
 
-  /* Hold the hero hidden until the reveal starts (html.js is set before paint; a timeout clears it). */
-  :global(html.js:not(.hero-ready)) .hero__name,
-  :global(html.js:not(.hero-ready)) [data-hero-fade] {
-    visibility: hidden;
-  }
 </style>

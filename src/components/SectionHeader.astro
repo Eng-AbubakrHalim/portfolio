@@ -66,7 +66,7 @@ const rest = lead ? num.slice(1) : num;
       const numReveal = lineReveal(num, { duration: DUR.slow, paused: true });
       const titleReveal = lineReveal(title, { duration: DUR.slow, delay: 0.1, paused: true });
       gsap.set([rule, tick], { scaleX: 0 });
-      if (intro) gsap.set(intro, { autoAlpha: 0, y: 12 });
+      if (intro) gsap.set(intro, { opacity: 0, y: 12 });
 
       const enter = ScrollTrigger.create({
         trigger: head,
@@ -77,7 +77,7 @@ const rest = lead ? num.slice(1) : num;
           gsap.to(tick, { scaleX: 1, duration: DUR.base, ease: EASE.out });
           numReveal.play();
           titleReveal.play();
-          if (intro) gsap.to(intro, { autoAlpha: 1, y: 0, duration: DUR.base, delay: 0.2, ease: EASE.out });
+          if (intro) gsap.to(intro, { opacity: 1, y: 0, duration: DUR.base, delay: 0.2, ease: EASE.out });
         },
       });
 

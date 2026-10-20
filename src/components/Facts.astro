@@ -66,7 +66,7 @@ const finalShift = (d: string) => -((10 + Number(d)) * 100) / STRIP.length;
     // Drop the server-rendered final position, then park every digit at 0 until the strip is seen.
     gsap.set(strips, { clearProps: 'transform' });
     gsap.set(strips, { y: 0, yPercent: 0 });
-    gsap.set(labels, { autoAlpha: 0, y: 12 });
+    gsap.set(labels, { opacity: 0, y: 12 });
 
     trigger = ScrollTrigger.create({
       trigger: root,
@@ -82,7 +82,7 @@ const finalShift = (d: string) => -((10 + Number(d)) * 100) / STRIP.length;
             ease: EASE.out,
           });
         });
-        gsap.to(labels, { autoAlpha: 1, y: 0, duration: DUR.base, delay: 0.25, stagger: 0.05, ease: EASE.out });
+        gsap.to(labels, { opacity: 1, y: 0, duration: DUR.base, delay: 0.25, stagger: 0.05, ease: EASE.out });
       },
     });
   });

@@ -13,9 +13,26 @@ import About from '../components/About.astro';
 import Contact from '../components/Contact.astro';
 import { section } from '../data/sections';
 import SiteFooter from '../components/SiteFooter.astro';
+import { profile } from '../data/profile';
+
+const person = {
+  '@context': 'https://schema.org',
+  '@type': 'Person',
+  name: profile.name,
+  jobTitle: 'Electrical engineer',
+  url: new URL(import.meta.env.BASE_URL, Astro.site).href,
+  email: `mailto:${profile.email}`,
+  sameAs: [profile.linkedin.href, profile.github.href],
+  alumniOf: { '@type': 'CollegeOrUniversity', name: 'Universiti Teknologi Malaysia' },
+  address: { '@type': 'PostalAddress', addressRegion: 'Johor', addressCountry: 'MY' },
+};
 ---
 
-<Base title="Abubakr M. Abdelhalim — Electrical engineer" noindex>
+<Base
+  title="Abubakr M. Abdelhalim — Electrical engineer"
+  description="Electrical engineer designing industrial measurement hardware: mixed-signal PCBs, power trees, embedded firmware. Graduating from UTM in February 2027."
+>
+  <script type="application/ld+json" slot="head" set:html={JSON.stringify(person)} />
   <SiteHeader home />
   <main id="main">
     <Hero
