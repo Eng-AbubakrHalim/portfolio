@@ -1,0 +1,266 @@
+---
+import { getCollection, render } from 'astro:content';
+import { Picture } from 'astro:assets';
+import Base from '../../layouts/Base.astro';
+import SiteHeader from '../../components/SiteHeader.astro';
+import SiteFooter from '../../components/SiteFooter.astro';
+import Cover from '../../components/Cover.astro';
+import { withBase } from '../../lib/url';
+
+export async function getStaticPaths() {
+  const projects = (await getCollection('projects')).sort((a, b) => a.data.order - b.data.order);
+  return projects.map((project, i) => ({
+    params: { slug: project.id },
+    props: { project, index: i, next: projects[(i + 1) % projects.length] },
+  }));
+}
+
+const { project, index, next } = Astro.props;
+const { Content } = await render(project);
+const d = project.data;
+const num = String(index + 1).padStart(2, '0');
+const spec = [
+  ['Role', d.role],
+  ['Year', d.year],
+  ['Tools', d.tools.join(', ')],
+  ['Status', d.status],
+].filter(([, v]) => v) as [string, string][];
+---
+
+<Base
+  title={`${d.title} — Abubakr M. Abdelhalim`}
+  description={d.summary}
+  ogImage={`og/work-${project.id}.png`}
+  ogImageAlt={`Case study: ${d.title}`}
+  ogType="article"
+>
+  <SiteHeader />
+  <main id="main" class="case page">
+    <header class="case-head" id="top">
+      <p class="case-head__crumb label">
+        <a href={withBase('#work')}>Work</a>
+        <span aria-hidden="true">/</span>
+        <span>Case study {num}</span>
+      </p>
+
+      <h1 class="case-head__title" transition:name="project-title">{d.title}</h1>
+      <p class="case-head__summary">{d.summary}</p>
+
+      <dl class="case-head__spec">
+        {
+          spec.map(([k, v]) => (
+            <div>
+              <dt>{k}</dt>
+              <dd>{v}</dd>
+            </div>
+          ))
+        }
+        {
+          d.repo && (
+            <div>
+              <dt>Code</dt>
+              <dd>
+                {d.repo.startsWith('http') ? (
+                  <a class="link" href={d.repo}>
+                    Repository
+                  </a>
+                ) : (
+                  d.repo
+                )}
+              </dd>
+            </div>
+          )
+        }
+      </dl>
+
+      <figure class="case-head__cover" transition:name="project-cover">
+        {
+          d.cover ? (
+            <Picture
+              src={d.cover}
+              alt={d.coverAlt ?? ''}
+              formats={['avif', 'webp']}
+              widths={[640, 1000, Math.min(1600, d.cover.width)]}
+              sizes="(min-width: 75rem) 72rem, 100vw"
+              loading="eager"
+              fetchpriority="high"
+            />
+          ) : (
+            <Cover num={num} title={d.title} meta={`${d.year} · ${d.tags[0]}`} />
+          )
+        }
+      </figure>
+      {
+        d.confidential && (
+          <p class="case-head__note">
+            Company work. Images are cropped views; no schematics, layout files or bills of materials are shown.
+          </p>
+        )
+      }
+    </header>
+
+    <div class="case-body">
+      <Content />
+    </div>
+
+    <nav class="case-next" aria-label="Next case study">
+      <a class="case-next__link" href={withBase(`work/${next.id}/`)}>
+        <span class="label">Next case study</span>
+        <span class="case-next__title">{next.data.title}</span>
+        <span class="case-next__summary">{next.data.summary}</span>
+      </a>
+    </nav>
+  </main>
+  <SiteFooter />
+</Base>
+
+<script>
+  import '../../scripts/smooth';
+  import '../../scripts/reveal';
+</script>
+
+<style>
+  .case {
+    padding-top: calc(var(--header-h) + var(--space-6));
+  }
+
+  .case-head {
+    display: grid;
+    gap: var(--space-4);
+  }
+
+  .case-head__crumb {
+    display: flex;
+    gap: var(--space-1);
+  }
+
+  .case-head__crumb a {
+    color: var(--fg);
+    text-decoration: none;
+  }
+
+  .case-head__crumb a:hover {
+    color: var(--accent);
+  }
+
+  .case-head__title {
+    font-family: var(--font-display);
+    font-size: clamp(2.5rem, 1.4rem + 5vw, 6.5rem);
+    font-weight: 500;
+    line-height: 0.95;
+    letter-spacing: var(--tracking-display);
+    max-width: 16ch;
+  }
+
+  .case-head__summary {
+    font-size: var(--text-lead);
+    line-height: 1.4;
+    max-width: 44ch;
+  }
+
+  .case-head__spec {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+    gap: var(--space-2) var(--gutter);
+    padding-block: var(--space-3);
+    border-block: var(--hairline) solid var(--rule);
+  }
+
+  .case-head__spec div {
+    display: grid;
+    gap: var(--space-half);
+    align-content: start;
+  }
+
+  .case-head__spec dt {
+    font-family: var(--font-mono);
+    font-size: var(--text-label);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .case-head__spec dd {
+    font-size: var(--text-small);
+  }
+
+  .case-head__cover {
+    margin-top: var(--space-2);
+    aspect-ratio: 16 / 10;
+    border: var(--hairline) solid var(--rule);
+    overflow: hidden;
+  }
+
+  .case-head__cover :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .case-head__cover :global(.cover) {
+    height: 100%;
+    border: 0;
+  }
+
+  .case-head__note {
+    font-family: var(--font-mono);
+    font-size: var(--text-label);
+    color: var(--muted);
+    max-width: 72ch;
+  }
+
+  .case-body {
+    padding-bottom: var(--space-6);
+  }
+
+  /* ---------- Next ---------- */
+  .case-next {
+    margin-top: var(--space-6);
+    border-top: var(--hairline) solid var(--rule);
+  }
+
+  .case-next__link {
+    display: grid;
+    gap: var(--space-2);
+    padding-block: var(--space-6) var(--space-4);
+    text-decoration: none;
+    color: var(--fg);
+  }
+
+  .case-next__title {
+    font-family: var(--font-display);
+    font-size: var(--text-h1);
+    font-weight: 500;
+    line-height: 1;
+    letter-spacing: var(--tracking-tight);
+    transition: transform var(--dur-base-exit) var(--ease-in);
+  }
+
+  .case-next__link:is(:hover, :focus-visible) .case-next__title {
+    color: var(--fg);
+    transform: translateX(var(--space-2));
+    transition: transform var(--dur-base) var(--ease-out);
+  }
+
+  .case-next__link:is(:hover, :focus-visible) .label {
+    color: var(--accent);
+  }
+
+  .case-next__summary {
+    color: var(--muted);
+    max-width: 52ch;
+  }
+
+  @media (min-width: 64rem) {
+    .case-head {
+      grid-template-columns: repeat(var(--columns), minmax(0, 1fr));
+      column-gap: var(--gutter);
+    }
+    .case-head > * {
+      grid-column: 1 / -1;
+    }
+    .case-head__summary {
+      grid-column: 1 / span 7;
+    }
+  }
+</style>

@@ -1,0 +1,58 @@
+---
+/**
+ * Typographic cover: used when a project has no approved image yet.
+ * Sized with container units so it reads the same as a thumbnail or a large preview.
+ */
+interface Props {
+  num: string;
+  title: string;
+  meta: string;
+}
+const { num, title, meta } = Astro.props;
+---
+
+<div class="cover" aria-hidden="true">
+  <div class="cover__inner">
+    <span class="cover__num">{num}</span>
+    <span class="cover__title">{title}</span>
+    <span class="cover__meta">{meta}</span>
+  </div>
+</div>
+
+<style>
+  /* The outer box is the size container; cq units only resolve against an ancestor, so padding lives on the inner box. */
+  .cover {
+    container-type: inline-size;
+    aspect-ratio: 16 / 10;
+    background: var(--surface);
+    border: var(--hairline) solid var(--rule);
+    color: var(--fg);
+  }
+
+  .cover__inner {
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    height: 100%;
+    padding: 6cqi;
+  }
+
+  .cover__num,
+  .cover__meta {
+    font-family: var(--font-mono);
+    font-size: max(0.625rem, 3cqi);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .cover__title {
+    align-self: end;
+    margin-bottom: 4cqi;
+    font-family: var(--font-display);
+    font-size: 9cqi;
+    font-weight: 500;
+    line-height: 1;
+    letter-spacing: var(--tracking-tight);
+    text-wrap: balance;
+  }
+</style>

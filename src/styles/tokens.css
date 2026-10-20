@@ -1,0 +1,123 @@
+/*
+ * Design tokens — "Editorial Precision"
+ * Every colour, size, space and motion value on the site comes from here.
+ * Contrast ratios (WCAG 2.x) are noted next to each text colour.
+ */
+
+:root {
+  /* ---------- Colour: dark (default) ---------- */
+  --bg: #0e0e0c;
+  --fg: #e8e6df;          /* 15.5:1 on --bg */
+  --muted: #8c8a83;       /* 5.6:1 on --bg — secondary text, labels */
+  --rule: #34332e;        /* hairlines and grid lines (decorative) */
+  --surface: #161614;     /* image frames, code blocks */
+  --frame: #121210;       /* neutral dark frame for CAD screenshots, both themes */
+
+  /* Accent: used only for the active nav indicator, links, focus rings, small highlights */
+  --accent-orange: #e4572e;  /* 5.3:1 on dark --bg */
+  --accent-copper: #c8743a;  /* 5.5:1 on dark --bg */
+  --accent: var(--accent-orange);
+
+  /* ---------- Typography ---------- */
+  --font-display: var(--font-familjen), sans-serif;
+  --font-body: var(--font-display);
+  --font-mono: var(--font-plex-mono), monospace;
+
+  /* Fluid scale, 360px → 1920px viewport */
+  --text-label: clamp(0.75rem, 0.7356rem + 0.0641vw, 0.8125rem);  /* 12 → 13 */
+  --text-small: clamp(0.875rem, 0.8606rem + 0.0641vw, 0.9375rem); /* 14 → 15 */
+  --text-body:  clamp(1rem, 0.9711rem + 0.1282vw, 1.125rem);      /* 16 → 18 */
+  --text-lead:  clamp(1.125rem, 1.0673rem + 0.2564vw, 1.375rem);  /* 18 → 22 */
+  --text-h3:    clamp(1.25rem, 1.1346rem + 0.5128vw, 1.75rem);    /* 20 → 28 */
+  --text-h2:    clamp(1.75rem, 1.3462rem + 1.7949vw, 3.5rem);     /* 28 → 56 */
+  --text-h1:    clamp(2.25rem, 1.5rem + 3.3333vw, 5.5rem);        /* 36 → 88 */
+
+  --leading-display: 0.92;
+  --leading-tight: 1.1;
+  --leading-body: 1.6;
+  --tracking-display: -0.035em;
+  --tracking-tight: -0.02em;
+  --tracking-label: 0.06em;
+  --measure: 68ch;
+  /* Hero name: em-width of the longest line ("Abubakr M."), measured per font.
+     font-size = container width / --hero-fit makes that line fill its container. */
+  --hero-fit: 4.76;
+  --email-fit-wide: 13.07; /* contact email, one line */
+  --email-fit-narrow: 8.04; /* contact email split at the @, longer line */
+
+  /* ---------- Space: 8px scale ---------- */
+  --space-half: 0.25rem; /* 4 */
+  --space-1: 0.5rem;     /* 8 */
+  --space-2: 1rem;       /* 16 */
+  --space-3: 1.5rem;     /* 24 */
+  --space-4: 2rem;       /* 32 */
+  --space-5: 3rem;       /* 48 */
+  --space-6: 4rem;       /* 64 */
+  --space-7: 6rem;       /* 96 */
+  --space-8: 8rem;       /* 128 */
+  --space-9: 12rem;      /* 192 */
+
+  --section-pad: clamp(var(--space-7), 4rem + 6vw, var(--space-9));
+
+  /* ---------- Grid ---------- */
+  --columns: 12;
+  --page-margin: clamp(1rem, 0.4231rem + 2.5641vw, 3.5rem); /* 16 → 56 */
+  --gutter: clamp(1rem, 0.7692rem + 1.0256vw, 2rem);        /* 16 → 32 */
+  --hairline: 1px;
+  --header-h: 3.5rem;
+
+  /* ---------- Motion ---------- */
+  --dur-fast: 150ms;   /* hover, press */
+  --dur-base: 300ms;   /* reveals, small moves */
+  --dur-slow: 500ms;   /* section entrances */
+  --dur-fast-exit: 110ms;  /* exits ≈ 75% of entrance */
+  --dur-base-exit: 225ms;
+  --dur-slow-exit: 375ms;
+  --stagger: 50ms;
+
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);     /* entrances */
+  --ease-in: cubic-bezier(0.5, 0, 0.75, 0);       /* exits */
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);  /* moves */
+
+  --reveal-y: 16px;
+
+  color-scheme: dark;
+}
+
+/* ---------- Colour: light ---------- */
+:root[data-theme='light'] {
+  --bg: #f2f0ea;
+  --fg: #161614;          /* 15.9:1 on --bg */
+  --muted: #66635c;       /* 5.3:1 on --bg */
+  --rule: #d3d0c7;
+  --surface: #e9e6de;
+  --accent-orange: #b5401a;  /* 5.0:1 on light --bg */
+  --accent-copper: #9c5524;  /* 4.9:1 on light --bg */
+  color-scheme: light;
+}
+
+:root[data-accent='copper'] {
+  --accent: var(--accent-copper);
+}
+
+/* Font candidates (styleguide only; the chosen pair becomes the default above) */
+:root[data-display='instrument'] {
+  --font-display: var(--font-instrument), sans-serif;
+  --hero-fit: 5.1;
+}
+:root[data-mono='jetbrains'] {
+  --font-mono: var(--font-jetbrains-mono), monospace;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --dur-fast: 0ms;
+    --dur-base: 0ms;
+    --dur-slow: 0ms;
+    --dur-fast-exit: 0ms;
+    --dur-base-exit: 0ms;
+    --dur-slow-exit: 0ms;
+    --stagger: 0ms;
+    --reveal-y: 0px;
+  }
+}

@@ -1,0 +1,219 @@
+---
+import { otherProjects } from '../data/other-projects';
+import Thumbs from './Thumbs.astro';
+---
+
+<ol class="other" role="list" data-other>
+  {
+    otherProjects.map((p, i) => (
+      <li class="other__item">
+        <details class="other__details">
+          <summary class="other__row">
+            <span class="other__num">{String(i + 1).padStart(2, '0')}</span>{' '}
+            <span class="other__main">
+              <span class="other__title">{p.title}</span>{' '}
+              <span class="other__context">{p.context}</span>
+            </span>{' '}
+            <span class="other__year">{p.year ?? '—'}</span>
+            <span class="other__toggle" aria-hidden="true" />
+          </summary>
+          <div class="other__body" data-other-body>
+            <ul class="other__points" role="list">
+              {p.details.map((d) => (
+                <li>{d}</li>
+              ))}
+            </ul>
+            <p class="other__tags">
+              {p.tags.map((t) => (
+                <span>{t} </span>
+              ))}
+            </p>
+            {p.images && <Thumbs images={p.images} />}
+          </div>
+        </details>
+      </li>
+    ))
+  }
+</ol>
+
+<script>
+  import { gsap, DUR, EASE, prefersReducedMotion } from '../scripts/motion';
+
+  // Opening a row eases its details in; closing is instant (native <details>).
+  document.addEventListener('astro:page-load', () => {
+    document.querySelectorAll<HTMLDetailsElement>('[data-other] details').forEach((d) => {
+      d.addEventListener('toggle', () => {
+        if (!d.open || prefersReducedMotion()) return;
+        gsap.fromTo(
+          d.querySelector('[data-other-body]'),
+          { autoAlpha: 0, y: -8 },
+          { autoAlpha: 1, y: 0, duration: DUR.base, ease: EASE.out, clearProps: 'all' },
+        );
+      });
+    });
+  });
+</script>
+
+<style>
+  .other {
+    border-top: var(--hairline) solid var(--rule);
+  }
+
+  .other__item {
+    border-bottom: var(--hairline) solid var(--rule);
+  }
+
+  .other__row {
+    display: grid;
+    grid-template-columns: 2.5rem minmax(0, 1fr) auto;
+    gap: var(--space-1) var(--gutter);
+    align-items: baseline;
+    padding-block: var(--space-3);
+    cursor: pointer;
+    list-style: none;
+    transition: color var(--dur-fast) var(--ease-out);
+  }
+
+  .other__row::-webkit-details-marker {
+    display: none;
+  }
+
+  .other__num,
+  .other__year {
+    font-family: var(--font-mono);
+    font-size: var(--text-label);
+    letter-spacing: var(--tracking-label);
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .other__main {
+    display: grid;
+    gap: var(--space-half);
+  }
+
+  .other__title {
+    font-family: var(--font-display);
+    font-size: var(--text-h3);
+    font-weight: 500;
+    line-height: 1.2;
+    letter-spacing: var(--tracking-tight);
+    transition: transform var(--dur-base-exit) var(--ease-in);
+  }
+
+  .other__context {
+    font-size: var(--text-small);
+    color: var(--muted);
+  }
+
+  /* Plus that turns into a minus: two hairlines, the vertical one rotates flat. */
+  .other__toggle {
+    position: relative;
+    grid-column: 3;
+    grid-row: 1;
+    justify-self: end;
+    align-self: center;
+    width: 0.875rem;
+    height: 0.875rem;
+    margin-left: var(--space-5);
+  }
+
+  .other__toggle::before,
+  .other__toggle::after {
+    content: '';
+    position: absolute;
+    inset: 50% 0 auto;
+    height: var(--hairline);
+    background: currentColor;
+    transition: transform var(--dur-base) var(--ease-in-out);
+  }
+
+  .other__toggle::after {
+    transform: rotate(90deg);
+  }
+
+  .other__details[open] .other__toggle::after {
+    transform: rotate(0deg);
+  }
+
+  .other__year {
+    grid-column: 3;
+    grid-row: 1;
+    justify-self: end;
+    padding-right: calc(0.875rem + var(--space-3));
+  }
+
+  .other__row:hover .other__title,
+  .other__row:focus-visible .other__title {
+    transform: translateX(var(--space-1));
+    transition: transform var(--dur-base) var(--ease-out);
+  }
+
+  .other__row:hover .other__toggle,
+  .other__details[open] .other__toggle {
+    color: var(--accent);
+  }
+
+  /* Rows that aren't hovered or open step back while one is. */
+  .other:has(.other__row:hover) .other__details:not([open]) .other__row:not(:hover) {
+    color: var(--muted);
+  }
+
+  .other__body {
+    display: grid;
+    gap: var(--space-2);
+    padding: 0 0 var(--space-4) calc(2.5rem + var(--gutter));
+  }
+
+  .other__points {
+    display: grid;
+    gap: var(--space-1);
+    max-width: 62ch;
+  }
+
+  .other__points li {
+    position: relative;
+    padding-left: var(--space-3);
+  }
+
+  .other__points li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.6em;
+    width: 0.3em;
+    height: 0.3em;
+    background: var(--accent);
+  }
+
+  .other__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-half) var(--space-2);
+    font-family: var(--font-mono);
+    font-size: var(--text-label);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  @media (min-width: 48rem) {
+    .other__row {
+      grid-template-columns: repeat(var(--columns), minmax(0, 1fr));
+    }
+    .other__num {
+      grid-column: 1;
+    }
+    .other__main {
+      grid-column: 2 / span 8;
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .other__year,
+    .other__toggle {
+      grid-column: 10 / -1;
+    }
+    .other__body {
+      padding-left: calc((100% - 11 * var(--gutter)) / 12 + var(--gutter));
+    }
+  }
+</style>

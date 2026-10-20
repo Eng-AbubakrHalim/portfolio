@@ -1,0 +1,352 @@
+---
+interface Props {
+  position: string;
+  meta: string[];
+  /** Availability line, marked with a slow-pulsing accent square. */
+  status?: string;
+}
+const { position, meta, status } = Astro.props;
+---
+
+<section class="hero page" id="top" aria-labelledby="hero-name" data-hero>
+  <div class="hero__fit">
+    <h1 class="hero__name" id="hero-name">
+      <span class="hero__line" data-hero-line
+        ><span class="hero__mask"><span class="hero__rise">Abubakr M<span class="hero__dot">.</span></span></span></span
+      >{' '}
+      <span class="hero__line" data-hero-line
+        ><span class="hero__mask"><span class="hero__rise" style="--i: 1">Abdelhalim</span></span></span
+      >
+    </h1>
+  </div>
+  <!-- Drafting-style dimension line: ticks mark the name's extents, label gives its rendered width. -->
+  <div class="hero__dim" aria-hidden="true" data-dim>
+    <span class="hero__dim-tick"></span>
+    <span class="hero__dim-label" data-dim-label></span>
+    <span class="hero__dim-tick hero__dim-tick--end"></span>
+  </div>
+  <div class="hero__below" data-hero-below>
+    <p class="hero__position" data-hero-fade>{position}</p>
+    <p class="hero__meta label" data-hero-fade style="--i: 1">
+      {
+        meta.map((m, i) => (
+          <>
+            {i > 0 && <span aria-hidden="true">·</span>}
+            <span>{m}</span>
+          </>
+        ))
+      }
+      {
+        status && (
+          <>
+            <span aria-hidden="true">·</span>
+            <span class="hero__status">
+              <span class="hero__led" aria-hidden="true" />
+              {status}
+            </span>
+          </>
+        )
+      }
+      <span aria-hidden="true">·</span>
+      <span class="hero__clock">
+        <span class="visually-hidden">Local time in Malaysia:</span>
+        <time data-clock-time>--:--</time> MYT
+      </span>
+    </p>
+    <a class="hero__cta" href="#work" data-hero-fade style="--i: 2">View work</a>
+  </div>
+</section>
+
+<script>
+  import { gsap, prefersReducedMotion } from '../scripts/motion';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+  gsap.registerPlugin(ScrollTrigger);
+
+  let exit: ScrollTrigger | undefined;
+  let clockTimer: number | undefined;
+
+  const clockFormat = new Intl.DateTimeFormat('en-GB', {
+    timeZone: 'Asia/Kuala_Lumpur',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  });
+
+  function startClock() {
+    const el = document.querySelector<HTMLTimeElement>('[data-clock-time]');
+    if (!el) return;
+    const tick = () => (el.textContent = clockFormat.format(new Date()));
+    tick();
+    window.clearInterval(clockTimer);
+    clockTimer = window.setInterval(tick, 15_000);
+  }
+
+  let dimObserver: ResizeObserver | undefined;
+
+  // Width of the widest name line, shown on the dimension line and used to size it.
+  function measureName(hero: HTMLElement) {
+    const dim = hero.querySelector<HTMLElement>('[data-dim]');
+    const label = hero.querySelector<HTMLElement>('[data-dim-label]');
+    if (!dim || !label) return;
+    // Measure the text runs inside the rise spans; the line wrappers themselves are full-width blocks.
+    const widths = [...hero.querySelectorAll<HTMLElement>('.hero__rise')].map((line) => {
+      const range = document.createRange();
+      range.selectNodeContents(line);
+      return range.getBoundingClientRect().width;
+    });
+    const w = Math.max(...widths);
+    dim.style.width = `${w}px`;
+    label.textContent = `W ${Math.round(w)} PX`;
+  }
+
+  function cleanup() {
+    dimObserver?.disconnect();
+    exit?.kill();
+    exit = undefined;
+  }
+
+  document.addEventListener('astro:page-load', () => {
+    const hero = document.querySelector<HTMLElement>('[data-hero]');
+    if (!hero) return;
+    startClock();
+    document.fonts.ready.then(() => {
+      measureName(hero);
+      dimObserver?.disconnect();
+      dimObserver = new ResizeObserver(() => measureName(hero));
+      dimObserver.observe(hero.querySelector('.hero__fit')!);
+    });
+
+    if (prefersReducedMotion()) return;
+
+    // The entrance is pure CSS (below), so the name paints without waiting for this script.
+    // Scrolling out of the hero pulls the two lines apart (scrubbed, so linear).
+    const lines = [...hero.querySelectorAll<HTMLElement>('[data-hero-line]')];
+    exit?.kill();
+    exit = ScrollTrigger.create({
+      trigger: hero,
+      start: 'top top',
+      end: 'bottom top',
+      scrub: true,
+      animation: gsap
+        .timeline()
+        .to(lines[0], { xPercent: -14, ease: 'none' }, 0)
+        .to(lines[1], { xPercent: 14, ease: 'none' }, 0)
+        .to([hero.querySelector('[data-dim]'), hero.querySelector('[data-hero-below]')], { opacity: 0, y: -24, ease: 'none' }, 0),
+    });
+  });
+
+  document.addEventListener('astro:before-swap', () => {
+    cleanup();
+    window.clearInterval(clockTimer);
+  });
+</script>
+
+<style>
+  .hero {
+    min-height: 100svh;
+    display: grid;
+    align-content: end;
+    padding-top: calc(var(--header-h) + var(--space-5));
+    padding-bottom: var(--space-5);
+    overflow: clip;
+  }
+
+  /* Phones: a shorter hero so the facts strip shows at the bottom of the first screen. */
+  @media (max-width: 47.99rem) {
+    .hero {
+      min-height: 80svh;
+    }
+  }
+
+  /* The name is sized from this box's width: font-size = width / measured em-width of the longest line. */
+  .hero__fit {
+    container-type: inline-size;
+  }
+
+  /* Width-fit, but on short wide screens cap by height so the line below stays above the fold
+     (19rem ≈ header + paddings + the row below; 1.84 = two lines at 0.92 leading). */
+  .hero__name {
+    font-family: var(--font-display);
+    font-size: min(calc(100cqi / var(--hero-fit)), calc((100svh - 19rem) / 1.84));
+    font-weight: 500;
+    line-height: var(--leading-display);
+    letter-spacing: var(--tracking-display);
+    white-space: nowrap;
+  }
+
+  .hero__line {
+    display: block;
+  }
+
+  /* Masked line reveal in CSS: each line rises from behind its own clip, 60 ms apart.
+     The mask is padded so the tight display leading never clips glyphs. */
+  .hero__mask {
+    display: block;
+    overflow: clip;
+    padding-block: 0.1em;
+    margin-block: -0.1em;
+  }
+
+  .hero__rise {
+    display: block;
+    animation: hero-rise var(--dur-slow) var(--ease-out) both;
+    animation-delay: calc(80ms + var(--i, 0) * 60ms);
+  }
+
+  [data-hero-fade] {
+    animation: hero-fade var(--dur-base) var(--ease-out) both;
+    animation-delay: calc(320ms + var(--i, 0) * 50ms);
+  }
+
+  @keyframes hero-rise {
+    from {
+      transform: translateY(120%);
+    }
+  }
+
+  @keyframes hero-fade {
+    from {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero__rise,
+    [data-hero-fade] {
+      animation: none;
+    }
+  }
+
+  .hero__dot {
+    color: var(--accent);
+  }
+
+  .hero__dim {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    height: 0.75rem;
+    margin-top: var(--space-4);
+  }
+
+  .hero__dim::before {
+    content: '';
+    position: absolute;
+    inset: 50% 0 auto;
+    height: var(--hairline);
+    background: var(--rule);
+  }
+
+  .hero__dim-tick {
+    position: relative;
+    width: var(--hairline);
+    height: 100%;
+    background: var(--accent);
+  }
+
+  .hero__dim-label {
+    position: relative;
+    padding-inline: var(--space-1);
+    background: var(--bg);
+    font-family: var(--font-mono);
+    font-size: var(--text-label);
+    letter-spacing: var(--tracking-label);
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .hero__dim-label:empty {
+    display: none;
+  }
+
+  .hero__below {
+    display: grid;
+    gap: var(--space-3);
+    margin-top: var(--space-3);
+  }
+
+  .hero__position {
+    font-size: var(--text-lead);
+    line-height: 1.35;
+    max-width: 28ch;
+  }
+
+  .hero__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-half) var(--space-1);
+  }
+
+  .hero__status {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+    color: var(--fg);
+  }
+
+  /* Availability light: a small square that breathes slowly. */
+  .hero__led {
+    width: 0.55em;
+    height: 0.55em;
+    background: var(--accent);
+    animation: led 2.4s var(--ease-in-out) infinite alternate;
+  }
+
+  @keyframes led {
+    from {
+      opacity: 1;
+    }
+    to {
+      opacity: 0.25;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero__led {
+      animation: none;
+    }
+  }
+
+  .hero__clock time {
+    color: var(--fg);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .hero__cta {
+    justify-self: start;
+    font-family: var(--font-mono);
+    font-size: var(--text-label);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--fg);
+    padding-block: var(--space-1);
+    text-underline-offset: 0.35em;
+  }
+
+  .hero__cta:hover {
+    color: var(--accent);
+  }
+
+  @media (min-width: 64rem) {
+    .hero__below {
+      grid-template-columns: repeat(var(--columns), minmax(0, 1fr));
+      column-gap: var(--gutter);
+      align-items: baseline;
+    }
+    .hero__position {
+      grid-column: 1 / span 4;
+    }
+    .hero__meta {
+      grid-column: 5 / span 6;
+    }
+    .hero__cta {
+      grid-column: 11 / -1;
+      justify-self: end;
+    }
+  }
+
+</style>

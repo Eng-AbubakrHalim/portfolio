@@ -1,0 +1,77 @@
+---
+title: Datasheet Search
+summary: Local full-text search across a folder of datasheets that shows the exact page, matches highlighted.
+year: '2026'
+role: Personal tool, built during the internship
+tools: [Python, PyMuPDF, SQLite FTS5, Tkinter]
+tags: [Python, SQLite FTS5, CLI]
+status: Working, not published yet
+repo: Repository not published yet
+cover: ../../assets/projects/datasheet-tool/datasheet-cover.png
+coverAlt: The Datasheet Search window searching for VDDP minimum. Two matching pages are listed on the left; the right shows the selected page with the matches highlighted.
+order: 4
+---
+
+import CaseSection from '../../components/case/CaseSection.astro';
+import Decisions from '../../components/case/Decisions.astro';
+import Decision from '../../components/case/Decision.astro';
+import DatasheetPipeline from '../../components/diagrams/DatasheetPipeline.astro';
+import Animation from '../../components/case/Animation.astro';
+import demo from '../../assets/projects/datasheet-tool/datasheet-demo.webp?url';
+import poster from '../../assets/projects/datasheet-tool/datasheet-cover.png';
+
+<CaseSection num="01" title="Problem">
+
+A design question about a part usually means opening the right PDF and searching it by hand, one datasheet at a time. Snippet search tools make it worse in a quieter way: they drop the conditions attached to a number.
+
+"The minimum input voltage at VDDP is 4.25 V" reads like a specification. The page shows it is a worked example at 30 mA and 5 V.
+
+</CaseSection>
+
+<CaseSection num="02" title="Architecture">
+
+A local library in one SQLite file. The indexer pulls text out of every PDF with PyMuPDF; searches return pages, and every result can be read on the real page or opened in your own PDF app at that page.
+
+<DatasheetPipeline />
+
+<Animation src={demo} poster={poster} width={1080} height={674} alt="Typing VDDP minimum into Datasheet Search: the result list narrows with each word, then the selected page appears with every match highlighted, first on one document and then on the LDO page with the worked example." caption="The app running on sample documents written for this demo. Results update as you type; the page view highlights every match." />
+
+The first version was a set of command-line scripts with a manifest that tagged each document with its IC and subsystem. The current one is a package with a search window, a library view and the same engine on the command line.
+
+</CaseSection>
+
+<CaseSection num="03" title="Key decisions">
+
+<Decisions>
+  <Decision title="Words, not meaning" options={['Embeddings and vector search', 'SQLite FTS5 with BM25 ranking']} choice="FTS5 in a single SQLite file">
+    Datasheet questions turn on exact terms: a pin name, a part number, a value with a unit. Word search finds those reliably, needs no server and runs fully offline. The trade-off is stated plainly: "max supply" won't find "absolute maximum voltage".
+  </Decision>
+  <Decision title="One tokenizer everywhere" options={['Separate logic for indexing, queries and highlights', 'One function for all four']} choice="A single word-splitting function for indexing, queries, snippets and on-page highlights">
+    That is why "4.25V" and "4.25 V" match each other, and why a highlight lands exactly where the search found its match.
+  </Decision>
+  <Decision title="Show the page, not just a snippet" options={['Snippet list', 'Rendered page with every match highlighted']} choice="PyMuPDF renders the page beside the results">
+    A snippet can lose the conditions on a number. Anything that goes into a design decision should be read off the page.
+  </Decision>
+  <Decision title="Index only what changed" options={['Rebuild the index each time', 'Incremental indexing']} choice="Re-read only new or changed files; index identical copies once">
+    The library updates in the background while you keep searching. Duplicate PDFs under different names become aliases of one document.
+  </Decision>
+  <Decision title="Part numbers narrow the search" options={['Search every document every time', 'Scope by part number']} choice="A part number in the query restricts results to that document">
+    Names come from the PDF title, aliases and file names, including families: a document called TLV930x answers to TLV9304.
+  </Decision>
+</Decisions>
+
+</CaseSection>
+
+<CaseSection num="04" title="Verification">
+
+- A unit-test suite builds its own throwaway PDFs and never touches the real library.
+- Indexing runs in a background thread while the window keeps searching, using SQLite's WAL mode.
+- PDFs that can't be searched are listed with the reason: password-protected, scanned without text, or damaged.
+
+</CaseSection>
+
+<CaseSection num="05" title="Result">
+
+Built while working on the DAQ module, and used on its datasheets. Everything runs on the computer; nothing is uploaded.
+
+</CaseSection>

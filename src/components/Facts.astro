@@ -1,0 +1,175 @@
+---
+/**
+ * Spec strip of headline numbers. Digits roll up like an odometer when the strip enters view.
+ * The server-rendered state is the final value, so no-JS and reduced-motion visitors see it as-is.
+ */
+interface Fact {
+  value: string;
+  suffix?: string;
+  label: string;
+}
+interface Props {
+  facts: Fact[];
+}
+const { facts } = Astro.props;
+
+// Each digit column holds 0–9 twice; the final digit sits in the second run so the roll does a full turn.
+const STRIP = [...'01234567890123456789'];
+const finalShift = (d: string) => -((10 + Number(d)) * 100) / STRIP.length;
+---
+
+<section class="facts page" aria-label="In numbers" data-facts>
+  <ul class="facts__list" role="list">
+    {
+      facts.map((f) => (
+        <li class="fact">
+          <p class="fact__value">
+            <span class="visually-hidden">
+              {f.value}
+              {f.suffix}
+            </span>
+            <span class="odo" aria-hidden="true">
+              {[...f.value].map((d, i) => (
+                <span class={`odo__col${i === 0 && d === '0' && f.value.length > 1 ? ' odo__col--zero' : ''}`}>
+                  <span class="odo__strip" data-odo-strip style={`transform: translateY(${finalShift(d)}%)`} data-final={finalShift(d)}>
+                    {STRIP.map((n) => (
+                      <span>{n}</span>
+                    ))}
+                  </span>
+                </span>
+              ))}
+              {f.suffix && <span class="odo__suffix">{f.suffix}</span>}
+            </span>
+          </p>
+          <p class="fact__label">{f.label}</p>
+        </li>
+      ))
+    }
+  </ul>
+</section>
+
+<script>
+  import { gsap, DUR, EASE, prefersReducedMotion, alreadyInView } from '../scripts/motion';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+  gsap.registerPlugin(ScrollTrigger);
+
+  let trigger: ScrollTrigger | undefined;
+
+  document.addEventListener('astro:page-load', () => {
+    trigger?.kill();
+    const root = document.querySelector<HTMLElement>('[data-facts]');
+    if (!root || prefersReducedMotion() || alreadyInView(root)) return;
+
+    const strips = [...root.querySelectorAll<HTMLElement>('[data-odo-strip]')];
+    const labels = root.querySelectorAll<HTMLElement>('.fact__label');
+    // Drop the server-rendered final position, then park every digit at 0 until the strip is seen.
+    gsap.set(strips, { clearProps: 'transform' });
+    gsap.set(strips, { y: 0, yPercent: 0 });
+    gsap.set(labels, { opacity: 0, y: 12 });
+
+    trigger = ScrollTrigger.create({
+      trigger: root,
+      // Roll as soon as the strip edges into view (it can sit at the fold on phones).
+      start: 'top 95%',
+      once: true,
+      onEnter: () => {
+        strips.forEach((strip, i) => {
+          gsap.to(strip, {
+            yPercent: Number(strip.dataset.final),
+            duration: 0.7,
+            delay: i * 0.05,
+            ease: EASE.out,
+          });
+        });
+        gsap.to(labels, { opacity: 1, y: 0, duration: DUR.base, delay: 0.25, stagger: 0.05, ease: EASE.out });
+      },
+    });
+  });
+
+  document.addEventListener('astro:before-swap', () => trigger?.kill());
+</script>
+
+<style>
+  .facts {
+    padding-top: var(--space-6);
+  }
+
+  .facts__list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: var(--gutter);
+    row-gap: var(--space-5);
+  }
+
+  .fact {
+    position: relative;
+    display: grid;
+    align-content: start;
+    gap: var(--space-2);
+    padding-top: var(--space-2);
+    border-top: var(--hairline) solid var(--rule);
+  }
+
+  /* Same accent lead-in as the section rules. */
+  .fact::before {
+    content: '';
+    position: absolute;
+    top: -1.5px;
+    left: 0;
+    width: var(--space-4);
+    height: 2px;
+    background: var(--accent);
+  }
+
+  .odo__col--zero {
+    color: var(--muted);
+  }
+
+  .fact__value {
+    font-family: var(--font-display);
+    font-size: clamp(3.5rem, 1.5rem + 8vw, 9rem);
+    font-weight: 500;
+    line-height: 1;
+    letter-spacing: -0.04em;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .odo {
+    display: inline-flex;
+    align-items: flex-start;
+  }
+
+  .odo__col {
+    display: inline-block;
+    height: 1em;
+    overflow: clip;
+  }
+
+  .odo__strip {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .odo__strip span {
+    display: block;
+    height: 1em;
+  }
+
+  .odo__suffix {
+    color: var(--accent);
+  }
+
+  .fact__label {
+    max-width: 26ch;
+    font-size: var(--text-small);
+    line-height: 1.45;
+    color: var(--muted);
+  }
+
+  @media (min-width: 64rem) {
+    .facts__list {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+  }
+</style>

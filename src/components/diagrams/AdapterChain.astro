@@ -1,0 +1,68 @@
+---
+/** M.2-to-EDSFF adapter: side profile of the rigid–flex–rigid build between tester and card. */
+---
+
+<figure class="diagram" data-reveal>
+  <div class="diagram__scroll" data-lenis-prevent>
+    <svg viewBox="0 0 1200 330" role="img" aria-labelledby="adp-title adp-desc">
+      <title id="adp-title">Adapter signal chain and build</title>
+      <desc id="adp-desc">
+        The SSD tester's M.2 socket takes the adapter's M.2 Key M gold fingers on a 4-layer rigid end, 0.8 mm thick
+        at the fingers. A 2-layer flex section joins it to a 6-layer rigid end with EDSFF gold fingers, 1.57 mm thick,
+        which plugs into the diagnostic card's EDSFF socket. Differential pairs run at 100 ohm through all three
+        sections.
+      </desc>
+      <defs>
+        <marker id="adp-arrow" viewBox="0 0 8 8" refX="7.5" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M0 0 L8 4 L0 8 z" class="d-head"></path>
+        </marker>
+      </defs>
+
+      <!-- Tester -->
+      <rect class="d-box" x="0" y="90" width="150" height="110"></rect>
+      <text class="d-t" x="75" y="142" text-anchor="middle">SSD TESTER</text>
+      <text class="d-s" x="75" y="160" text-anchor="middle">M.2 socket</text>
+      <path class="d-line" d="M150 145 H196" marker-start="url(#adp-arrow)" marker-end="url(#adp-arrow)"></path>
+
+      <!-- Rigid M.2 end: 0.8 mm (drawn 30 high) -->
+      <rect class="d-fill" x="200" y="130" width="230" height="30"></rect>
+      <rect class="d-gold" x="200" y="130" width="24" height="3"></rect>
+      <rect class="d-gold" x="200" y="157" width="24" height="3"></rect>
+
+      <!-- Flex: drawn 8 high, runs into both rigid ends -->
+      <rect class="d-fill" x="430" y="141" width="330" height="8"></rect>
+
+      <!-- Rigid EDSFF end: 1.57 mm (drawn 59 high) -->
+      <rect class="d-fill" x="760" y="116" width="250" height="59"></rect>
+      <rect class="d-gold" x="986" y="116" width="24" height="3"></rect>
+      <rect class="d-gold" x="986" y="172" width="24" height="3"></rect>
+
+      <!-- Card -->
+      <path class="d-line" d="M1010 145 H1050" marker-start="url(#adp-arrow)" marker-end="url(#adp-arrow)"></path>
+      <rect class="d-box" x="1050" y="90" width="150" height="110"></rect>
+      <text class="d-t" x="1125" y="134" text-anchor="middle">DIAGNOSTIC</text>
+      <text class="d-t" x="1125" y="152" text-anchor="middle">CARD</text>
+      <text class="d-s" x="1125" y="170" text-anchor="middle">EDSFF socket</text>
+
+      <!-- Differential pairs through every section -->
+      <path class="d-line d-line--key d-line--dash" d="M212 100 H998"></path>
+      <text class="d-k" x="605" y="90" text-anchor="middle">DIFFERENTIAL PAIRS · 100 Ω THROUGH ALL THREE SECTIONS</text>
+
+      <!-- Section labels -->
+      <path class="d-line" d="M200 200 V214 H430 V200"></path>
+      <text class="d-t" x="315" y="238" text-anchor="middle">RIGID M.2 END</text>
+      <text class="d-s" x="315" y="256" text-anchor="middle">4 layers · 0.8 mm at the fingers</text>
+      <text class="d-s" x="315" y="272" text-anchor="middle">M.2 Key M gold fingers</text>
+
+      <path class="d-line" d="M430 200 V214 H760 V200"></path>
+      <text class="d-t" x="595" y="238" text-anchor="middle">FLEX</text>
+      <text class="d-s" x="595" y="256" text-anchor="middle">2 layers</text>
+
+      <path class="d-line" d="M760 200 V214 H1010 V200"></path>
+      <text class="d-t" x="885" y="238" text-anchor="middle">RIGID EDSFF END</text>
+      <text class="d-s" x="885" y="256" text-anchor="middle">6 layers · 1.57 mm at the fingers</text>
+      <text class="d-s" x="885" y="272" text-anchor="middle">EDSFF gold fingers</text>
+    </svg>
+  </div>
+  <figcaption>Side profile, thicknesses not to scale. Orange marks the gold fingers.</figcaption>
+</figure>

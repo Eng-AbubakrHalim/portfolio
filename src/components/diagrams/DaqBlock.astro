@@ -1,0 +1,107 @@
+---
+/** DAQ module block diagram: inputs → converters → MCU → interfaces. Drawn from the case-study text. */
+---
+
+<figure class="diagram" data-reveal>
+  <div class="diagram__scroll" data-lenis-prevent>
+    <svg viewBox="0 0 1200 560" role="img" aria-labelledby="daq-block-title daq-block-desc">
+      <title id="daq-block-title">DAQ module block diagram</title>
+      <desc id="daq-block-desc">
+        Eight voltage inputs and four 4–20 mA current inputs pass through protection into an AD4111 ADC. Two RTD
+        inputs go to two MAX31865 converters. Both connect to the STM32H563 over SPI. The MCU drives an AD3531 DAC
+        over SPI, whose four outputs are buffered by op-amps at a gain of 2. The MCU connects to a LAN8742A Ethernet
+        PHY over RMII and to an RS-485 transceiver over UART. A 24 V input feeds an LT3514 triple buck and LDOs.
+      </desc>
+      <defs>
+        <marker id="daq-arrow" viewBox="0 0 8 8" refX="7.5" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M0 0 L8 4 L0 8 z" class="d-head"></path>
+        </marker>
+      </defs>
+
+      <!-- Input ports -->
+      <g>
+        <text class="d-t" x="148" y="92" text-anchor="end">8× VOLTAGE</text>
+        <text class="d-s" x="148" y="110" text-anchor="end">or 4 differential</text>
+        <rect class="d-term" x="154" y="91" width="8" height="8"></rect>
+        <text class="d-t" x="148" y="172" text-anchor="end">4× CURRENT</text>
+        <text class="d-s" x="148" y="190" text-anchor="end">4–20 mA</text>
+        <rect class="d-term" x="154" y="171" width="8" height="8"></rect>
+        <text class="d-t" x="148" y="304" text-anchor="end">2× RTD</text>
+        <rect class="d-term" x="154" y="296" width="8" height="8"></rect>
+      </g>
+
+      <!-- Protection -->
+      <rect class="d-box" x="200" y="60" width="130" height="150"></rect>
+      <text class="d-t" x="265" y="130" text-anchor="middle">PROTECTION</text>
+      <text class="d-s" x="265" y="148" text-anchor="middle">TVS + RC</text>
+      <path class="d-line" d="M162 95 H200" marker-end="url(#daq-arrow)"></path>
+      <path class="d-line" d="M162 175 H200" marker-end="url(#daq-arrow)"></path>
+
+      <!-- ADC -->
+      <rect class="d-box" x="380" y="70" width="150" height="130"></rect>
+      <text class="d-t" x="455" y="130" text-anchor="middle">AD4111</text>
+      <text class="d-s" x="455" y="148" text-anchor="middle">ADC · 8 V + 4 I</text>
+      <path class="d-line" d="M330 95 H380" marker-end="url(#daq-arrow)"></path>
+      <path class="d-line" d="M330 175 H380" marker-end="url(#daq-arrow)"></path>
+
+      <!-- RTD converters -->
+      <rect class="d-box" x="380" y="265" width="150" height="70"></rect>
+      <text class="d-t" x="455" y="296" text-anchor="middle">2× MAX31865</text>
+      <text class="d-s" x="455" y="314" text-anchor="middle">RTD converter</text>
+      <path class="d-line" d="M162 300 H380" marker-end="url(#daq-arrow)"></path>
+
+      <!-- MCU -->
+      <rect class="d-box d-box--key" x="590" y="50" width="150" height="390"></rect>
+      <text class="d-t" x="665" y="238" text-anchor="middle">STM32H563</text>
+      <text class="d-s" x="665" y="256" text-anchor="middle">MCU</text>
+      <path class="d-line" d="M530 135 H590" marker-start="url(#daq-arrow)" marker-end="url(#daq-arrow)"></path>
+      <text class="d-s" x="560" y="127" text-anchor="middle">SPI</text>
+      <path class="d-line" d="M530 300 H590" marker-start="url(#daq-arrow)" marker-end="url(#daq-arrow)"></path>
+      <text class="d-s" x="560" y="292" text-anchor="middle">SPI</text>
+
+      <!-- Analog outputs -->
+      <rect class="d-box" x="800" y="70" width="130" height="70"></rect>
+      <text class="d-t" x="865" y="101" text-anchor="middle">AD3531</text>
+      <text class="d-s" x="865" y="119" text-anchor="middle">DAC</text>
+      <path class="d-line" d="M740 105 H800" marker-end="url(#daq-arrow)"></path>
+      <text class="d-s" x="770" y="97" text-anchor="middle">SPI</text>
+      <rect class="d-box" x="960" y="70" width="110" height="70"></rect>
+      <text class="d-t" x="1015" y="101" text-anchor="middle">4× BUFFER</text>
+      <text class="d-s" x="1015" y="119" text-anchor="middle">op-amp, gain 2</text>
+      <path class="d-line" d="M930 105 H960" marker-end="url(#daq-arrow)"></path>
+      <path class="d-line" d="M1070 105 H1092" marker-end="url(#daq-arrow)"></path>
+      <rect class="d-term" x="1094" y="101" width="8" height="8"></rect>
+      <text class="d-t" x="1110" y="101">4× ANALOG</text>
+      <text class="d-t" x="1110" y="119">OUT</text>
+
+      <!-- Ethernet -->
+      <rect class="d-box" x="800" y="220" width="270" height="70"></rect>
+      <text class="d-t" x="935" y="251" text-anchor="middle">LAN8742A</text>
+      <text class="d-s" x="935" y="269" text-anchor="middle">Ethernet PHY</text>
+      <path class="d-line" d="M740 255 H800" marker-start="url(#daq-arrow)" marker-end="url(#daq-arrow)"></path>
+      <text class="d-s" x="770" y="247" text-anchor="middle">RMII</text>
+      <path class="d-line" d="M1070 255 H1094" marker-start="url(#daq-arrow)"></path>
+      <rect class="d-term" x="1094" y="251" width="8" height="8"></rect>
+      <text class="d-t" x="1110" y="251">ETHERNET</text>
+      <text class="d-s" x="1110" y="269">RJ45</text>
+
+      <!-- RS-485 -->
+      <rect class="d-box" x="800" y="340" width="270" height="70"></rect>
+      <text class="d-t" x="935" y="371" text-anchor="middle">RS-485 TRANSCEIVER</text>
+      <path class="d-line" d="M740 375 H800" marker-start="url(#daq-arrow)" marker-end="url(#daq-arrow)"></path>
+      <text class="d-s" x="770" y="367" text-anchor="middle">UART</text>
+      <path class="d-line" d="M1070 375 H1094" marker-start="url(#daq-arrow)"></path>
+      <rect class="d-term" x="1094" y="371" width="8" height="8"></rect>
+      <text class="d-t" x="1110" y="379">RS-485</text>
+
+      <!-- Power -->
+      <text class="d-t" x="148" y="512" text-anchor="end">24 V IN</text>
+      <rect class="d-term" x="154" y="504" width="8" height="8"></rect>
+      <path class="d-line" d="M162 508 H200" marker-end="url(#daq-arrow)"></path>
+      <rect class="d-box d-box--ghost" x="200" y="478" width="870" height="60"></rect>
+      <text class="d-t" x="220" y="512">LT3514 TRIPLE BUCK + LDOS</text>
+      <text class="d-s" x="1050" y="512" text-anchor="end">rails for every block, see power tree</text>
+    </svg>
+  </div>
+  <figcaption>Block diagram. Drawn from the design, not exported from it.</figcaption>
+</figure>

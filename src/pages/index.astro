@@ -1,0 +1,181 @@
+---
+import Base from '../layouts/Base.astro';
+import SiteHeader from '../components/SiteHeader.astro';
+import Hero from '../components/Hero.astro';
+import SectionHeader from '../components/SectionHeader.astro';
+import WorkList from '../components/WorkList.astro';
+import Facts from '../components/Facts.astro';
+import Band from '../components/Band.astro';
+import OtherProjects from '../components/OtherProjects.astro';
+import Experience from '../components/Experience.astro';
+import Toolkit from '../components/Toolkit.astro';
+import About from '../components/About.astro';
+import Contact from '../components/Contact.astro';
+import { section } from '../data/sections';
+import SiteFooter from '../components/SiteFooter.astro';
+import { profile } from '../data/profile';
+
+const person = {
+  '@context': 'https://schema.org',
+  '@type': 'Person',
+  name: profile.name,
+  jobTitle: 'Electrical engineer',
+  url: new URL(import.meta.env.BASE_URL, Astro.site).href,
+  email: `mailto:${profile.email}`,
+  sameAs: [profile.linkedin.href, profile.github.href],
+  alumniOf: { '@type': 'CollegeOrUniversity', name: 'Universiti Teknologi Malaysia' },
+  address: { '@type': 'PostalAddress', addressRegion: 'Johor', addressCountry: 'MY' },
+};
+---
+
+<Base
+  title="Abubakr M. Abdelhalim — Electrical engineer"
+  description="Electrical engineer designing industrial measurement hardware: mixed-signal PCBs, power trees, embedded firmware. Graduating from UTM in February 2027."
+>
+  <script type="application/ld+json" slot="head" set:html={JSON.stringify(person)} />
+  <SiteHeader home />
+  <main id="main">
+    <Hero
+      position="Electrical engineer designing industrial measurement hardware."
+      meta={['Based in Malaysia', 'Graduating Feb 2027']}
+      status="Open to roles"
+    />
+
+    <Facts
+      facts={[
+        { value: '12', label: 'Analog inputs on the industrial DAQ module: 8 voltage (or 4 differential) and 4 current' },
+        { value: '02', label: 'Awards for Smart Posture Correction: Gold Medal, MIIE 2026, and Industry Award, UTM 2026' },
+        { value: '02', label: 'ABU Robocon cycles as electronics head of UTM Robocon, 2024 and 2025' },
+        { value: '50', suffix: '+', label: 'Robocon apprentices trained in Altium Designer and STM32' },
+      ]}
+    />
+
+    <Band label="Focus" items={['Hardware design', 'Embedded systems', 'Power and signal integrity', 'Power quality']} />
+
+    <section class="section page" id="work" aria-labelledby="work-title" data-section="work">
+      <SectionHeader
+        num={section('work').num}
+        title="Selected work"
+        id="work-title"
+        intro="Case studies: what had to be built, the decisions behind it, and how it was verified."
+      />
+      <WorkList />
+    </section>
+
+    <section class="section page" id="projects" aria-labelledby="projects-title" data-section="projects">
+      <SectionHeader
+        num={section('projects').num}
+        title="Other projects"
+        id="projects-title"
+        intro="Competition robots, final-year research and smaller builds. Open a row for details."
+      />
+      <OtherProjects />
+    </section>
+
+    <section class="section page" id="experience" aria-labelledby="experience-title" data-section="experience">
+      <SectionHeader
+        num={section('experience').num}
+        title="Experience"
+        id="experience-title"
+        intro="Internships, part-time work, leadership and teaching, 2023 to now."
+      />
+      <Experience />
+    </section>
+
+    <section class="section page" id="toolkit" aria-labelledby="toolkit-title" data-section="toolkit">
+      <SectionHeader
+        num={section('toolkit').num}
+        title="Toolkit"
+        id="toolkit-title"
+        intro="What I design, simulate and program with, and where I've used it."
+      />
+      <Toolkit />
+    </section>
+
+    <section class="section page" id="about" aria-labelledby="about-title" data-section="about">
+      <SectionHeader num={section('about').num} title="About" id="about-title" />
+      <About />
+    </section>
+
+    <section class="section page" id="contact" aria-labelledby="contact-title" data-section="contact">
+      <SectionHeader
+        num={section('contact').num}
+        title="Contact"
+        id="contact-title"
+        intro="Open to graduate roles in hardware design and embedded systems from February 2027."
+      />
+      <Contact />
+    </section>
+  </main>
+
+  <SiteFooter />
+</Base>
+
+<script>
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+  import { gsap } from '../scripts/motion';
+  import '../scripts/smooth';
+  import '../scripts/reveal';
+
+  gsap.registerPlugin(ScrollTrigger);
+
+  let triggers: ScrollTrigger[] = [];
+
+  // Index nav: mark the section crossing 40% of the viewport and slide the accent line under it.
+  function setActive(id: string | null) {
+    document.querySelectorAll<HTMLAnchorElement>('[data-nav-link]').forEach((a) => {
+      if (a.dataset.navLink === id) a.setAttribute('aria-current', 'true');
+      else a.removeAttribute('aria-current');
+    });
+    const indicator = document.querySelector<HTMLElement>('[data-nav-indicator]');
+    const link = id && document.querySelector<HTMLElement>(`.index-nav [data-nav-link="${id}"] .index-nav__label`);
+    if (!indicator) return;
+    if (!link) {
+      indicator.style.opacity = '0';
+      return;
+    }
+    const nav = indicator.parentElement!.getBoundingClientRect();
+    const box = link.getBoundingClientRect();
+    indicator.style.transform = `translateX(${box.left - nav.left}px) scaleX(${box.width})`;
+    indicator.style.opacity = '1';
+  }
+
+  function initNav() {
+    triggers.forEach((t) => t.kill());
+    const els = [...document.querySelectorAll<HTMLElement>('[data-section]')];
+    triggers = els.map((el, i) =>
+      ScrollTrigger.create({
+        trigger: el,
+        start: 'top 40%',
+        end: i === els.length - 1 ? 'max' : 'bottom 40%',
+        // Recompute from every trigger so instant jumps (Home key, restored scroll) settle correctly.
+        onToggle: () => {
+          const current = triggers.findIndex((t) => t.isActive);
+          setActive(current === -1 ? null : els[current].dataset.section!);
+        },
+      }),
+    );
+  }
+
+  // Re-measure the indicator after layout changes (resize, font swap).
+  ScrollTrigger.addEventListener('refresh', () => {
+    const current = document.querySelector<HTMLElement>('.index-nav [aria-current="true"]');
+    setActive(current?.dataset.navLink ?? null);
+  });
+
+  document.addEventListener('astro:page-load', () => {
+    if (document.querySelector('[data-section]')) document.fonts.ready.then(initNav);
+  });
+  document.addEventListener('astro:before-swap', () => {
+    triggers.forEach((t) => t.kill());
+    triggers = [];
+  });
+</script>
+
+<style>
+  .section {
+    padding-block: var(--section-pad) 0;
+    scroll-margin-top: 0;
+  }
+
+</style>

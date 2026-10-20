@@ -1,0 +1,23 @@
+---
+import { profile } from '../data/profile';
+---
+
+<footer class="site-footer page">
+  <span class="label">© 2026 {profile.name}</span>
+  <a class="label" href="#top">Back to top</a>
+</footer>
+
+<style>
+  .site-footer {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--space-2);
+    margin-top: var(--section-pad);
+    padding-block: var(--space-4);
+    border-top: var(--hairline) solid var(--rule);
+  }
+
+  .site-footer a {
+    text-decoration: none;
+  }
+</style>

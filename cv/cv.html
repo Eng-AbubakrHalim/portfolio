@@ -1,0 +1,371 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Abubakr M. Abdelhalim — CV</title>
+    <meta name="author" content="Abubakr M. Abdelhalim" />
+    <style>
+      /* FONTS */
+
+      @page {
+        size: A4;
+        margin: 11mm 13mm 10mm;
+      }
+
+      :root {
+        --fg: #161614;
+        --muted: #5c5a54;
+        --rule: #cfccc3;
+        --accent: #b5401a;
+        --display: 'Familjen Grotesk Variable', 'Helvetica Neue', Arial, sans-serif;
+        --mono: 'IBM Plex Mono', ui-monospace, monospace;
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      html {
+        background: #fff;
+      }
+
+      body {
+        color: var(--fg);
+        font-family: var(--display);
+        font-size: 8.6pt;
+        line-height: 1.34;
+        font-kerning: normal;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+
+      a {
+        color: inherit;
+        text-decoration: none;
+      }
+
+      ul {
+        list-style: none;
+      }
+
+      .label,
+      .date,
+      .contact {
+        font-family: var(--mono);
+        font-size: 7pt;
+        letter-spacing: 0.04em;
+        font-variant-numeric: tabular-nums;
+      }
+
+      .label {
+        text-transform: uppercase;
+        color: var(--muted);
+      }
+
+      /* ---------- Header ---------- */
+      header {
+        padding-bottom: 3.6mm;
+        border-bottom: 0.6pt solid var(--fg);
+      }
+
+      h1 {
+        font-size: 27pt;
+        font-weight: 500;
+        letter-spacing: -0.035em;
+        line-height: 0.95;
+      }
+
+      .title {
+        margin-top: 2.2mm;
+        font-size: 10.5pt;
+        letter-spacing: -0.005em;
+      }
+
+      .contact {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.8mm 3.2mm;
+        margin-top: 2.6mm;
+        color: var(--fg);
+      }
+
+      .contact a {
+        border-bottom: 0.5pt solid var(--rule);
+      }
+
+      .summary {
+        margin-top: 3mm;
+        max-width: 165mm;
+        font-size: 9pt;
+        line-height: 1.38;
+      }
+
+      /* ---------- Sections ---------- */
+      section {
+        padding-top: 1.8mm;
+        margin-top: 2.2mm;
+        border-top: 0.5pt solid var(--rule);
+      }
+
+      header + section {
+        border-top: 0;
+      }
+
+      h2 {
+        font-family: var(--mono);
+        font-size: 7pt;
+        font-weight: 500;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        margin-bottom: 1.8mm;
+      }
+
+      .entries {
+        display: grid;
+        gap: 1.8mm;
+      }
+
+      .entry {
+        break-inside: avoid;
+      }
+
+      .entry-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        gap: 4mm;
+      }
+
+      h3 {
+        font-size: 9.5pt;
+        font-weight: 600;
+        letter-spacing: -0.005em;
+      }
+
+      .org {
+        font-weight: 400;
+      }
+
+      .date {
+        flex: none;
+        color: var(--muted);
+      }
+
+      .sub {
+        color: var(--muted);
+        font-size: 8.3pt;
+      }
+
+      .entry ul {
+        margin-top: 0.7mm;
+        display: grid;
+        gap: 0.5mm;
+      }
+
+      .entry li,
+      .plain li {
+        position: relative;
+        padding-left: 3.2mm;
+      }
+
+      .entry li::before,
+      .plain li::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0.62em;
+        width: 1.5mm;
+        height: 0.5pt;
+        background: var(--fg);
+      }
+
+      .plain {
+        display: grid;
+        gap: 0.9mm;
+      }
+
+      .tag {
+        color: var(--accent);
+        font-family: var(--mono);
+        font-size: 7pt;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+      }
+
+      /* ---------- Skills spec table ---------- */
+      .spec {
+        display: grid;
+        grid-template-columns: 30mm 1fr;
+        column-gap: 4mm;
+        row-gap: 0.8mm;
+      }
+
+      .spec dt {
+        padding-top: 0.5mm;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Abubakr M. Abdelhalim</h1>
+      <p class="title">Electrical engineer — hardware design, embedded systems, power and signal integrity</p>
+      <p class="contact">
+        <span>Johor, Malaysia</span>
+        <a href="tel:+60123526371">+60 12-352 6371</a>
+        <a href="mailto:abdelhalimabubakr@gmail.com">abdelhalimabubakr@gmail.com</a>
+        <a href="https://eng-abubakrhalim.github.io/portfolio/">eng-abubakrhalim.github.io/portfolio</a>
+        <a href="https://github.com/Eng-AbubakrHalim">github.com/Eng-AbubakrHalim</a>
+        <a href="https://linkedin.com/in/abubakr-halim-626304288">linkedin.com/in/abubakr-halim-626304288</a>
+      </p>
+      <p class="summary">
+        Final-year electrical engineering student at Universiti Teknologi Malaysia, graduating February 2027. At
+        Pythonium.ai I worked on the hardware design of an industrial DAQ module and a rigid-flex SSD tester adapter,
+        from part selection and simulation to schematic review. Gold Medal, MIIE 2026; Industry Award, UTM EE Capstone
+        Showcase 2026.
+      </p>
+    </header>
+
+    <section>
+      <h2>Experience</h2>
+      <div class="entries">
+        <article class="entry">
+          <div class="entry-head">
+            <h3>Embedded / PCB Design Engineer Intern <span class="org">· Pythonium.ai</span></h3>
+            <span class="date">Jul – Oct 2026</span>
+          </div>
+          <p class="sub">Johor Bahru, Malaysia</p>
+          <ul>
+            <li>
+              Industrial DAQ module on an STM32H563: AD4111 front end for 8 single-ended (or 4 differential) voltage
+              inputs and 4 current inputs, 2 MAX31865 RTD inputs, AD3531 analog outputs, LT3514 power tree, LAN8742A
+              Ethernet and RS-485.
+            </li>
+            <li>
+              Stabilised the analog output stage with an isolation resistor and feedback capacitor, verified in
+              simulation; ran schematic reviews with findings logged by severity.
+            </li>
+            <li>
+              Designed a passive M.2-to-EDSFF adapter linking an SSD tester to an on-board diagnostic card, with
+              footprints built from the connector spec dimensions.
+            </li>
+            <li>
+              Reworked the adapter as a rigid-flex board designed to IPC-2223: bend radius, flex-zone routing and
+              rigid-to-flex transitions.
+            </li>
+          </ul>
+        </article>
+
+        <article class="entry">
+          <div class="entry-head">
+            <h3>Part-Time Engineer <span class="org">· TSH Group</span></h3>
+            <span class="date">Apr – Jul 2025</span>
+          </div>
+          <p class="sub">Factory automation and commissioning, Johor</p>
+          <ul>
+            <li>PLC testing and industrial wiring for automation systems; wrote the work instructions for MTC machine testing.</li>
+            <li>Designed and built a DI/DO testing kit for verifying industrial PLC signals in the field.</li>
+          </ul>
+        </article>
+
+        <article class="entry">
+          <div class="entry-head">
+            <h3>Electronics Head of Department <span class="org">· UTM Robocon</span></h3>
+            <span class="date">Jun 2024 – May 2025</span>
+          </div>
+          <p class="sub">Malaysia's team at ABU Robocon 2024 and 2025</p>
+          <ul>
+            <li>
+              Designed 4-layer STM32F4 main-control and STM32G4 motor-interface boards in Altium, with CAN, I²C and SPI
+              links across all subsystems.
+            </li>
+            <li>
+              Upgraded the mainboard's short-circuit protection and layout; designed a custom IMU board for navigation and
+              STM32 + PID shooter control.
+            </li>
+            <li>Sole electronics lead between the mechanical and software teams; trained 50+ apprentices in Altium and STM32.</li>
+          </ul>
+        </article>
+      </div>
+    </section>
+
+    <section>
+      <h2>Education</h2>
+      <div class="entries">
+        <article class="entry">
+          <div class="entry-head">
+            <h3>Bachelor of Electrical Engineering (Hons) <span class="org">· Universiti Teknologi Malaysia</span></h3>
+            <span class="date">Mar 2023 – Feb 2027</span>
+          </div>
+          <p class="sub">Final-year project: supraharmonic emissions in PV inverter systems, simulated in MATLAB/Simulink · Student member, Saudi Council of Engineers</p>
+          <p class="sub">Certificate: PCB Basic Design (Altium Fundamentals), Altium Education, Sep 2026</p>
+        </article>
+      </div>
+    </section>
+
+    <section>
+      <h2>Projects</h2>
+      <div class="entries">
+        <article class="entry">
+          <div class="entry-head">
+            <h3>Smart Posture Correction System <span class="org">· Capstone</span></h3>
+          </div>
+          <p class="tag">Gold Medal, MIIE 2026 · Industry Award, UTM EECS 2026</p>
+          <ul>
+            <li>Python/OpenCV and dlib face-pose pipeline fused with IMU data to classify posture; haptic feedback in under 200 ms.</li>
+            <li>4-layer KiCad PCB (XIAO ESP32-C3, MPU6050), C++ firmware over UDP with Blynk IoT, SolidWorks enclosure.</li>
+          </ul>
+        </article>
+
+        <article class="entry">
+          <div class="entry-head">
+            <h3>Datasheet lookup tool</h3>
+            <span class="date">2026</span>
+          </div>
+          <ul>
+            <li>Local Python CLI for component datasheets: PyMuPDF extraction, SQLite FTS5 search, incremental indexing, IC tagging.</li>
+          </ul>
+        </article>
+
+        <article class="entry">
+          <div class="entry-head">
+            <h3>Other builds</h3>
+          </div>
+          <ul>
+            <li>
+              Self-balancing robot (ESP32, MPU6050, PID) · STM32 line follower with Bluetooth override · custom boards:
+              isolated valve drivers, DC-DC bucks, ESP32 and STM32 dev boards.
+            </li>
+          </ul>
+        </article>
+      </div>
+    </section>
+
+    <section>
+      <h2>Leadership</h2>
+      <ul class="plain">
+        <li>Organising committee and referee, IYRC 2025 (International Youth Robot Competition), Johor <span class="date">· Jun 2025</span></li>
+        <li>Presenter and mentor, month-long Self-Balancing Robot Workshop: PCB design, embedded systems, PID <span class="date">· May 2025</span></li>
+        <li>Mentor, Team Sudan, FIRST Global Challenge 2026, Incheon <span class="date">· Oct 2026</span></li>
+        <li>Workshop instructor, EEExplore, remote <span class="date">· Sep 2025 – now</span></li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Skills</h2>
+      <dl class="spec">
+        <dt class="label">Hardware design</dt>
+        <dd>Altium Designer, KiCad, 4-layer PCB, rigid-flex to IPC-2223, schematic review, SolidWorks</dd>
+        <dt class="label">Simulation</dt>
+        <dd>LTspice, PSpice, ngspice, MATLAB/Simulink, NI Multisim</dd>
+        <dt class="label">Firmware</dt>
+        <dd>Embedded C on STM32 (CubeMX, CubeIDE), peripheral bring-up and drivers, ESP32, CAN, I²C, SPI, RS-485</dd>
+        <dt class="label">Software</dt>
+        <dd>Python, C/C++, OpenCV, SQLite</dd>
+        <dt class="label">Industrial</dt>
+        <dd>PLC testing, industrial wiring, DI/DO signal verification</dd>
+      </dl>
+    </section>
+  </body>
+</html>

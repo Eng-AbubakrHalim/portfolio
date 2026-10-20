@@ -1,0 +1,360 @@
+---
+import { sections } from '../data/sections';
+import { withBase } from '../lib/url';
+
+interface Props {
+  /** On the home page links are in-page anchors; elsewhere they point back home. */
+  home?: boolean;
+}
+const { home = false } = Astro.props;
+const href = (id: string) => (home ? `#${id}` : `${withBase()}#${id}`);
+---
+
+<header class="site-header page" data-site-header>
+  <a class="site-header__name" href={home ? '#top' : withBase()}>Abubakr M. Abdelhalim</a>
+
+  <nav class="index-nav" aria-label="Sections">
+    <ol role="list" class="index-nav__list">
+      {
+        sections.map((s) => (
+          <li>
+            <a class="index-nav__link" href={href(s.id)} data-nav-link={s.id}>
+              <span class="index-nav__num">{s.num}</span>{' '}
+              <span class="index-nav__label">{s.label}</span>
+            </a>
+          </li>
+        ))
+      }
+    </ol>
+    <span class="index-nav__indicator" aria-hidden="true" data-nav-indicator></span>
+  </nav>
+
+  <div class="site-header__tools">
+    <button class="text-button" type="button" data-theme-toggle>
+      <span data-theme-label>Light</span>{' '}
+      <span class="visually-hidden">theme</span>
+    </button>
+    <button
+      class="text-button menu-button"
+      type="button"
+      aria-haspopup="dialog"
+      aria-expanded="false"
+      aria-controls="site-menu"
+      data-menu-open
+    >
+      Menu
+    </button>
+  </div>
+
+  <span class="site-header__progress" aria-hidden="true" data-progress></span>
+
+  <dialog id="site-menu" class="menu" aria-label="Sections" data-menu>
+    <div class="menu__inner page">
+      <div class="menu__top">
+        <span class="label">Index</span>
+        <button class="text-button" type="button" data-menu-close>Close</button>
+      </div>
+      <nav aria-label="Sections menu">
+        <ol role="list" class="menu__list">
+          {
+            sections.map((s) => (
+              <li>
+                <a class="menu__link" href={href(s.id)} data-nav-link={s.id} data-menu-link>
+                  <span class="menu__num">{s.num}</span>{' '}
+                  <span class="menu__label">{s.label}</span>
+                </a>
+              </li>
+            ))
+          }
+        </ol>
+      </nav>
+      <div class="menu__foot">
+        <a class="link" href="mailto:abdelhalimabubakr@gmail.com">abdelhalimabubakr@gmail.com</a>
+        <button class="text-button" type="button" data-theme-toggle>
+          <span data-theme-label>Light</span>{' '}
+          <span class="visually-hidden">theme</span>
+        </button>
+      </div>
+    </div>
+  </dialog>
+</header>
+
+<script>
+  import { lenis } from '../scripts/smooth';
+  import { gsap, DUR, EASE, prefersReducedMotion } from '../scripts/motion';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+  gsap.registerPlugin(ScrollTrigger);
+
+  function syncThemeLabels() {
+    const next = document.documentElement.dataset.theme === 'light' ? 'Dark' : 'Light';
+    document.querySelectorAll('[data-theme-label]').forEach((el) => (el.textContent = next));
+  }
+
+  function toggleTheme() {
+    const root = document.documentElement;
+    const theme = root.dataset.theme === 'light' ? 'dark' : 'light';
+    root.dataset.theme = theme;
+    try {
+      localStorage.setItem('theme', theme);
+    } catch {}
+    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', theme === 'light' ? '#f2f0ea' : '#0e0e0c');
+    syncThemeLabels();
+  }
+
+  function initMenu() {
+    const dialog = document.querySelector<HTMLDialogElement>('[data-menu]');
+    const openBtn = document.querySelector<HTMLButtonElement>('[data-menu-open]');
+    if (!dialog || !openBtn) return;
+
+    const open = () => {
+      dialog.showModal();
+      openBtn.setAttribute('aria-expanded', 'true');
+      lenis?.stop();
+      if (!prefersReducedMotion()) {
+        gsap.fromTo(dialog, { autoAlpha: 0 }, { autoAlpha: 1, duration: DUR.fast, ease: EASE.out });
+        gsap.fromTo(
+          dialog.querySelectorAll('.menu__list li'),
+          { autoAlpha: 0, y: 16 },
+          { autoAlpha: 1, y: 0, duration: DUR.base, stagger: 0.04, ease: EASE.out },
+        );
+      }
+    };
+
+    const close = (then?: () => void) => {
+      const done = () => {
+        dialog.close();
+        openBtn.setAttribute('aria-expanded', 'false');
+        lenis?.start();
+        then?.();
+      };
+      if (prefersReducedMotion()) return done();
+      gsap.to(dialog, { autoAlpha: 0, duration: DUR.fast * 0.75, ease: EASE.in, onComplete: done });
+    };
+
+    openBtn.addEventListener('click', open);
+    dialog.querySelector('[data-menu-close]')?.addEventListener('click', () => close());
+    dialog.addEventListener('cancel', (e) => {
+      e.preventDefault();
+      close();
+    });
+
+    // Menu links: close first, then let the shared anchor handler scroll.
+    dialog.querySelectorAll<HTMLAnchorElement>('[data-menu-link]').forEach((link) => {
+      link.addEventListener('click', (e) => {
+        if (!link.hash || link.pathname !== location.pathname) return;
+        e.preventDefault();
+        e.stopPropagation();
+        close(() => {
+          const target = document.querySelector<HTMLElement>(link.hash);
+          if (target) window.dispatchEvent(new CustomEvent('site:scroll-to', { detail: target }));
+        });
+      });
+    });
+  }
+
+  // Reading progress: a hairline along the header's bottom edge (scroll-linked, so linear).
+  let progress: ScrollTrigger | undefined;
+  function initProgress() {
+    progress?.kill();
+    const bar = document.querySelector<HTMLElement>('[data-progress]');
+    if (!bar) return;
+    const set = gsap.quickSetter(bar, 'scaleX');
+    progress = ScrollTrigger.create({ start: 0, end: 'max', onUpdate: (self) => set(self.progress) });
+    set(progress.progress);
+  }
+
+  document.addEventListener('astro:page-load', () => {
+    initProgress();
+    syncThemeLabels();
+    document.querySelectorAll('[data-theme-toggle]').forEach((b) => b.addEventListener('click', toggleTheme));
+    initMenu();
+  });
+</script>
+
+<style>
+  .site-header {
+    position: fixed;
+    inset: 0 0 auto 0;
+    z-index: 50;
+    height: var(--header-h);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4);
+    background: var(--bg);
+  }
+
+  .site-header__progress {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: var(--hairline);
+    background: var(--accent);
+    transform: scaleX(0);
+    transform-origin: left center;
+  }
+
+  .site-header__name,
+  .index-nav__link,
+  .text-button {
+    font-family: var(--font-mono);
+    font-size: var(--text-label);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    text-decoration: none;
+  }
+
+  .site-header__name {
+    white-space: nowrap;
+  }
+
+  .site-header__tools {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+  }
+
+  .text-button {
+    color: var(--muted);
+    padding-block: var(--space-1);
+    transition: color var(--dur-fast) var(--ease-out);
+  }
+
+  .text-button:hover {
+    color: var(--fg);
+  }
+
+  /* ---------- Desktop index ---------- */
+  .index-nav {
+    display: none;
+    position: relative;
+    margin-left: auto;
+  }
+
+  .index-nav__list {
+    display: flex;
+    gap: var(--space-3);
+  }
+
+  .index-nav__link {
+    display: inline-flex;
+    gap: var(--space-1);
+    padding-block: var(--space-1);
+    color: var(--muted);
+    transition: color var(--dur-fast) var(--ease-out);
+  }
+
+  .index-nav__link:hover,
+  .index-nav__link[aria-current='true'] {
+    color: var(--fg);
+  }
+
+  .index-nav__link[aria-current='true'] .index-nav__label {
+    font-weight: 500;
+  }
+
+  .index-nav__indicator {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 1px;
+    height: 1px;
+    background: var(--accent);
+    transform-origin: 0 0;
+    opacity: 0;
+    transition:
+      transform var(--dur-base) var(--ease-in-out),
+      opacity var(--dur-base) var(--ease-out);
+  }
+
+  .menu-button {
+    color: var(--fg);
+  }
+
+  @media (min-width: 64rem) {
+    .index-nav {
+      display: block;
+    }
+    .menu-button {
+      display: none;
+    }
+  }
+
+  /* ---------- Full-screen menu ---------- */
+  .menu {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    max-width: none;
+    height: 100%;
+    max-height: none;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: var(--bg);
+    color: var(--fg);
+  }
+
+  .menu::backdrop {
+    background: var(--bg);
+  }
+
+  .menu__inner {
+    display: grid;
+    grid-template-rows: var(--header-h) 1fr auto;
+    min-height: 100%;
+    padding-bottom: var(--space-4);
+  }
+
+  .menu__top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .menu__list {
+    display: grid;
+    align-content: center;
+    border-top: var(--hairline) solid var(--rule);
+  }
+
+  .menu__link {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-3);
+    padding-block: var(--space-2);
+    border-bottom: var(--hairline) solid var(--rule);
+    text-decoration: none;
+  }
+
+  .menu__num {
+    font-family: var(--font-mono);
+    font-size: var(--text-label);
+    color: var(--muted);
+    min-width: 2.5ch;
+  }
+
+  .menu__label {
+    font-family: var(--font-display);
+    font-size: var(--text-h2);
+    font-weight: 500;
+    letter-spacing: var(--tracking-tight);
+    line-height: 1.05;
+  }
+
+  .menu__link[aria-current='true'] .menu__num {
+    color: var(--accent);
+  }
+
+  .menu__foot {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--space-2);
+    padding-top: var(--space-4);
+    font-size: var(--text-small);
+  }
+</style>

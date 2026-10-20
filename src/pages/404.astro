@@ -1,0 +1,64 @@
+---
+import Base from '../layouts/Base.astro';
+import SiteHeader from '../components/SiteHeader.astro';
+import { withBase } from '../lib/url';
+---
+
+<Base title="Page not found — Abubakr M. Abdelhalim" description="This page doesn't exist." noindex>
+  <SiteHeader />
+  <main id="main" class="nf page">
+    <p class="nf__code" aria-hidden="true">4<span class="nf__zero">0</span>4</p>
+    <h1 class="nf__title">This page doesn't exist.</h1>
+    <a class="nf__home" href={withBase()}>Back to the home page</a>
+  </main>
+</Base>
+
+<script>
+  import '../scripts/smooth';
+</script>
+
+<style>
+  .nf {
+    min-height: 100svh;
+    display: grid;
+    align-content: end;
+    gap: var(--space-3);
+    padding-top: calc(var(--header-h) + var(--space-6));
+    padding-bottom: var(--space-7);
+  }
+
+  .nf__code {
+    font-family: var(--font-display);
+    font-size: clamp(9rem, 4rem + 30vw, 34rem);
+    font-weight: 500;
+    line-height: 0.8;
+    letter-spacing: -0.06em;
+    margin-left: -0.05em;
+  }
+
+  .nf__zero {
+    color: var(--muted);
+  }
+
+  .nf__title {
+    font-size: var(--text-h3);
+    font-weight: 500;
+    padding-top: var(--space-3);
+    border-top: var(--hairline) solid var(--rule);
+  }
+
+  .nf__home {
+    justify-self: start;
+    font-family: var(--font-mono);
+    font-size: var(--text-label);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--fg);
+    padding-block: var(--space-1);
+    text-underline-offset: 0.35em;
+  }
+
+  .nf__home:hover {
+    color: var(--accent);
+  }
+</style>

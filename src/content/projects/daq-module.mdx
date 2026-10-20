@@ -1,0 +1,89 @@
+---
+title: Industrial DAQ module
+summary: 12 analog inputs (8 voltage or 4 differential, plus 4 current), 2 RTD inputs, four analog outputs, Ethernet and RS-485 on an STM32H563.
+year: '2026'
+role: Hardware design intern, Pythonium.ai
+tools: [Altium Designer, LTspice, PSpice, STM32CubeMX, STM32CubeIDE]
+tags: [Mixed-signal, STM32H563, '2026']
+status: Company design, shown in part
+cover: ../../assets/projects/daq-module/daq-cover.png
+coverAlt: 3D render of the power section, cropped. Switching regulator, three inductors, catch diodes and a bulk input capacitor.
+order: 1
+confidential: true
+---
+
+import CaseSection from '../../components/case/CaseSection.astro';
+import Figure from '../../components/case/Figure.astro';
+import Decisions from '../../components/case/Decisions.astro';
+import Decision from '../../components/case/Decision.astro';
+import DaqBlock from '../../components/diagrams/DaqBlock.astro';
+import DaqPowerTree from '../../components/diagrams/DaqPowerTree.astro';
+import top from '../../assets/projects/daq-module/daq-3d-top.png';
+import startup from '../../assets/projects/daq-module/daq-power-startup-sim.png';
+import ripple from '../../assets/projects/daq-module/daq-ripple-sim.png';
+import bench from '../../assets/projects/daq-module/daq-output-stage-bench.png';
+import ethernet from '../../assets/projects/daq-module/daq-ethernet-pair.png';
+
+<CaseSection num="01" title="Problem">
+
+One board had to read industrial sensors of three kinds and drive analog outputs back: voltage inputs, 4–20 mA current loops and RTD temperature sensors in, four voltage outputs out. It reports over Ethernet and RS-485 and runs from a 24 V supply.
+
+The hard part is the mix. Twelve precision analog inputs sit on the same board as a switching regulator, an Ethernet PHY and a microcontroller.
+
+</CaseSection>
+
+<CaseSection num="02" title="Architecture">
+
+One AD4111 takes all twelve analog inputs: eight voltage inputs, usable as four differential pairs, and four current inputs. Two MAX31865 converters handle the RTDs. An AD3531 DAC feeds four op-amp buffers at a gain of 2 for a 0–10 V output range. The STM32H563 talks to all three converters over SPI, to a LAN8742A PHY over RMII and to the RS-485 transceiver over a UART.
+
+<DaqBlock />
+
+A 24 V input feeds an LT3514 triple buck. LDOs follow the buck where the load is analog: 13.5 V down to 12 V for the output buffers, 5.8 V down to 5 V, and 3.3 V down to 1.8 V for the DAC's logic. The 3.3 V output is also split through ferrite beads into digital, analog and PHY rails.
+
+<DaqPowerTree />
+
+<Figure src={top} alt="3D render of the upper part of the DAQ board: power section top left, two RJ45 jacks, the MCU in the middle, input terminals down the left edge and output terminals on the right." caption="Top side, cropped: power entry top left, input terminals down the left edge, outputs on the right." maxWidth={575} />
+
+</CaseSection>
+
+<CaseSection num="03" title="Key decisions">
+
+<Decisions>
+  <Decision title="A clean supply for the analog outputs" options={['Run the output buffers straight from the buck', 'Buck to 13.5 V, then an LDO to 12 V']} choice="13.5 V from the LT3514, regulated down to 12 V by an LDO">
+    The buffers swing the outputs across 0–10 V, so their supply needs headroom above 10 V and as little switching ripple as possible. The LDO after the buck gives both.
+  </Decision>
+  <Decision title="Separate 3.3 V rails" options={['One 3.3 V rail for everything', 'Ferrite-filtered branches per function']} choice="Digital 3.3 V for the MCU, with filtered branches for the MCU's analog supply and the Ethernet PHY">
+    Keeping digital switching noise off the MCU's analog supply and reference, and off the PHY, without adding another regulator.
+  </Decision>
+  <Decision title="Stable output into capacitive loads" options={['Op-amp drives the terminal directly', 'Isolation resistor with a feedback capacitor']} choice="10 Ω in series with the output, 47 pF from the op-amp output to its inverting input">
+    A capacitive load on an op-amp output adds a pole inside the feedback loop and can make it ring. The resistor isolates the load; the capacitor closes a high-frequency loop around it, while the divider at the terminal still sets the DC gain.
+  </Decision>
+  <Decision title="Ethernet routing" options={['Route each line on its own', 'Coupled, length-matched pairs']} choice="TX and RX as 100 Ω differential pairs, length-matched">
+    The PHY and the jack's magnetics expect a 100 Ω differential line. Matching keeps the two halves of each pair in phase.
+  </Decision>
+</Decisions>
+
+</CaseSection>
+
+<CaseSection num="04" title="Verification">
+
+- The LT3514 stage was simulated in LTspice for start-up and steady-state ripple.
+- The output stage was checked in a PSpice testbench against a 1 nF load.
+- Layout rules cover clearance per area, differential pairs and power nets. The design-rule check finished with no violations.
+- Schematic reviews logged each finding by severity.
+
+<Figure src={startup} alt="LTspice plot of the triple buck regulator starting up: output voltages and load currents rise from zero and settle within the 0 to 800 microsecond window." caption="Start-up transient of the triple buck converter in LTspice, 0–800 µs." plate="dark" wide />
+
+<Figure src={ripple} alt="LTspice plot of one output rail in steady state, zoomed to millivolts: a small sinusoidal ripple between about 11.913 and 11.917 volts." caption="Steady-state ripple on the 12 V rail: about 3.4 mV peak to peak between the cursors." plate="dark" />
+
+<Figure src={bench} alt="PSpice testbench of the analog output stage: a TLV9302 op-amp at a gain of 2 with a 10 ohm isolation resistor and a 47 pF feedback capacitor driving a 1 nF load. Bias points show 3 V in and 6 V out." caption="Output-stage testbench in PSpice: isolation resistor and feedback capacitor against a 1 nF load." plate="light" />
+
+<Figure src={ethernet} alt="PCB layout close-up of an Ethernet transmit pair routed together from the jack pins down to the PHY, with a small length-matching loop near the top." caption="Ethernet transmit pair, routed as a coupled differential pair (layout detail)." plate="dark" maxWidth={540} />
+
+</CaseSection>
+
+<CaseSection num="05" title="Result">
+
+Schematic and six-layer layout finished, with a clean design-rule check and fabrication outputs set up.
+
+</CaseSection>

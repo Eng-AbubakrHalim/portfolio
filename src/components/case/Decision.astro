@@ -1,0 +1,120 @@
+---
+/**
+ * One key decision as a compact row: options considered → choice → why (slot).
+ * `draft` marks reasoning the author still has to confirm; it shows a tag in dev builds only.
+ */
+interface Props {
+  title: string;
+  options: string[];
+  choice: string;
+  draft?: boolean;
+}
+const { title, options, choice, draft = false } = Astro.props;
+const showDraft = draft && import.meta.env.DEV;
+---
+
+<li class="decision" data-reveal>
+  <h3 class="decision__title">
+    {title}
+    {showDraft && <span class="decision__draft">Draft: confirm</span>}
+  </h3>
+  <dl class="decision__grid">
+    <div>
+      <dt>Options</dt>
+      <dd>
+        <ul role="list" class="decision__options">
+          {options.map((o) => <li>{o}</li>)}
+        </ul>
+      </dd>
+    </div>
+    <div>
+      <dt>Choice</dt>
+      <dd class="decision__choice">{choice}</dd>
+    </div>
+    <div>
+      <dt>Why</dt>
+      <dd class="decision__why"><slot /></dd>
+    </div>
+  </dl>
+</li>
+
+<style>
+  .decision {
+    display: grid;
+    gap: var(--space-2);
+    padding-block: var(--space-4);
+    border-bottom: var(--hairline) solid var(--rule);
+  }
+
+  .decision__title {
+    font-family: var(--font-display);
+    font-size: var(--text-h3);
+    font-weight: 500;
+    letter-spacing: var(--tracking-tight);
+  }
+
+  .decision__draft {
+    margin-left: var(--space-2);
+    font-family: var(--font-mono);
+    font-size: var(--text-label);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--accent);
+    vertical-align: middle;
+  }
+
+  .decision__grid {
+    display: grid;
+    gap: var(--space-2) var(--gutter);
+  }
+
+  .decision__grid > div {
+    display: grid;
+    gap: var(--space-half);
+    align-content: start;
+  }
+
+  dt {
+    font-family: var(--font-mono);
+    font-size: var(--text-label);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  dd {
+    font-size: var(--text-small);
+  }
+
+  .decision__options {
+    display: grid;
+    gap: var(--space-half);
+    color: var(--muted);
+  }
+
+  .decision__choice {
+    position: relative;
+    padding-left: var(--space-3);
+  }
+
+  /* Accent marker on the chosen option. */
+  .decision__choice::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.6em;
+    width: 0.4em;
+    height: 0.4em;
+    background: var(--accent);
+  }
+
+  .decision__why :global(p) {
+    margin: 0;
+  }
+
+  @media (min-width: 48rem) {
+    .decision__grid {
+      grid-template-columns: 3fr 3fr 6fr;
+    }
+  }
+</style>
