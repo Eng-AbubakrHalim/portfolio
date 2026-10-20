@@ -15,8 +15,12 @@ export const otherProjects: OtherProject[] = [
     title: 'Supraharmonic emissions in PV inverter systems',
     context: 'Final-year project, Universiti Teknologi Malaysia',
     year: '2026–27',
-    tags: ['Power quality', 'In progress'],
-    details: ['Final-year research on supraharmonic emissions (2–150 kHz) from photovoltaic inverter systems.'],
+    tags: ['Power quality', 'MATLAB / Simulink', 'In progress'],
+    details: [
+      'Open-loop simulation in MATLAB/Simulink: a two-level inverter (600 V DC, 15.8 kHz sinusoidal PWM) feeding a 400 V, 50 Hz grid through an LCL filter.',
+      'Emission spectrum from an FFT set up to IEC 61000-4-7 grouping, with three harm indicators (THD-S, dielectric-heating power and the cable-termination index QSH) at the inverter terminals and the point of common coupling.',
+      'Grid current distortion up to 2.5 kHz was 1.40%, within IEEE 519, yet supraharmonic distortion at the inverter terminals reached 13.42%: a compliant inverter can still stress its own terminals. Part two extends this to a multi-inverter network.',
+    ],
   },
   {
     title: 'UTM Robocon electronics',
@@ -32,18 +36,21 @@ export const otherProjects: OtherProject[] = [
   {
     title: 'Self-balancing robot',
     context: 'Two-wheeled balancing robot',
+    year: '2025',
     tags: ['ESP32', 'MPU6050', 'PID'],
     details: ['ESP32 and MPU6050 with a real-time PID loop tuned to stay stable under disturbances.'],
   },
   {
     title: 'Line follower with Bluetooth override',
     context: 'Autonomous vehicle',
+    year: '2023',
     tags: ['STM32', 'Bluetooth'],
     details: ['STM32-based line tracking with sensor fusion, plus a Bluetooth link for manual override.'],
   },
   {
     title: 'Custom boards',
-    context: 'Small PCBs designed, built and tested',
+    context: 'Small PCBs designed, built and tested during the Robocon years',
+    year: '2024–25',
     tags: ['KiCad', 'Altium'],
     details: [
       'Isolated valve drivers, DC-DC buck converters, ESP32 breakout boards and STM32 development boards.',
