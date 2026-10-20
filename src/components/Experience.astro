@@ -1,5 +1,5 @@
 ---
-import { work, leadership, education, awards, timeline, formatRange } from '../data/experience';
+import { work, leadership, education, certifications, awards, timeline, formatRange } from '../data/experience';
 import Thumbs from './Thumbs.astro';
 
 // Chart axis: Jan 2023 → Jun 2027, in months.
@@ -108,17 +108,42 @@ const groups = [
   }
 
   <div class="xp__group">
-    <h3 class="xp__subhead"><span class="xp__subnum">03.3</span> Education and awards</h3>
+    <h3 class="xp__subhead"><span class="xp__subnum">03.3</span> Education, certificates and awards</h3>
     <ol class="xp__list" role="list">
-      <li class="xp__item" data-reveal>
-        <p class="xp__when">{formatRange(education.start, education.end)}</p>
-        <div class="xp__what">
-          <h4 class="xp__role">{education.degree} <span class="xp__org">· {education.school}</span></h4>
-          <ul class="xp__points" role="list">
-            {education.notes.map((n) => <li>{n}</li>)}
-          </ul>
-        </div>
-      </li>
+      {
+        education.map((e) => (
+          <li class="xp__item" data-reveal>
+            <p class="xp__when">{formatRange(e.start, e.end)}</p>
+            <div class="xp__what">
+              <h4 class="xp__role">
+                {e.degree} <span class="xp__org">· {e.school}</span>
+              </h4>
+              {e.notes.length > 0 && (
+                <ul class="xp__points" role="list">
+                  {e.notes.map((n) => (
+                    <li>{n}</li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          </li>
+        ))
+      }
+      {
+        certifications.map((c) => (
+          <li class="xp__item" data-reveal>
+            <p class="xp__when">
+              {c.when}
+              <span class="xp__place">Certificate</span>
+            </p>
+            <div class="xp__what">
+              <h4 class="xp__role">
+                {c.title} <span class="xp__org">· {c.issuer}</span>
+              </h4>
+            </div>
+          </li>
+        ))
+      }
       {
         awards.map((a) => (
           <li class="xp__item" data-reveal>

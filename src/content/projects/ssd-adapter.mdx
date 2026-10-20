@@ -55,8 +55,8 @@ Two rigid ends joined by a flex section. Each rigid end has its own stack-up, be
   <Decision title="Controlled impedance through three stack-ups" options={['One trace width everywhere', 'A profile per section and layer']} choice="Five impedance profiles: microstrip and offset stripline on each rigid end, microstrip on the flex">
     The differential pairs cross three different stack-ups. Each needs its own width and gap to stay at 100 Ω ±10%.
   </Decision>
-  <Decision title="One site, three packages" options={['One package option per sensor', 'Stacked footprint for three packages']} choice="Overlaid WSON, SOIC and VSSOP footprints on one site" draft>
-    Any of the three packages can be fitted to the same pads without changing the board.
+  <Decision title="One site, three packages" options={['One package option per sensor', 'Stacked footprint for three packages']} choice="Overlaid WSON, SOIC and VSSOP footprints on one site">
+    The customer asked for it, for parts availability: whichever package is in stock can be fitted to the same pads without changing the board.
   </Decision>
 </Decisions>
 
@@ -76,10 +76,8 @@ Two rigid ends joined by a flex section. Each rigid end has its own stack-up, be
 
 </CaseSection>
 
-<CaseSection num="05" title="Result and next">
+<CaseSection num="05" title="Result">
 
 A rigid-flex adapter with matched edge thicknesses and defined impedance on every section, documented for fabrication with a stack-up drawing, an impedance table and fabrication notes.
-
-Next is a first-article check: fit in both sockets, then the differential pairs measured against the calculated impedance.
 
 </CaseSection>

@@ -7,6 +7,8 @@ tools: [Python, PyMuPDF, SQLite FTS5, Tkinter]
 tags: [Python, SQLite FTS5, CLI]
 status: Working, not published yet
 repo: Repository not published yet
+cover: ../../assets/projects/datasheet-tool/datasheet-cover.png
+coverAlt: The Datasheet Search window searching for VDDP minimum. Two matching pages are listed on the left; the right shows the selected page with the matches highlighted.
 order: 4
 ---
 
@@ -14,6 +16,9 @@ import CaseSection from '../../components/case/CaseSection.astro';
 import Decisions from '../../components/case/Decisions.astro';
 import Decision from '../../components/case/Decision.astro';
 import DatasheetPipeline from '../../components/diagrams/DatasheetPipeline.astro';
+import Animation from '../../components/case/Animation.astro';
+import demo from '../../assets/projects/datasheet-tool/datasheet-demo.webp?url';
+import poster from '../../assets/projects/datasheet-tool/datasheet-cover.png';
 
 <CaseSection num="01" title="Problem">
 
@@ -28,6 +33,8 @@ A design question about a part usually means opening the right PDF and searching
 A local library in one SQLite file. The indexer pulls text out of every PDF with PyMuPDF; searches return pages, and every result can be read on the real page or opened in your own PDF app at that page.
 
 <DatasheetPipeline />
+
+<Animation src={demo} poster={poster} width={1280} height={799} alt="Typing VDDP minimum into Datasheet Search: the result list narrows with each word, then the selected page appears with every match highlighted, first on one document and then on the LDO page with the worked example." caption="The app running on sample documents written for this demo. Results update as you type; the page view highlights every match." />
 
 The first version was a set of command-line scripts with a manifest that tagged each document with its IC and subsystem. The current one is a package with a search window, a library view and the same engine on the command line.
 
@@ -63,10 +70,8 @@ The first version was a set of command-line scripts with a manifest that tagged 
 
 </CaseSection>
 
-<CaseSection num="05" title="Result and next">
+<CaseSection num="05" title="Result">
 
 Built while working on the DAQ module, and used on its datasheets. Everything runs on the computer; nothing is uploaded.
-
-Next: OCR for scanned PDFs, which it can't search today, and publishing the repository.
 
 </CaseSection>

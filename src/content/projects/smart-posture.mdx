@@ -41,11 +41,8 @@ A camera and the host PC classify posture with a Python, OpenCV and dlib face-po
   <Decision title="Where the vision runs" options={['On the wearable', 'On the host PC']} choice="Host PC; the wearable receives only the result">
     Face-pose estimation needs far more compute than a small microcontroller has. Keeping it on the PC lets the wearable stay a small board with a module, an IMU and a motor driver.
   </Decision>
-  <Decision title="Camera plus IMU" options={['Camera only', 'IMU only', 'Camera fused with the IMU']} choice="Fuse face pose from the camera with IMU data" draft>
-    Each source covers what the other misses: the camera sees head and face position, the IMU measures the back directly.
-  </Decision>
-  <Decision title="Monitoring without writing an app" options={['A custom phone app', 'Blynk IoT platform']} choice="Blynk dashboard and push notifications" draft>
-    It gave a live dashboard and phone alerts from the ESP32 firmware, so the team's time went into the hardware and the vision pipeline.
+  <Decision title="Camera plus IMU" options={['Camera only', 'IMU only', 'Camera fused with the IMU']} choice="Fuse face pose from the camera with IMU data">
+    Each sensor sees part of the posture. The IMU sits on the back and captures the curvature of the spine; the camera captures the position of the neck and shoulders, which the IMU can't see.
   </Decision>
 </Decisions>
 

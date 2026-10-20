@@ -60,6 +60,14 @@ export const work: Role[] = [
 
 export const leadership: Role[] = [
   {
+    role: 'Workshop Instructor',
+    org: 'EEExplore',
+    place: 'Remote, Sudan',
+    start: '2025-09',
+    end: 'now',
+    points: ['Teaching and lecturing EEExplore workshops, remotely.'],
+  },
+  {
     role: 'Mentor',
     org: 'FIRST Global Challenge, Team Sudan',
     place: 'Incheon, South Korea',
@@ -89,18 +97,31 @@ export const leadership: Role[] = [
     org: 'UTM Robocon',
     start: '2024-01',
     end: '2025-04',
-    points: ['Trained 20+ junior members in Altium Designer, STM32 programming and circuit analysis.'],
+    points: ['Trained 50+ apprentices in Altium Designer, STM32 programming and circuit analysis as head of department.'],
     images: [{ src: training, alt: 'Abubakr speaking at a lectern during a Robocon training session at UTM.', caption: 'Training session at UTM' }],
   },
 ];
 
-export const education = {
-  degree: 'Bachelor of Electrical Engineering (Hons)',
-  school: 'Universiti Teknologi Malaysia',
-  start: '2023-03',
-  end: '2027-02',
-  notes: ['Final-year project: supraharmonic emissions in PV inverter systems', 'Student member, Saudi Council of Engineers'],
-};
+export const education = [
+  {
+    degree: 'Bachelor of Electrical Engineering (Hons)',
+    school: 'Universiti Teknologi Malaysia',
+    start: '2023-03',
+    end: '2027-02',
+    notes: ['Final-year project: supraharmonic emissions in PV inverter systems', 'Student member, Saudi Council of Engineers'],
+  },
+  {
+    degree: 'Student',
+    school: 'University of Khartoum',
+    start: '2021-08',
+    end: '2022-09',
+    notes: [],
+  },
+];
+
+export const certifications = [
+  { title: 'PCB Basic Design (Altium Fundamentals)', issuer: 'Altium Education', when: 'Sep 2026' },
+];
 
 export const awards = [
   { title: 'Gold Medal, University Student Innovator', event: 'Malaysia Invention & Innovation Expo (MIIE)', when: '2026', project: 'Smart Posture Correction' },
@@ -124,6 +145,7 @@ export function formatMonth(ym: string) {
 }
 
 export function formatRange(start: string, end?: string) {
+  if (end === 'now') return `${formatMonth(start)} – now`;
   if (!end || end === start) return formatMonth(start);
   const [sy] = start.split('-');
   const [ey] = end.split('-');

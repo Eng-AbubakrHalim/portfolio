@@ -1,0 +1,54 @@
+---
+/**
+ * An animated image (animated WebP), served as-is so the frames survive.
+ * Under reduced motion a still poster frame is shown instead.
+ */
+import { Image } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+
+interface Props {
+  src: string;
+  poster: ImageMetadata;
+  width: number;
+  height: number;
+  alt: string;
+  caption?: string;
+}
+const { src, poster, width, height, alt, caption } = Astro.props;
+---
+
+<figure class="anim fig--wide" data-reveal>
+  <div class="anim__frame">
+    <picture>
+      <source media="(prefers-reduced-motion: no-preference)" srcset={src} type="image/webp" />
+      <Image src={poster} alt={alt} widths={[640, 1280]} sizes="(min-width: 75rem) 72rem, 100vw" loading="lazy" width={width} height={height} />
+    </picture>
+  </div>
+  {caption && <figcaption>{caption}</figcaption>}
+</figure>
+
+<style>
+  .anim {
+    display: grid;
+    gap: var(--space-1);
+    margin-block: var(--space-5);
+  }
+
+  .anim__frame {
+    border: var(--hairline) solid var(--rule);
+  }
+
+  .anim :global(img) {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  figcaption {
+    font-family: var(--font-mono);
+    font-size: var(--text-label);
+    letter-spacing: 0.02em;
+    color: var(--muted);
+    max-width: 72ch;
+  }
+</style>

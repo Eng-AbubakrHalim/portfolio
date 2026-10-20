@@ -7,8 +7,9 @@
     <svg viewBox="0 0 1200 470" role="img" aria-labelledby="daq-power-title daq-power-desc">
       <title id="daq-power-title">DAQ power tree</title>
       <desc id="daq-power-desc">
-        A 24 V input feeds an LT3514 triple buck converter with three outputs: 13.5 V for the output buffers, 5.8 V
-        into a TPS78550 LDO that makes 5 V, and 3.3 V. The 3.3 V output passes through a ferrite to become the
+        A 24 V input feeds an LT3514 triple buck converter with three outputs. 13.5 V goes into an LDO that makes
+        12 V for the output buffers, which drive the 0–10 V outputs. 5.8 V goes into a TPS78550 LDO that makes 5 V. The
+        third output is 3.3 V. The 3.3 V output passes through a ferrite to become the
         digital 3.3 V rail for the MCU. From that rail, a second ferrite makes an analog 3.3 V rail for the MCU's
         analog supply, a branch feeds the Ethernet PHY, and a TLV75718 LDO makes 1.8 V for the DAC's logic.
       </desc>
@@ -29,11 +30,16 @@
       <!-- Output bus -->
       <path class="d-line" d="M310 230 H350 M350 60 V340"></path>
 
-      <!-- 13.5 V -->
-      <path class="d-line" d="M350 60 H900" marker-end="url(#pwr-arrow)"></path>
+      <!-- 13.5 V → LDO → 12 V -->
+      <path class="d-line" d="M350 60 H460" marker-end="url(#pwr-arrow)"></path>
       <text class="d-k" x="370" y="52">13.5 V</text>
+      <rect class="d-box" x="460" y="35" width="160" height="50"></rect>
+      <text class="d-t" x="540" y="65" text-anchor="middle">LDO</text>
+      <path class="d-line" d="M620 60 H900" marker-end="url(#pwr-arrow)"></path>
+      <text class="d-k" x="640" y="52">12 V</text>
       <rect class="d-box" x="900" y="35" width="200" height="50"></rect>
-      <text class="d-t" x="1000" y="65" text-anchor="middle">OUTPUT BUFFERS</text>
+      <text class="d-t" x="1000" y="58" text-anchor="middle">OUTPUT BUFFERS</text>
+      <text class="d-s" x="1000" y="75" text-anchor="middle">0–10 V outputs</text>
 
       <!-- 5.8 V → 5 V -->
       <path class="d-line" d="M350 150 H460" marker-end="url(#pwr-arrow)"></path>

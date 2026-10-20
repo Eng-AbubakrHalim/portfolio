@@ -34,11 +34,11 @@ The hard part is the mix. Twelve precision analog inputs sit on the same board a
 
 <CaseSection num="02" title="Architecture">
 
-One AD4111 takes all twelve analog inputs: eight voltage inputs, usable as four differential pairs, and four current inputs. Two MAX31865 converters handle the RTDs. An AD3531 DAC feeds four op-amp buffers at a gain of 2. The STM32H563 talks to all three converters over SPI, to a LAN8742A PHY over RMII and to the RS-485 transceiver over a UART.
+One AD4111 takes all twelve analog inputs: eight voltage inputs, usable as four differential pairs, and four current inputs. Two MAX31865 converters handle the RTDs. An AD3531 DAC feeds four op-amp buffers at a gain of 2 for a 0–10 V output range. The STM32H563 talks to all three converters over SPI, to a LAN8742A PHY over RMII and to the RS-485 transceiver over a UART.
 
 <DaqBlock />
 
-A 24 V input feeds an LT3514 triple buck. Its 3.3 V output is split through ferrite beads into digital, analog and PHY rails. LDOs make 5 V from the 5.8 V output and 1.8 V for the DAC's logic.
+A 24 V input feeds an LT3514 triple buck. LDOs follow the buck where the load is analog: 13.5 V down to 12 V for the output buffers, 5.8 V down to 5 V, and 3.3 V down to 1.8 V for the DAC's logic. The 3.3 V output is also split through ferrite beads into digital, analog and PHY rails.
 
 <DaqPowerTree />
 
@@ -49,14 +49,11 @@ A 24 V input feeds an LT3514 triple buck. Its 3.3 V output is split through ferr
 <CaseSection num="03" title="Key decisions">
 
 <Decisions>
-  <Decision title="One ADC for every analog input" options={['ADE7913, three channels per chip', 'AD4111']} choice="AD4111" draft>
-    Its inputs map onto the module one to one: eight voltage inputs, or four differential, and four current inputs. One part replaces the several three-channel ADE7913s the inputs would otherwise need.
+  <Decision title="A clean supply for the analog outputs" options={['Run the output buffers straight from the buck', 'Buck to 13.5 V, then an LDO to 12 V']} choice="13.5 V from the LT3514, regulated down to 12 V by an LDO">
+    The buffers swing the outputs across 0–10 V, so their supply needs headroom above 10 V and as little switching ripple as possible. The LDO after the buck gives both.
   </Decision>
-  <Decision title="One DAC for four outputs" options={['AD5422, one channel per chip', 'AD3531 with op-amp buffers']} choice="AD3531, buffered at a gain of 2" draft>
-    One device covers all four outputs, and the op-amp stage sets the output range at the terminal.
-  </Decision>
-  <Decision title="Isolation on the converter SPI" options={['ADuM5411 isolated SPI with its own isolated supply', 'Direct SPI']} choice="Removed the ADuM5411" draft>
-    It took a part and its isolated supply out of the path between the ADC and the MCU.
+  <Decision title="Separate 3.3 V rails" options={['One 3.3 V rail for everything', 'Ferrite-filtered branches per function']} choice="Digital 3.3 V for the MCU, with filtered branches for the MCU's analog supply and the Ethernet PHY">
+    Keeping digital switching noise off the MCU's analog supply and reference, and off the PHY, without adding another regulator.
   </Decision>
   <Decision title="Stable output into capacitive loads" options={['Op-amp drives the terminal directly', 'Isolation resistor with a feedback capacitor']} choice="10 Ω in series with the output, 47 pF from the op-amp output to its inverting input">
     A capacitive load on an op-amp output adds a pole inside the feedback loop and can make it ring. The resistor isolates the load; the capacitor closes a high-frequency loop around it, while the divider at the terminal still sets the DC gain.
@@ -85,10 +82,8 @@ A 24 V input feeds an LT3514 triple buck. Its 3.3 V output is split through ferr
 
 </CaseSection>
 
-<CaseSection num="05" title="Result and next">
+<CaseSection num="05" title="Result">
 
 Schematic and six-layer layout finished, with a clean design-rule check and fabrication outputs set up.
-
-Next is bring-up on real hardware: checking input accuracy against the simulation and the output stage on real cable loads.
 
 </CaseSection>
