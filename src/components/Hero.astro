@@ -2,16 +2,24 @@
 interface Props {
   position: string;
   meta: string[];
+  /** Availability line, marked with a slow-pulsing accent square. */
+  status?: string;
 }
-const { position, meta } = Astro.props;
+const { position, meta, status } = Astro.props;
 ---
 
 <section class="hero page" id="top" aria-labelledby="hero-name" data-hero>
   <div class="hero__fit">
     <h1 class="hero__name" id="hero-name">
-      <span class="hero__line" data-hero-line>Abubakr M.</span>{' '}
+      <span class="hero__line" data-hero-line>Abubakr M<span class="hero__dot">.</span></span>{' '}
       <span class="hero__line" data-hero-line>Abdelhalim</span>
     </h1>
+  </div>
+  <!-- Drafting-style dimension line: ticks mark the name's extents, label gives its rendered width. -->
+  <div class="hero__dim" aria-hidden="true" data-dim>
+    <span class="hero__dim-tick"></span>
+    <span class="hero__dim-label" data-dim-label></span>
+    <span class="hero__dim-tick hero__dim-tick--end"></span>
   </div>
   <div class="hero__below" data-hero-below>
     <p class="hero__position" data-hero-fade>{position}</p>
@@ -23,6 +31,17 @@ const { position, meta } = Astro.props;
             <span>{m}</span>
           </>
         ))
+      }
+      {
+        status && (
+          <>
+            <span aria-hidden="true">·</span>
+            <span class="hero__status">
+              <span class="hero__led" aria-hidden="true" />
+              {status}
+            </span>
+          </>
+        )
       }
       <span aria-hidden="true">·</span>
       <span class="hero__clock">
@@ -60,7 +79,25 @@ const { position, meta } = Astro.props;
     clockTimer = window.setInterval(tick, 15_000);
   }
 
+  let dimObserver: ResizeObserver | undefined;
+
+  // Width of the widest name line, shown on the dimension line and used to size it.
+  function measureName(hero: HTMLElement) {
+    const dim = hero.querySelector<HTMLElement>('[data-dim]');
+    const label = hero.querySelector<HTMLElement>('[data-dim-label]');
+    if (!dim || !label) return;
+    const widths = [...hero.querySelectorAll<HTMLElement>('[data-hero-line]')].map((line) => {
+      const range = document.createRange();
+      range.selectNodeContents(line);
+      return range.getBoundingClientRect().width;
+    });
+    const w = Math.max(...widths);
+    dim.style.width = `${w}px`;
+    label.textContent = `W ${Math.round(w)} PX`;
+  }
+
   function cleanup() {
+    dimObserver?.disconnect();
     reveals.forEach((r) => r.split.revert());
     reveals = [];
     exit?.kill();
@@ -72,6 +109,12 @@ const { position, meta } = Astro.props;
     if (!hero) return;
     startClock();
     const root = document.documentElement;
+    document.fonts.ready.then(() => {
+      measureName(hero);
+      dimObserver?.disconnect();
+      dimObserver = new ResizeObserver(() => measureName(hero));
+      dimObserver.observe(hero.querySelector('.hero__fit')!);
+    });
 
     if (prefersReducedMotion()) {
       root.classList.add('hero-ready');
@@ -108,7 +151,7 @@ const { position, meta } = Astro.props;
           .timeline()
           .to(lines[0], { xPercent: -14, ease: 'none' }, 0)
           .to(lines[1], { xPercent: 14, ease: 'none' }, 0)
-          .to(hero.querySelector('[data-hero-below]'), { autoAlpha: 0, y: -24, ease: 'none' }, 0),
+          .to([hero.querySelector('[data-dim]'), hero.querySelector('[data-hero-below]')], { autoAlpha: 0, y: -24, ease: 'none' }, 0),
       });
     });
   });
@@ -156,12 +199,54 @@ const { position, meta } = Astro.props;
     display: block;
   }
 
+  .hero__dot {
+    color: var(--accent);
+  }
+
+  .hero__dim {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    height: 0.75rem;
+    margin-top: var(--space-4);
+  }
+
+  .hero__dim::before {
+    content: '';
+    position: absolute;
+    inset: 50% 0 auto;
+    height: var(--hairline);
+    background: var(--rule);
+  }
+
+  .hero__dim-tick {
+    position: relative;
+    width: var(--hairline);
+    height: 100%;
+    background: var(--accent);
+  }
+
+  .hero__dim-label {
+    position: relative;
+    padding-inline: var(--space-1);
+    background: var(--bg);
+    font-family: var(--font-mono);
+    font-size: var(--text-label);
+    letter-spacing: var(--tracking-label);
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .hero__dim-label:empty {
+    display: none;
+  }
+
   .hero__below {
     display: grid;
     gap: var(--space-3);
-    margin-top: var(--space-5);
-    padding-top: var(--space-3);
-    border-top: var(--hairline) solid var(--rule);
+    margin-top: var(--space-3);
   }
 
   .hero__position {
@@ -174,6 +259,36 @@ const { position, meta } = Astro.props;
     display: flex;
     flex-wrap: wrap;
     gap: var(--space-half) var(--space-1);
+  }
+
+  .hero__status {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+    color: var(--fg);
+  }
+
+  /* Availability light: a small square that breathes slowly. */
+  .hero__led {
+    width: 0.55em;
+    height: 0.55em;
+    background: var(--accent);
+    animation: led 2.4s var(--ease-in-out) infinite alternate;
+  }
+
+  @keyframes led {
+    from {
+      opacity: 1;
+    }
+    to {
+      opacity: 0.25;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero__led {
+      animation: none;
+    }
   }
 
   .hero__clock time {

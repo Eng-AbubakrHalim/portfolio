@@ -40,24 +40,33 @@ const { items, label } = Astro.props;
     const track = band?.querySelector<HTMLElement>('[data-band-track]');
     if (!band || !track || prefersReducedMotion()) return;
 
-    const setX = gsap.quickSetter(track, 'xPercent');
+    const setX = gsap.quickSetter(track, 'x', 'px');
+    const IDLE = 40; // px/s drift when the page is still
+    const MAX = 200; // px/s cap while scrolling, so fast scrolls never spin it
+    const GAIN = 4; // px/s added per px/frame of scroll velocity
+    const EASE_MS = 250; // time constant for speed and direction changes
+    let groupWidth = track.scrollWidth / 2;
     let x = 0;
+    let speed = -IDLE; // signed px/s, negative = leftward
     let dir = -1;
     let visible = false;
 
-    // Two identical groups: wrapping at -50% makes the loop seamless.
+    // Two identical groups: wrapping by one group width makes the loop seamless.
     const tick = (_time: number, deltaMs: number) => {
-      if (!visible) return;
+      if (!visible || !groupWidth) return;
       const velocity = lenis?.velocity ?? 0;
-      if (velocity > 0.1) dir = -1;
-      else if (velocity < -0.1) dir = 1;
-      const speed = 0.006 + Math.min(Math.abs(velocity) * 0.004, 0.12); // % of track per ms
-      x += dir * speed * deltaMs;
-      if (x <= -50) x += 50;
-      if (x > 0) x -= 50;
+      if (velocity > 0.5) dir = -1;
+      else if (velocity < -0.5) dir = 1;
+      const target = dir * Math.min(IDLE + Math.abs(velocity) * GAIN, MAX);
+      speed += (target - speed) * (1 - Math.exp(-deltaMs / EASE_MS));
+      x += (speed * deltaMs) / 1000;
+      if (x <= -groupWidth) x += groupWidth;
+      if (x > 0) x -= groupWidth;
       setX(x);
     };
 
+    const ro = new ResizeObserver(() => (groupWidth = track.scrollWidth / 2));
+    ro.observe(track);
     const io = new IntersectionObserver(([entry]) => (visible = entry.isIntersecting));
     io.observe(band);
     gsap.ticker.add(tick);
@@ -65,6 +74,7 @@ const { items, label } = Astro.props;
     stop = () => {
       gsap.ticker.remove(tick);
       io.disconnect();
+      ro.disconnect();
     };
   });
 

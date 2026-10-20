@@ -11,13 +11,19 @@ interface Props {
   reveal?: boolean;
 }
 const { num, title, id, intro, as: Tag = 'h2', reveal = true } = Astro.props;
+// Leading zero is set in grey so the significant digit carries the weight.
+const lead = num.length > 1 && num.startsWith('0') ? '0' : '';
+const rest = lead ? num.slice(1) : num;
 ---
 
 <header class="section-head" data-section-head={reveal ? '' : undefined}>
-  <hr class="rule section-head__rule" data-rule />
+  <div class="section-head__rules">
+    <hr class="rule section-head__rule" data-rule />
+    <span class="section-head__tick" data-tick></span>
+  </div>
   <div class="section-head__row">
     <p class="section-head__num" aria-hidden="true">
-      <span class="section-head__num-inner" data-num>{num}</span>
+      <span class="section-head__num-inner" data-num>{lead && <span class="section-head__zero">{lead}</span>}{rest}</span>
     </p>
     <div class="section-head__text">
       <Tag class="section-head__title" id={id} data-lines>{title}</Tag>
@@ -49,6 +55,7 @@ const { num, title, id, intro, as: Tag = 'h2', reveal = true } = Astro.props;
     if (prefersReducedMotion()) return;
     document.querySelectorAll<HTMLElement>('[data-section-head]').forEach((head) => {
       const rule = head.querySelector<HTMLElement>('[data-rule]');
+      const tick = head.querySelector<HTMLElement>('[data-tick]');
       const num = head.querySelector<HTMLElement>('[data-num]');
       const title = head.querySelector<HTMLElement>('[data-lines]');
       const intro = head.querySelector<HTMLElement>('[data-intro]');
@@ -56,7 +63,7 @@ const { num, title, id, intro, as: Tag = 'h2', reveal = true } = Astro.props;
 
       const numReveal = lineReveal(num, { duration: DUR.slow, paused: true });
       const titleReveal = lineReveal(title, { duration: DUR.slow, delay: 0.1, paused: true });
-      gsap.set(rule, { scaleX: 0 });
+      gsap.set([rule, tick], { scaleX: 0 });
       if (intro) gsap.set(intro, { autoAlpha: 0, y: 12 });
 
       const enter = ScrollTrigger.create({
@@ -65,6 +72,7 @@ const { num, title, id, intro, as: Tag = 'h2', reveal = true } = Astro.props;
         once: true,
         onEnter: () => {
           gsap.to(rule, { scaleX: 1, duration: DUR.slow, ease: EASE.out });
+          gsap.to(tick, { scaleX: 1, duration: DUR.base, ease: EASE.out });
           numReveal.play();
           titleReveal.play();
           if (intro) gsap.to(intro, { autoAlpha: 1, y: 0, duration: DUR.base, delay: 0.2, ease: EASE.out });
@@ -95,8 +103,24 @@ const { num, title, id, intro, as: Tag = 'h2', reveal = true } = Astro.props;
     margin-bottom: var(--space-7);
   }
 
-  .section-head__rule {
+  .section-head__rules {
+    position: relative;
     margin-bottom: var(--space-3);
+  }
+
+  /* Short accent lead-in on the section rule. */
+  .section-head__tick {
+    position: absolute;
+    left: 0;
+    top: -0.5px;
+    width: var(--space-6);
+    height: 2px;
+    background: var(--accent);
+    transform-origin: left center;
+  }
+
+  .section-head__zero {
+    color: var(--muted);
   }
 
   .section-head__row {

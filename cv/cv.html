@@ -221,8 +221,9 @@
       </p>
       <p class="summary">
         Final-year electrical engineering student at Universiti Teknologi Malaysia, graduating February 2027. At
-        Pythonium.ai I worked on the hardware design of a 4-channel industrial DAQ module, from part selection and
-        simulation to stackup and schematic review. Gold Medal, MIIE 2026; Industry Award, UTM EE Capstone Showcase 2026.
+        Pythonium.ai I worked on the hardware design of an industrial DAQ module and a rigid-flex SSD tester adapter,
+        from part selection and simulation to schematic review. Gold Medal, MIIE 2026; Industry Award, UTM EE Capstone
+        Showcase 2026.
       </p>
     </header>
 
@@ -237,18 +238,21 @@
           <p class="sub">Johor Bahru, Malaysia</p>
           <ul>
             <li>
-              4-channel industrial DAQ module: STM32H563 MCU, AD4111 ADC, AD3531 output DAC, LT3514 triple-buck power
-              tree, LAN8742A Ethernet PHY, RS-485, MAX31865 RTD and 4–20 mA inputs.
+              Industrial DAQ module on an STM32H563: AD4111 front end for 8 single-ended (or 4 differential) voltage
+              inputs and 4 current inputs, 2 MAX31865 RTD inputs, AD3531 analog outputs, LT3514 power tree, LAN8742A
+              Ethernet and RS-485.
             </li>
             <li>
-              Replaced the ADE7913 with the AD4111 and the AD5422 with the AD3531; removed the digital isolator from the
-              isolation scheme; stabilised the output stage with an isolation resistor and feedback capacitor, verified
-              in simulation.
+              Stabilised the analog output stage with an isolation resistor and feedback capacitor, verified in
+              simulation; ran schematic reviews with findings logged by severity.
             </li>
-            <li>Chose TU-872 over FR-4 and Rogers for the stackup; ran schematic reviews with findings logged by severity.</li>
             <li>
-              Designed a passive M.2-to-EDSFF adapter linking an SSD tester to an on-board diagnostic card; built the
-              footprints from connector spec dimensions and converted the board to rigid-flex.
+              Designed a passive M.2-to-EDSFF adapter linking an SSD tester to an on-board diagnostic card, with
+              footprints built from the connector spec dimensions.
+            </li>
+            <li>
+              Reworked the adapter as a rigid-flex board designed to IPC-2223: bend radius, flex-zone routing and
+              rigid-to-flex transitions.
             </li>
           </ul>
         </article>
@@ -342,7 +346,7 @@
       <ul class="plain">
         <li>Organising committee and referee, IYRC 2025 (International Youth Robot Competition), Johor <span class="date">· Jun 2025</span></li>
         <li>Presenter and mentor, month-long Self-Balancing Robot Workshop: PCB design, embedded systems, PID <span class="date">· May 2025</span></li>
-        <li>Electronics mentor, FIRST Global Challenge, Team Sudan</li>
+        <li>Mentor, Team Sudan, FIRST Global Challenge 2026, Incheon <span class="date">· Oct 2026</span></li>
       </ul>
     </section>
 
@@ -350,7 +354,7 @@
       <h2>Skills</h2>
       <dl class="spec">
         <dt class="label">Hardware design</dt>
-        <dd>Altium Designer, KiCad, 4-layer and rigid-flex PCB, stackup selection, schematic review, SolidWorks</dd>
+        <dd>Altium Designer, KiCad, 4-layer PCB, rigid-flex to IPC-2223, schematic review, SolidWorks</dd>
         <dt class="label">Simulation</dt>
         <dd>LTspice, PSpice, ngspice, MATLAB/Simulink, NI Multisim</dd>
         <dt class="label">Firmware</dt>

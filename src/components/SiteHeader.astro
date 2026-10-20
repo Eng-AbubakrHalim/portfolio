@@ -46,6 +46,8 @@ const href = (id: string) => (home ? `#${id}` : `${withBase()}#${id}`);
     </button>
   </div>
 
+  <span class="site-header__progress" aria-hidden="true" data-progress></span>
+
   <dialog id="site-menu" class="menu" aria-label="Sections" data-menu>
     <div class="menu__inner page">
       <div class="menu__top">
@@ -80,6 +82,9 @@ const href = (id: string) => (home ? `#${id}` : `${withBase()}#${id}`);
 <script>
   import { lenis } from '../scripts/smooth';
   import { gsap, DUR, EASE, prefersReducedMotion } from '../scripts/motion';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+  gsap.registerPlugin(ScrollTrigger);
 
   function syncThemeLabels() {
     const next = document.documentElement.dataset.theme === 'light' ? 'Dark' : 'Light';
@@ -148,7 +153,19 @@ const href = (id: string) => (home ? `#${id}` : `${withBase()}#${id}`);
     });
   }
 
+  // Reading progress: a hairline along the header's bottom edge (scroll-linked, so linear).
+  let progress: ScrollTrigger | undefined;
+  function initProgress() {
+    progress?.kill();
+    const bar = document.querySelector<HTMLElement>('[data-progress]');
+    if (!bar) return;
+    const set = gsap.quickSetter(bar, 'scaleX');
+    progress = ScrollTrigger.create({ start: 0, end: 'max', onUpdate: (self) => set(self.progress) });
+    set(progress.progress);
+  }
+
   document.addEventListener('astro:page-load', () => {
+    initProgress();
     syncThemeLabels();
     document.querySelectorAll('[data-theme-toggle]').forEach((b) => b.addEventListener('click', toggleTheme));
     initMenu();
@@ -166,6 +183,17 @@ const href = (id: string) => (home ? `#${id}` : `${withBase()}#${id}`);
     justify-content: space-between;
     gap: var(--space-4);
     background: var(--bg);
+  }
+
+  .site-header__progress {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: var(--hairline);
+    background: var(--accent);
+    transform: scaleX(0);
+    transform-origin: left center;
   }
 
   .site-header__name,
