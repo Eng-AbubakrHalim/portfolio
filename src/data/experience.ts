@@ -48,8 +48,8 @@ export const work: Role[] = [
     role: 'Electronics Head of Department',
     org: 'UTM Robocon',
     place: "Malaysia's team at ABU Robocon",
-    start: '2024-01',
-    end: '2025-04',
+    start: '2024-06',
+    end: '2025-05',
     points: [
       'Led the electronics department through the 2024 and 2025 competition cycles.',
       '4-layer STM32 control and motor-interface boards in Altium, linked over CAN.',
@@ -95,8 +95,8 @@ export const leadership: Role[] = [
   {
     role: 'Trainer',
     org: 'UTM Robocon',
-    start: '2024-01',
-    end: '2025-04',
+    start: '2024-06',
+    end: '2025-05',
     points: ['Trained 50+ apprentices in Altium Designer, STM32 programming and circuit analysis as head of department.'],
     images: [{ src: training, alt: 'Abubakr speaking at a lectern during a Robocon training session at UTM.', caption: 'Training session at UTM' }],
   },
@@ -131,7 +131,7 @@ export const awards = [
 /** Rows for the timeline chart (Experience section). */
 export const timeline = [
   { label: 'BEng, UTM', start: '2023-03', end: '2027-02', kind: 'study' },
-  { label: 'UTM Robocon', start: '2024-01', end: '2025-04', kind: 'role' },
+  { label: 'UTM Robocon', start: '2024-06', end: '2025-05', kind: 'role' },
   { label: 'TSH Group', start: '2025-04', end: '2025-07', kind: 'role' },
   { label: 'Workshop, IYRC', start: '2025-05', end: '2025-06', kind: 'role' },
   { label: 'Pythonium.ai', start: '2026-07', end: '2026-10', kind: 'role' },
