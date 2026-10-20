@@ -17,6 +17,8 @@ const projects = defineCollection({
       status: z.string().optional(),
       cover: image().optional(),
       coverAlt: z.string().optional(),
+      /** Public repository URL, or a note when it isn't published yet. */
+      repo: z.string().optional(),
       order: z.number(),
       confidential: z.boolean().default(false),
     }),

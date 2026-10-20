@@ -1,0 +1,79 @@
+---
+import { Picture } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+
+interface Props {
+  src: ImageMetadata;
+  alt: string;
+  caption?: string;
+  /** Plate behind the image. 'dark' keeps dark CAD/plot screenshots intentional in light mode. */
+  plate?: 'dark' | 'light' | 'none';
+  /** Span the full content width instead of the reading column. */
+  wide?: boolean;
+  /** Cap the rendered width (px) so small screenshots aren't blown up. */
+  maxWidth?: number;
+  eager?: boolean;
+}
+
+const { src, alt, caption, plate = 'none', wide = false, maxWidth, eager = false } = Astro.props;
+const cap = Math.min(maxWidth ?? src.width, src.width);
+---
+
+<figure class:list={['fig', `fig--${plate}`, { 'fig--wide': wide }]} data-reveal>
+  <div class="fig__plate">
+    <Picture
+      src={src}
+      alt={alt}
+      formats={['avif', 'webp']}
+      widths={[...new Set([Math.min(640, cap), Math.min(1000, cap), cap])]}
+      sizes={`(min-width: 64rem) ${Math.min(cap, wide ? 1200 : 820)}px, 100vw`}
+      loading={eager ? 'eager' : 'lazy'}
+      fetchpriority={eager ? 'high' : 'auto'}
+      style={`max-width: min(100%, ${cap}px)`}
+    />
+  </div>
+  {caption && <figcaption class="fig__caption">{caption}</figcaption>}
+</figure>
+
+<style>
+  .fig {
+    display: grid;
+    gap: var(--space-1);
+    margin-block: var(--space-5);
+  }
+
+  .fig__plate {
+    display: grid;
+    place-items: center;
+    border: var(--hairline) solid var(--rule);
+  }
+
+  .fig--dark .fig__plate {
+    background: var(--frame);
+    padding: var(--space-3);
+  }
+
+  .fig--light .fig__plate {
+    background: #f4f3ef;
+    padding: var(--space-3);
+  }
+
+  .fig :global(img) {
+    width: 100%;
+    height: auto;
+  }
+
+  .fig__caption {
+    font-family: var(--font-mono);
+    font-size: var(--text-label);
+    letter-spacing: 0.02em;
+    color: var(--muted);
+    max-width: 72ch;
+  }
+
+  @media (min-width: 64rem) {
+    .fig--wide {
+      margin-inline: calc(-1 * var(--case-outdent, 0px));
+    }
+  }
+</style>

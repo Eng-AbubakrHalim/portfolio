@@ -1,0 +1,50 @@
+---
+/** Datasheet Search: from PDF folders to the highlighted page. */
+const boxes = [
+  { x: 0, t: 'PDF FOLDERS', s: ['datasheets, manuals,', 'standards'] },
+  { x: 206, t: 'INDEXER', s: ['PyMuPDF text', 'new or changed only', 'duplicates once'], key: true },
+  { x: 412, t: 'SQLITE FILE', s: ['library + FTS5', 'BM25 ranking'] },
+  { x: 618, t: 'SEARCH', s: ['window or CLI', 'part-number scoping'] },
+  { x: 824, t: 'PAGE VIEW', s: ['rendered page,', 'matches highlighted'], key: true },
+  { x: 1030, t: 'YOUR PDF APP', s: ['opened at', 'the right page'] },
+];
+const W = 170;
+---
+
+<figure class="diagram" data-reveal>
+  <div class="diagram__scroll" data-lenis-prevent>
+    <svg viewBox="0 0 1200 250" role="img" aria-labelledby="ds-title ds-desc">
+      <title id="ds-title">Datasheet Search pipeline</title>
+      <desc id="ds-desc">
+        PDF folders are read by an indexer that extracts text with PyMuPDF, re-reads only new or changed files and
+        indexes identical copies once. The text goes into one SQLite file with an FTS5 index ranked by BM25. Searches
+        from the window or the command line return pages, shown rendered with matches highlighted, and can open the
+        PDF in your own app at that page. One tokenizer is shared by indexing, queries, snippets and highlights.
+      </desc>
+      <defs>
+        <marker id="ds-arrow" viewBox="0 0 8 8" refX="7.5" refY="4" markerWidth="7" markerHeight="7" orient="auto">
+          <path d="M0 0 L8 4 L0 8 z" class="d-head"></path>
+        </marker>
+      </defs>
+      {
+        boxes.map((b, i) => (
+          <g>
+            <rect class:list={['d-box', { 'd-box--key': b.key }]} x={b.x} y="40" width={W} height="120" />
+            <text class="d-t" x={b.x + 16} y="72">
+              {b.t}
+            </text>
+            {b.s.map((line, j) => (
+              <text class="d-s" x={b.x + 16} y={100 + j * 17}>
+                {line}
+              </text>
+            ))}
+            {i < boxes.length - 1 && <path class="d-line" d={`M${b.x + W} 100 H${b.x + 206}`} marker-end="url(#ds-arrow)" />}
+          </g>
+        ))
+      }
+      <path class="d-line d-line--key" d="M206 190 V200 H994 V190"></path>
+      <text class="d-k" x="600" y="226" text-anchor="middle">ONE TOKENIZER FOR INDEXING, QUERIES, SNIPPETS AND HIGHLIGHTS</text>
+    </svg>
+  </div>
+  <figcaption>Pipeline. Everything runs locally; nothing is uploaded.</figcaption>
+</figure>

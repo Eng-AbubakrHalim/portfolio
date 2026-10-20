@@ -1,0 +1,89 @@
+---
+/** DAQ power tree, drawn from the schematic: 24 V → LT3514 triple buck → LDOs and filtered 3.3 V rails. */
+---
+
+<figure class="diagram" data-reveal>
+  <div class="diagram__scroll" data-lenis-prevent>
+    <svg viewBox="0 0 1200 470" role="img" aria-labelledby="daq-power-title daq-power-desc">
+      <title id="daq-power-title">DAQ power tree</title>
+      <desc id="daq-power-desc">
+        A 24 V input feeds an LT3514 triple buck converter with three outputs: 13.5 V for the output buffers, 5.8 V
+        into a TPS78550 LDO that makes 5 V, and 3.3 V. The 3.3 V output passes through a ferrite to become the
+        digital 3.3 V rail for the MCU. From that rail, a second ferrite makes an analog 3.3 V rail for the MCU's
+        analog supply, a branch feeds the Ethernet PHY, and a TLV75718 LDO makes 1.8 V for the DAC's logic.
+      </desc>
+      <defs>
+        <marker id="pwr-arrow" viewBox="0 0 8 8" refX="7.5" refY="4" markerWidth="7" markerHeight="7" orient="auto">
+          <path d="M0 0 L8 4 L0 8 z" class="d-head"></path>
+        </marker>
+      </defs>
+
+      <!-- Input and converter -->
+      <text class="d-t" x="92" y="234" text-anchor="end">24 V IN</text>
+      <rect class="d-term" x="98" y="226" width="8" height="8"></rect>
+      <path class="d-line" d="M106 230 H150" marker-end="url(#pwr-arrow)"></path>
+      <rect class="d-box d-box--key" x="150" y="190" width="160" height="80"></rect>
+      <text class="d-t" x="230" y="226" text-anchor="middle">LT3514</text>
+      <text class="d-s" x="230" y="244" text-anchor="middle">triple buck</text>
+
+      <!-- Output bus -->
+      <path class="d-line" d="M310 230 H350 M350 60 V340"></path>
+
+      <!-- 13.5 V -->
+      <path class="d-line" d="M350 60 H900" marker-end="url(#pwr-arrow)"></path>
+      <text class="d-k" x="370" y="52">13.5 V</text>
+      <rect class="d-box" x="900" y="35" width="200" height="50"></rect>
+      <text class="d-t" x="1000" y="65" text-anchor="middle">OUTPUT BUFFERS</text>
+
+      <!-- 5.8 V → 5 V -->
+      <path class="d-line" d="M350 150 H460" marker-end="url(#pwr-arrow)"></path>
+      <text class="d-k" x="370" y="142">5.8 V</text>
+      <rect class="d-box" x="460" y="125" width="160" height="50"></rect>
+      <text class="d-t" x="540" y="148" text-anchor="middle">TPS78550</text>
+      <text class="d-s" x="540" y="165" text-anchor="middle">LDO</text>
+      <path class="d-line" d="M620 150 H700"></path>
+      <text class="d-k" x="640" y="142">5 V</text>
+
+      <!-- 3.3 V raw → ferrite → 3.3 V digital -->
+      <path class="d-line" d="M350 340 H460" marker-end="url(#pwr-arrow)"></path>
+      <text class="d-k" x="370" y="332">3.3 V</text>
+      <rect class="d-box" x="460" y="320" width="60" height="40"></rect>
+      <text class="d-s" x="490" y="344" text-anchor="middle">FB</text>
+      <path class="d-line" d="M520 340 H600"></path>
+      <path class="d-line" d="M600 250 V430"></path>
+
+      <!-- 3.3 V digital → MCU -->
+      <path class="d-line" d="M600 250 H900" marker-end="url(#pwr-arrow)"></path>
+      <text class="d-k" x="620" y="242">3.3 V DIGITAL</text>
+      <rect class="d-box" x="900" y="225" width="200" height="50"></rect>
+      <text class="d-t" x="1000" y="255" text-anchor="middle">MCU</text>
+
+      <!-- 3.3 V analog → MCU VDDA -->
+      <path class="d-line" d="M600 310 H660"></path>
+      <rect class="d-box" x="660" y="292" width="60" height="36"></rect>
+      <text class="d-s" x="690" y="314" text-anchor="middle">FB</text>
+      <path class="d-line" d="M720 310 H900" marker-end="url(#pwr-arrow)"></path>
+      <text class="d-k" x="740" y="302">3.3 V ANALOG</text>
+      <rect class="d-box" x="900" y="285" width="200" height="50"></rect>
+      <text class="d-t" x="1000" y="309" text-anchor="middle">MCU ANALOG</text>
+      <text class="d-s" x="1000" y="325" text-anchor="middle">VDDA / VREF+</text>
+
+      <!-- 3.3 V PHY -->
+      <path class="d-line" d="M600 370 H900" marker-end="url(#pwr-arrow)"></path>
+      <text class="d-k" x="620" y="362">3.3 V PHY</text>
+      <rect class="d-box" x="900" y="345" width="200" height="50"></rect>
+      <text class="d-t" x="1000" y="375" text-anchor="middle">ETHERNET PHY</text>
+
+      <!-- 1.8 V DAC logic -->
+      <path class="d-line" d="M600 430 H660" marker-end="url(#pwr-arrow)"></path>
+      <rect class="d-box" x="660" y="410" width="140" height="40"></rect>
+      <text class="d-t" x="730" y="430" text-anchor="middle">TLV75718</text>
+      <text class="d-s" x="730" y="444" text-anchor="middle">LDO</text>
+      <path class="d-line" d="M800 430 H900" marker-end="url(#pwr-arrow)"></path>
+      <text class="d-k" x="815" y="422">1.8 V</text>
+      <rect class="d-box" x="900" y="405" width="200" height="50"></rect>
+      <text class="d-t" x="1000" y="435" text-anchor="middle">DAC LOGIC</text>
+    </svg>
+  </div>
+  <figcaption>Power tree. FB = ferrite bead.</figcaption>
+</figure>

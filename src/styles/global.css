@@ -203,3 +203,102 @@ a:hover {
   padding-block: 0.1em;
   margin-block: -0.1em;
 }
+
+/* ---------- Diagrams (inline SVG, drawn in the site's style) ---------- */
+.diagram {
+  display: grid;
+  gap: var(--space-1);
+  margin-block: var(--space-5);
+}
+
+.diagram__scroll {
+  overflow-x: auto;
+  padding-block: var(--space-3);
+  border-block: var(--hairline) solid var(--rule);
+}
+
+.diagram svg {
+  display: block;
+  width: 100%;
+  min-width: 46rem;
+  height: auto;
+  overflow: visible;
+}
+
+.diagram figcaption {
+  font-family: var(--font-mono);
+  font-size: var(--text-label);
+  letter-spacing: 0.02em;
+  color: var(--muted);
+}
+
+.d-box {
+  fill: var(--bg);
+  stroke: var(--fg);
+  stroke-width: 1;
+}
+
+.d-box--key {
+  stroke: var(--accent);
+}
+
+.d-box--ghost {
+  stroke: var(--muted);
+  stroke-dasharray: 3 4;
+}
+
+.d-fill {
+  fill: var(--surface);
+  stroke: var(--fg);
+  stroke-width: 1;
+}
+
+.d-gold {
+  fill: var(--accent);
+}
+
+.d-line {
+  fill: none;
+  stroke: var(--muted);
+  stroke-width: 1;
+}
+
+.d-line--key {
+  stroke: var(--accent);
+}
+
+.d-line--dash {
+  stroke-dasharray: 4 4;
+}
+
+.d-head {
+  fill: var(--muted);
+}
+
+.d-head--key {
+  fill: var(--accent);
+}
+
+.d-term {
+  fill: var(--fg);
+}
+
+.d-t {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  letter-spacing: 0.05em;
+  fill: var(--fg);
+}
+
+.d-s {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  fill: var(--muted);
+}
+
+.d-k {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  fill: var(--accent);
+}
