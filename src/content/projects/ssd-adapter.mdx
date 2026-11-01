@@ -5,11 +5,10 @@ year: '2026'
 role: Hardware design intern, Pythonium.ai
 tools: [Altium Designer]
 tags: [Rigid-flex, IPC-2223, '2026']
-status: Company design, shown in part
+status: Layout complete, documented for fabrication
 cover: ../../assets/projects/ssd-adapter/adapter-cover.png
-coverAlt: Layer-stack view of the adapter. Two thick rigid sections, labelled EDSFF end and M.2 end, joined by a thin flex section.
+coverAlt: Altium 3D render of the rigid-flex adapter from the top. The M.2 end with its gold fingers on the left, the flex section in the middle, and the EDSFF end on the right with two ICs and test points.
 order: 3
-confidential: true
 ---
 
 import CaseSection from '../../components/case/CaseSection.astro';
@@ -21,6 +20,9 @@ import bottom from '../../assets/projects/ssd-adapter/adapter-3d-bottom.png';
 import section from '../../assets/projects/ssd-adapter/adapter-section.png';
 import m2 from '../../assets/projects/ssd-adapter/adapter-m2-footprint.png';
 import stacked from '../../assets/projects/ssd-adapter/adapter-stacked-footprint.png';
+import layout from '../../assets/projects/ssd-adapter/adapter-layout.png';
+import stackup from '../../assets/projects/ssd-adapter/adapter-stackup-m2.png';
+import stackView from '../../assets/projects/ssd-adapter/adapter-stack-view.png';
 
 <CaseSection num="01" title="Problem">
 
@@ -35,6 +37,10 @@ The signal path is passive. The board also carries temperature sensors and an ID
 Two rigid ends joined by a flex section. Each rigid end has its own stack-up, because each edge must match its own connector's thickness.
 
 <AdapterChain />
+
+<Figure src={stackView} alt="Altium layer-stack view of the adapter: two thick rigid sections, labelled EDSFF end and M.2 end, joined by a thin flex section." caption="Rigid–flex–rigid build in the layer-stack view." plate="dark" maxWidth={690} />
+
+<Figure src={layout} alt="PCB layout of the whole adapter: the EDSFF end on the left and the M.2 end on the right, both rigid, with the flex region between them carrying parallel traces." caption="Full layout: EDSFF end (left), flex region (centre), M.2 end (right)." plate="dark" wide fullSize />
 
 <Figure src={bottom} alt="3D render of the rigid-flex adapter, bottom side: EDSFF gold fingers on the left, M.2 Key M fingers on the right, a teal flex section between them and test points along both rigid ends." caption="Bottom side: EDSFF edge on the left, M.2 edge on the right." wide />
 
@@ -63,6 +69,26 @@ Two rigid ends joined by a flex section. Each rigid end has its own stack-up, be
 <Figure src={m2} alt="Footprint of the M.2 edge connector: two groups of gold-finger pads either side of the key gap, on a chamfered board edge." caption="M.2 gold-finger footprint, built from the connector spec dimensions." plate="dark" />
 
 <Figure src={stacked} alt="One footprint that overlays three 8-pin package outlines of different sizes, nested inside each other, so any one of the three packages can be fitted to the same site." caption="Stacked footprint: three package options for the same 8-pin sensor share one site." plate="dark" maxWidth={560} />
+
+<figure class="spec-table">
+<div class="spec-table__scroll" tabindex="0" role="region" aria-labelledby="impedance-caption">
+<table>
+  <thead>
+    <tr><th scope="col">Line</th><th scope="col">Section</th><th scope="col">Layer</th><th scope="col">Ref.</th><th scope="col">Width</th><th scope="col">Gap</th><th scope="col">Calc.</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Coated microstrip</td><td>EDSFF end</td><td>L1</td><td>L2</td><td>9.00 mil</td><td>5.00 mil</td><td>105.5 Ω</td></tr>
+    <tr><td>Offset stripline</td><td>EDSFF end</td><td>L3</td><td>L2, L4</td><td>4.25 mil</td><td>8.75 mil</td><td>99.2 Ω</td></tr>
+    <tr><td>Coated microstrip</td><td>Flex</td><td>L4</td><td>L4</td><td>5.00 mil</td><td>8.00 mil</td><td>99.8 Ω</td></tr>
+    <tr><td>Coated microstrip</td><td>M.2 end</td><td>L1</td><td>L3</td><td>8.00 mil</td><td>6.00 mil</td><td>102.5 Ω</td></tr>
+    <tr><td>Offset stripline</td><td>M.2 end</td><td>L3</td><td>L1, L4</td><td>4.25 mil</td><td>8.75 mil</td><td>99.2 Ω</td></tr>
+  </tbody>
+</table>
+</div>
+<figcaption id="impedance-caption">Impedance profiles from the layer stack manager. Every target is 100 Ω differential, ±10%.</figcaption>
+</figure>
+
+<Figure src={stackup} alt="Stack-up drawing for the M.2 end: four copper layers with cores and prepregs between them, solder mask and nickel-gold finish on both sides, total thickness 0.813 mm." caption="Stack-up drawing, M.2 end: four layers, 0.813 mm total." plate="light" maxWidth={665} fullSize />
 
 </CaseSection>
 

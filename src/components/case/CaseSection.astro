@@ -38,4 +38,51 @@ const id = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
     padding-left: var(--space-3);
     margin-block: 0 var(--space-2);
   }
+
+  /* Data tables (e.g. impedance profiles): mono, hairline rows, scrolls sideways on phones. */
+  .case-section__body :global(.spec-table) {
+    display: grid;
+    gap: var(--space-1);
+    margin-block: var(--space-5);
+  }
+
+  .case-section__body :global(.spec-table__scroll) {
+    overflow-x: auto;
+  }
+
+  .case-section__body :global(.spec-table table) {
+    width: 100%;
+    min-width: 40rem;
+    border-collapse: collapse;
+    font-family: var(--font-mono);
+    font-size: var(--text-small);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .case-section__body :global(.spec-table figcaption) {
+    font-family: var(--font-mono);
+    font-size: var(--text-label);
+    letter-spacing: 0.02em;
+    color: var(--muted);
+  }
+
+  .case-section__body :global(.spec-table :is(th, td)) {
+    padding: var(--space-1) var(--space-2) var(--space-1) 0;
+    border-bottom: var(--hairline) solid var(--rule);
+    text-align: left;
+    white-space: nowrap;
+  }
+
+  .case-section__body :global(.spec-table th) {
+    font-size: var(--text-label);
+    font-weight: 400;
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--muted);
+    border-bottom-color: var(--fg);
+  }
+
+  .case-section__body :global(.spec-table td:last-child) {
+    color: var(--accent);
+  }
 </style>

@@ -4,7 +4,13 @@ import roboconRobot from '../assets/projects/robocon/robocon-board-on-robot.jpg'
 import fypModel from '../assets/projects/fyp/fyp-model.png';
 import fypSpectrum from '../assets/projects/fyp/fyp-grid-spectrum.png';
 import fypHeating from '../assets/projects/fyp/fyp-dielectric-heating.png';
+import roboconSoldering from '../assets/projects/robocon/robocon-soldering.jpg';
+import roboconSchematic from '../assets/projects/robocon/robocon-schematic.jpg';
+import roboconBluepill from '../assets/projects/robocon/robocon-bluepill.jpg';
 import perfboard from '../assets/projects/custom-boards/custom-board-stm32.jpg';
+import buckLayout from '../assets/projects/custom-boards/custom-buck-layout.jpg';
+import etched from '../assets/projects/custom-boards/custom-etched.jpg';
+import dido from '../assets/projects/tsh/tsh-dido-testing.jpg';
 
 /**
  * 02 — Other projects: compact rows that expand to a few details.
@@ -45,10 +51,14 @@ export const otherProjects: OtherProject[] = [
       '4-layer STM32F4 main-control and STM32G4 motor-interface boards, with CAN, I²C and SPI links across all subsystems.',
       'Upgraded the mainboard with better short-circuit protection and layout.',
       'Designed a custom IMU board for navigation and STM32 + PID control for the shooter mechanism.',
+      'Joined through the Autocar Challenge in November 2023, then the apprentice training in SolidWorks, Altium and the STM32 Blue Pill.',
     ],
     images: [
       { src: robocon3d, alt: '3D render of a Robocon control board with a central QFP microcontroller surrounded by rows of connectors.', caption: 'Control board, Altium 3D' },
       { src: roboconRobot, alt: 'A black UTM Robocon PCB mounted on the robot, with many cables plugged into its connectors.', caption: 'In service on the robot' },
+      { src: roboconSchematic, alt: 'A Robocon schematic in Altium, laid out in labelled blocks for power, logic and drivers.', caption: 'Board schematic in Altium' },
+      { src: roboconSoldering, alt: 'Abubakr soldering a small PCB at a workbench in the Robocon lab.', caption: 'Assembly in the lab' },
+      { src: roboconBluepill, alt: 'An STM32 Blue Pill board on a breadboard with jumper wires.', caption: 'Blue Pill prototyping, apprentice training' },
     ],
   },
   {
@@ -76,6 +86,8 @@ export const otherProjects: OtherProject[] = [
     ],
     images: [
       { src: perfboard, alt: 'A green perfboard prototype with a blue STM32 development module, an 8-pin IC, trimmers and push buttons, held in front of a laptop showing its schematic.', caption: 'STM32 perfboard prototype' },
+      { src: buckLayout, alt: 'Altium layout of a small buck converter board built around an LM2596 regulator, with its inductor, input and output capacitors and a switch.', caption: 'LM2596 buck converter layout' },
+      { src: etched, alt: 'Two home-etched copper PCBs with their traces visible, held up to the camera.', caption: 'Home-etched prototypes' },
     ],
   },
   {
@@ -84,6 +96,9 @@ export const otherProjects: OtherProject[] = [
     year: '2025',
     tags: ['PLC', 'Industrial I/O'],
     details: ['A digital I/O test kit built from scratch for verifying industrial PLC signals in the field.'],
+    images: [
+      { src: dido, alt: 'Abubakr checking the PLC signals of an open industrial control cabinet, taking notes on a tablet.', caption: 'Checking PLC I/O in the cabinet' },
+    ],
   },
   {
     title: 'FIRST Global Challenge, Team Sudan',

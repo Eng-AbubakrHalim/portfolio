@@ -11,24 +11,49 @@
 const S = (stamp) => `screens/Screenshot ${stamp}.png`;
 
 export const images = [
-  // ---------------- DAQ module (company work: cropped, no product name) ----------------
+  // ---------------- DAQ module (PyDAQ mini) ----------------
   {
     slug: 'daq-module',
     name: 'daq-cover',
     role: 'cover',
-    // The 10 Sep render of the same section has Altium's light-handle widget over the regulator.
-    src: S('2026-08-28 141345'),
-    crop: { left: 30, top: 50, width: 790, height: 494 },
-    alt: '3D render of the power section: switching regulator, three inductors, catch diodes and a bulk input capacitor.',
-    caption: 'Power section, 3D view in Altium (cropped).',
+    src: S('2026-09-29 103206'),
+    ops: [
+      // Altium's axis gizmo at the board's bottom-left corner sits on the grey background.
+      { op: 'bgRows', x0: 140, x1: 191, y0: 686, y1: 775, refX: 110 },
+      { op: 'bgRows', x0: 140, x1: 268, y0: 725, y1: 775, refX: 110 },
+    ],
+    aspect: 16 / 10,
+    alt: 'Altium 3D render of the whole PyDAQ mini board from the top: power section and two RJ45 jacks along the top, input terminal blocks down the left edge, output terminals on the right, the RTD input connector at the bottom and a coin cell holder.',
+    caption: 'PyDAQ mini, top side (Altium 3D).',
   },
   {
     slug: 'daq-module',
-    name: 'daq-3d-top',
-    src: S('2026-09-28 113605'),
-    crop: { left: 105, top: 12, width: 575, height: 556 },
-    alt: '3D render of the upper part of the DAQ board: power section top left, two RJ45 jacks, the MCU in the middle, input terminals down the left edge and output terminals on the right.',
-    caption: 'Top side, cropped: power entry top left, input terminals down the left edge, outputs on the right.',
+    name: 'daq-layout-top',
+    src: S('2026-09-29 102956'),
+    crop: { left: 22, top: 12, width: 590, height: 762 },
+    alt: 'Top-layer PCB layout of the whole board with the placement rooms labelled: SMPS top left, PHY and MCU in the middle, DAC lower middle, with the input connectors down the left edge.',
+    caption: 'Top layer with the placement rooms: power supply, Ethernet PHY, MCU and DAC.',
+  },
+  {
+    slug: 'daq-module',
+    name: 'daq-sch-power',
+    src: 'sch/daq-sch-power.png',
+    alt: 'Schematic of the power regulator: an LT3514 triple buck taking 24 V in through an input filter, with its outputs on the nets VP5V8, VP3V3_RAW and VP13V5.',
+    caption: 'Power regulator sheet: the LT3514 triple buck.',
+  },
+  {
+    slug: 'daq-module',
+    name: 'daq-sch-adc',
+    src: 'sch/daq-sch-adc.png',
+    alt: 'Schematic of the ADC sheet: the AD4111 with eight voltage inputs and four current inputs, SPI to the MCU, an ADR4525 voltage reference and a crystal.',
+    caption: 'ADC sheet: AD4111 with its reference and crystal.',
+  },
+  {
+    slug: 'daq-module',
+    name: 'daq-sch-output',
+    src: 'sch/daq-sch-output.png',
+    alt: 'Schematic of the voltage outputs: a TLV76701 LDO making 12 V from the 13.5 V rail, and two of the four output stages, each a TLV9301 op-amp with a 10 ohm isolation resistor, a 47 pF feedback capacitor and a 10 k / 10 k divider setting a gain of 2.',
+    caption: 'Voltage-output sheet: the 12 V LDO and two of the four output stages.',
   },
   {
     slug: 'daq-module',
@@ -72,9 +97,40 @@ export const images = [
     slug: 'ssd-adapter',
     name: 'adapter-cover',
     role: 'cover',
+    src: S('2026-09-29 161257'),
+    ops: [
+      // Altium light-handle (orange) under the flex section, on the background.
+      { op: 'bgRows', x0: 420, x1: 510, y0: 380, y1: 495, refX: 395 },
+      // Axis gizmo: the Y arrow on the board, then the X arrow and labels across the board edge.
+      { op: 'copyCol', x0: 850, x1: 866, y0: 376, y1: 417, srcX: 840 },
+      { op: 'copyCol', x0: 853, x1: 860, y0: 417, y1: 436, srcX: 840 }, // stop short of the TP24 label
+      { op: 'copyCol', x0: 845, x1: 932, y0: 436, y1: 490, srcX: 835 },
+    ],
+    aspect: 16 / 10,
+    alt: 'Altium 3D render of the rigid-flex adapter from the top: the M.2 end with its gold fingers on the left, the flex section in the middle, and the EDSFF end on the right with two ICs and test points.',
+    caption: 'Rigid–flex adapter, top side (Altium 3D).',
+  },
+  {
+    slug: 'ssd-adapter',
+    name: 'adapter-layout',
+    src: S('2026-10-07 143801'),
+    crop: { left: 0, top: 18, width: 1300, height: 700 },
+    alt: 'PCB layout of the whole adapter: the EDSFF end on the left and the M.2 end on the right, both rigid, with the flex region between them carrying parallel traces.',
+    caption: 'Full layout: EDSFF end (left), flex region (centre), M.2 end (right).',
+  },
+  {
+    slug: 'ssd-adapter',
+    name: 'adapter-stackup-m2',
+    src: S('2026-10-06 172344'),
+    crop: { left: 75, top: 82, width: 665, height: 325 },
+    alt: 'Stack-up drawing for the M.2 end: four copper layers with cores and prepregs between them, solder mask and nickel-gold finish on both sides, total thickness 0.813 mm.',
+    caption: 'Stack-up drawing, M.2 end: four layers, 0.813 mm total.',
+  },
+  {
+    slug: 'ssd-adapter',
+    name: 'adapter-stack-view',
     src: S('2026-10-09 101904'),
     crop: { left: 0, top: 150, width: 690, height: 460 },
-    aspect: 16 / 10,
     alt: 'Altium layer-stack view of the adapter: two thick rigid sections, labelled EDSFF end and M.2 end, joined by a thin flex section.',
     caption: 'Rigid–flex–rigid build in the layer-stack view.',
   },
@@ -215,10 +271,97 @@ export const images = [
   },
   {
     slug: 'tsh',
-    name: 'tsh-control-cabinet',
+    name: 'tsh-dido-testing',
     src: 'legacy/portfolio-pics/WhatsApp Image 2026-05-14 at 16.25.14 (1).jpeg',
     crop: { left: 0, top: 80, width: 810, height: 1000 },
-    alt: 'Abubakr checking an open industrial control cabinet with drive modules and wiring, taking notes on a tablet.',
-    caption: 'Checking an industrial control cabinet.',
+    alt: 'Abubakr checking the PLC signals of an open industrial control cabinet, taking notes on a tablet.',
+    caption: 'Checking PLC I/O in a control cabinet during DI/DO testing.',
+  },
+
+  // ---------------- From LinkedIn posts (_raw/linkedin/) ----------------
+  {
+    slug: 'smart-posture',
+    name: 'posture-worn',
+    src: 'linkedin/capstone-11.jpg',
+    alt: 'The wearable mounted on the upper back of a person in a grey jacket: a white enclosure with six square openings, held by straps.',
+    caption: 'The wearable in use, on the upper back.',
+  },
+  {
+    slug: 'smart-posture',
+    name: 'posture-bench',
+    src: 'linkedin/capstone-10.jpg',
+    alt: 'Assembled boards on a lab bench: the custom PCB with its sensors, a battery holder, wiring and a laptop beside them.',
+    caption: 'Bring-up on the bench: assembled boards and wiring.',
+  },
+  {
+    slug: 'smart-posture',
+    name: 'posture-cv',
+    src: 'linkedin/capstone-05.jpg',
+    alt: 'The posture-detection program running: a camera window showing a face with landmark lines and the label Inclined Sitting Position, next to the Python code and its console output.',
+    caption: 'Vision pipeline running: the camera window labels the posture live.',
+  },
+  {
+    slug: 'smart-posture',
+    name: 'posture-layout',
+    src: 'linkedin/capstone-09.jpg',
+    alt: 'KiCad 2D layout of the capstone PCB showing both copper layers in red and blue, with the module footprint, connectors, LEDs and push buttons.',
+    caption: 'PCB layout in KiCad.',
+  },
+  {
+    slug: 'smart-posture',
+    name: 'posture-medal',
+    src: 'linkedin/capstone-04.jpg',
+    crop: { left: 0, top: 120, width: 720, height: 720 },
+    alt: 'The Industry Award medal from the UTM capstone showcase, held in a hand.',
+    caption: 'The Industry Award medal, EECS 2026.',
+  },
+  {
+    slug: 'robocon',
+    name: 'robocon-soldering',
+    src: 'linkedin/robocon-hod-11.jpg',
+    alt: 'Abubakr soldering a small PCB at a workbench in the Robocon lab.',
+    caption: 'Assembling a board in the Robocon lab.',
+  },
+  {
+    slug: 'robocon',
+    name: 'robocon-schematic',
+    src: 'linkedin/robocon-hod-04.jpg',
+    alt: 'A Robocon schematic in Altium, laid out in labelled blocks for power, logic and drivers.',
+    caption: 'A Robocon board schematic in Altium.',
+  },
+  {
+    slug: 'robocon',
+    name: 'robocon-teaching',
+    src: 'linkedin/set6-01.jpg',
+    alt: 'Abubakr helping a group of students at their desks during a training session in a lecture hall.',
+    caption: 'Helping apprentices during a training session.',
+  },
+  {
+    slug: 'robocon',
+    name: 'robocon-bluepill',
+    src: 'linkedin/robocon-junior-02.jpg',
+    alt: 'An STM32 Blue Pill board on a breadboard with jumper wires.',
+    caption: 'STM32 Blue Pill prototyping, Robocon apprentice training.',
+  },
+  {
+    slug: 'custom-boards',
+    name: 'custom-buck-layout',
+    src: 'linkedin/robocon-junior-05.jpg',
+    alt: 'Altium layout of a small buck converter board built around an LM2596 regulator, with its inductor, input and output capacitors and a switch.',
+    caption: 'LM2596 buck converter layout.',
+  },
+  {
+    slug: 'custom-boards',
+    name: 'custom-etched',
+    src: 'linkedin/robocon-junior-06.jpg',
+    alt: 'Two home-etched copper PCBs with their traces visible, held up to the camera.',
+    caption: 'Home-etched prototype boards.',
+  },
+  {
+    slug: 'workshop',
+    name: 'workshop-group',
+    src: 'linkedin/sbr-workshop-04.jpg',
+    alt: 'Abubakr leaning over a table to help a group of participants at their laptops during the workshop.',
+    caption: 'Helping a team at the workshop.',
   },
 ];

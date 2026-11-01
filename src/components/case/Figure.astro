@@ -13,9 +13,11 @@ interface Props {
   /** Cap the rendered width (px) so small screenshots aren't blown up. */
   maxWidth?: number;
   eager?: boolean;
+  /** Link to the source image from the caption, for drawings too detailed to read at page width. */
+  fullSize?: boolean;
 }
 
-const { src, alt, caption, plate = 'none', wide = false, maxWidth, eager = false } = Astro.props;
+const { src, alt, caption, plate = 'none', wide = false, maxWidth, eager = false, fullSize = false } = Astro.props;
 const cap = Math.min(maxWidth ?? src.width, src.width);
 ---
 
@@ -32,7 +34,18 @@ const cap = Math.min(maxWidth ?? src.width, src.width);
       style={`max-width: min(100%, ${cap}px)`}
     />
   </div>
-  {caption && <figcaption class="fig__caption">{caption}</figcaption>}
+  {
+    caption && (
+      <figcaption class="fig__caption">
+        {caption}
+        {fullSize && (
+          <a class="link" href={src.src} aria-label={`Open full size: ${caption}`} data-astro-reload>
+            Open full size
+          </a>
+        )}
+      </figcaption>
+    )
+  }
 </figure>
 
 <style>
@@ -79,6 +92,11 @@ const cap = Math.min(maxWidth ?? src.width, src.width);
     letter-spacing: 0.02em;
     color: var(--muted);
     max-width: 72ch;
+  }
+
+  .fig__caption a {
+    margin-left: 0.75em;
+    white-space: nowrap;
   }
 
   @media (min-width: 64rem) {

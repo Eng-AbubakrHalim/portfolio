@@ -2,11 +2,12 @@
 title: Smart Posture Correction
 summary: Wearable and computer-vision system with haptic feedback in under 200 ms. Gold Medal, MIIE 2026.
 year: '2026'
-role: PCB, firmware and enclosure, capstone team of four
+role: System architecture and integration, PCB, firmware and enclosure; capstone team of four
 tools: [KiCad, ESP32-C3, C++, Python, OpenCV, SolidWorks]
 tags: [KiCad, ESP32, OpenCV]
 status: Built and tested, Gold Medal MIIE 2026, Industry Award UTM 2026
 cover: ../../assets/projects/smart-posture/posture-cover.jpg
+repo: https://github.com/Eng-AbubakrHalim/smart-posture-correction
 coverAlt: KiCad 3D render of the capstone PCB with a microcontroller module footprint, an IMU header, push buttons, red LEDs, a regulator and electrolytic capacitors.
 order: 2
 ---
@@ -18,6 +19,11 @@ import Decision from '../../components/case/Decision.astro';
 import PostureSystem from '../../components/diagrams/PostureSystem.astro';
 import enclosure from '../../assets/projects/smart-posture/posture-enclosure.jpg';
 import award from '../../assets/projects/smart-posture/posture-award.jpg';
+import worn from '../../assets/projects/smart-posture/posture-worn.jpg';
+import bench from '../../assets/projects/smart-posture/posture-bench.jpg';
+import cv from '../../assets/projects/smart-posture/posture-cv.jpg';
+import layout from '../../assets/projects/smart-posture/posture-layout.jpg';
+import medal from '../../assets/projects/smart-posture/posture-medal.jpg';
 
 <CaseSection num="01" title="Problem">
 
@@ -27,11 +33,17 @@ Detect bad sitting posture in real time and correct it straight away, with hapti
 
 <CaseSection num="02" title="Architecture">
 
-A camera and the host PC classify posture with a Python, OpenCV and dlib face-pose pipeline, fused with IMU data from the wearable. The result goes over UDP to a XIAO ESP32-C3 on a custom PCB, which drives a vibration motor. Blynk carries monitoring and alerts to a phone.
+A camera and the host PC classify posture with a Python, OpenCV and dlib face-pose pipeline, fused with IMU data from the wearable. The result goes over UDP to a XIAO ESP32-C3 on a custom PCB, which drives a vibration motor. The wearable reads an IMU and pressure sensors. Blynk carries monitoring and alerts to a phone.
+
+The hardware is several custom KiCad boards: sensor integration, signal conditioning and the ESP32-based controller.
 
 <PostureSystem />
 
 <Figure src={enclosure} alt="SolidWorks exploded view of the wearable enclosure: the lid with button cut-outs lifted above the base, which holds the battery and the green PCB." caption="Wearable enclosure in SolidWorks, exploded view." plate="light" maxWidth={780} />
+
+<Figure src={layout} alt="KiCad 2D layout of the capstone PCB showing both copper layers in red and blue, with the module footprint, connectors, LEDs and push buttons." caption="Controller PCB layout in KiCad." plate="dark" maxWidth={820} />
+
+<Figure src={worn} alt="The wearable mounted on the upper back of a person in a grey jacket: a white enclosure held by straps." caption="The wearable in use, on the upper back." maxWidth={820} />
 
 </CaseSection>
 
@@ -53,12 +65,18 @@ A camera and the host PC classify posture with a Python, OpenCV and dlib face-po
 - The PCB was fabricated, assembled and tested with the firmware and the vision pipeline running end to end.
 - Haptic feedback reaches the wearer in under 200 ms.
 
+<Figure src={bench} alt="Assembled boards on a lab bench: the custom PCB with its sensors, a battery holder, wiring and a laptop beside them." caption="Bring-up on the bench: assembled boards and wiring." maxWidth={520} />
+
+<Figure src={cv} alt="The posture-detection program running: a camera window showing a face with landmark lines and the label Inclined Sitting Position, next to the Python code and its console output." caption="Vision pipeline running: the camera window labels the posture live." wide />
+
 </CaseSection>
 
 <CaseSection num="05" title="Result">
 
 Gold Medal (University Student Innovator) at the Malaysia Invention & Innovation Expo 2026, and the Industry Award at UTM's 9th EE Capstone Showcase in January 2026.
 
-<Figure src={award} alt="Abubakr and his capstone team holding their award medals at the UTM capstone showcase." caption="Industry Award, UTM 9th EE Capstone Showcase, January 2026." maxWidth={900} />
+<Figure src={award} alt="Abubakr and the capstone team holding their award medals at the UTM capstone showcase." caption="Industry Award, UTM 9th EE Capstone Showcase, January 2026." maxWidth={900} />
+
+<Figure src={medal} alt="The Industry Award medal for Communication Engineering from the UTM capstone showcase, in its case." caption="The Industry Award medal, Communication Engineering." maxWidth={420} />
 
 </CaseSection>

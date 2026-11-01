@@ -1,8 +1,9 @@
 import type { Thumb } from '../components/Thumbs.astro';
-import cabinet from '../assets/projects/tsh/tsh-control-cabinet.jpg';
 import training from '../assets/projects/robocon/robocon-training.jpg';
 import mentoring from '../assets/projects/workshop/workshop-mentoring.jpg';
 import presenting from '../assets/projects/workshop/workshop-presenting.jpg';
+import workshopGroup from '../assets/projects/workshop/workshop-group.jpg';
+import teaching from '../assets/projects/robocon/robocon-teaching.jpg';
 import referee from '../assets/projects/iyrc/iyrc-referee.jpg';
 
 /** 03 — Experience. Dates are 'YYYY-MM'; `end` omitted means a single month. */
@@ -40,9 +41,6 @@ export const work: Role[] = [
       'Wrote the work instructions for MTC machine testing.',
       'Designed and built a DI/DO testing kit for field signal verification.',
     ],
-    images: [
-      { src: cabinet, alt: 'Abubakr checking an open industrial control cabinet with drive modules and wiring, taking notes on a tablet.', caption: 'Checking a control cabinet' },
-    ],
   },
   {
     role: 'Electronics Head of Department',
@@ -65,7 +63,7 @@ export const leadership: Role[] = [
     place: 'Remote, Sudan',
     start: '2025-09',
     end: 'now',
-    points: ['Teaching and lecturing EEExplore workshops, remotely.'],
+    points: ['Teaching and lecturing workshops for EEExplore, an online engineering education initiative.'],
   },
   {
     role: 'Mentor',
@@ -85,11 +83,13 @@ export const leadership: Role[] = [
   {
     role: 'Presenter and mentor',
     org: 'Self-Balancing Robot Workshop',
+    place: 'UTM, run by ISS Sudan, ISS Yemen and ISS Egypt',
     start: '2025-05',
     points: ['Month-long programme from zero to a working robot: delivered the embedded systems and PCB design sessions and mentored students one to one.'],
     images: [
       { src: mentoring, alt: "Abubakr pointing at a student's laptop screen during the self-balancing robot workshop.", caption: 'Mentoring' },
       { src: presenting, alt: 'Abubakr speaking into a microphone at a laptop during the workshop.', caption: 'Presenting' },
+      { src: workshopGroup, alt: 'Abubakr leaning over a table to help a group of participants at their laptops during the workshop.', caption: 'Helping a team' },
     ],
   },
   {
@@ -98,7 +98,10 @@ export const leadership: Role[] = [
     start: '2024-06',
     end: '2025-05',
     points: ['Trained 50+ apprentices in Altium Designer, STM32 programming and circuit analysis as head of department.'],
-    images: [{ src: training, alt: 'Abubakr speaking at a lectern during a Robocon training session at UTM.', caption: 'Training session at UTM' }],
+    images: [
+      { src: training, alt: 'Abubakr speaking at a lectern during a Robocon training session at UTM.', caption: 'Training session at UTM' },
+      { src: teaching, alt: 'Abubakr helping a group of students at their desks during a training session in a lecture hall.', caption: 'Helping apprentices' },
+    ],
   },
 ];
 

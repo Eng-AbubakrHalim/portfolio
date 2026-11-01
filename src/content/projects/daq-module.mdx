@@ -5,11 +5,10 @@ year: '2026'
 role: Hardware design intern, Pythonium.ai
 tools: [Altium Designer, LTspice, PSpice, STM32CubeMX, STM32CubeIDE]
 tags: [Mixed-signal, STM32H563, '2026']
-status: Company design, shown in part
+status: Schematic and six-layer layout complete
 cover: ../../assets/projects/daq-module/daq-cover.png
-coverAlt: 3D render of the power section, cropped. Switching regulator, three inductors, catch diodes and a bulk input capacitor.
+coverAlt: Altium 3D render of the whole board from the top. Power section and two RJ45 jacks along the top, input terminal blocks down the left edge, output terminals on the right and the RTD connector at the bottom.
 order: 1
-confidential: true
 ---
 
 import CaseSection from '../../components/case/CaseSection.astro';
@@ -18,7 +17,10 @@ import Decisions from '../../components/case/Decisions.astro';
 import Decision from '../../components/case/Decision.astro';
 import DaqBlock from '../../components/diagrams/DaqBlock.astro';
 import DaqPowerTree from '../../components/diagrams/DaqPowerTree.astro';
-import top from '../../assets/projects/daq-module/daq-3d-top.png';
+import layoutTop from '../../assets/projects/daq-module/daq-layout-top.png';
+import schPower from '../../assets/projects/daq-module/daq-sch-power.png';
+import schAdc from '../../assets/projects/daq-module/daq-sch-adc.png';
+import schOutput from '../../assets/projects/daq-module/daq-sch-output.png';
 import startup from '../../assets/projects/daq-module/daq-power-startup-sim.png';
 import ripple from '../../assets/projects/daq-module/daq-ripple-sim.png';
 import bench from '../../assets/projects/daq-module/daq-output-stage-bench.png';
@@ -38,11 +40,15 @@ One AD4111 takes all twelve analog inputs: eight voltage inputs, usable as four 
 
 <DaqBlock />
 
+<Figure src={schAdc} alt="Schematic of the ADC sheet: the AD4111 with eight voltage inputs and four current inputs, SPI to the MCU, an ADR4525 voltage reference and a crystal." caption="ADC sheet: the AD4111 with its reference and crystal." plate="light" wide fullSize />
+
 A 24 V input feeds an LT3514 triple buck. LDOs follow the buck where the load is analog: 13.5 V down to 12 V for the output buffers, 5.8 V down to 5 V, and 3.3 V down to 1.8 V for the DAC's logic. The 3.3 V output is also split through ferrite beads into digital, analog and PHY rails.
 
 <DaqPowerTree />
 
-<Figure src={top} alt="3D render of the upper part of the DAQ board: power section top left, two RJ45 jacks, the MCU in the middle, input terminals down the left edge and output terminals on the right." caption="Top side, cropped: power entry top left, input terminals down the left edge, outputs on the right." maxWidth={575} />
+<Figure src={schPower} alt="Schematic of the power regulator: an LT3514 triple buck taking 24 V in through an input filter, with three outputs." caption="Power sheet: the LT3514 triple buck and its input filter." plate="light" wide fullSize />
+
+<Figure src={layoutTop} alt="Top-layer PCB layout of the whole board with the placement rooms labelled: SMPS top left, PHY and MCU in the middle, DAC lower middle, with the input connectors down the left edge." caption="Top layer with the placement rooms: power supply, Ethernet PHY, MCU and DAC." plate="dark" maxWidth={590} fullSize />
 
 </CaseSection>
 
@@ -62,6 +68,8 @@ A 24 V input feeds an LT3514 triple buck. LDOs follow the buck where the load is
     The PHY and the jack's magnetics expect a 100 Ω differential line. Matching keeps the two halves of each pair in phase.
   </Decision>
 </Decisions>
+
+<Figure src={schOutput} alt="Schematic of the voltage outputs: a TLV76701 LDO making 12 V from the 13.5 V rail, and two of the four output stages, each a TLV9301 op-amp with a 10 ohm isolation resistor, a 47 pF feedback capacitor and a 10 k / 10 k divider setting a gain of 2." caption="Voltage-output sheet: the 12 V LDO and two of the four output stages." plate="light" wide fullSize />
 
 </CaseSection>
 
