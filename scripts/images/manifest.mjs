@@ -31,28 +31,6 @@ export const images = [
   },
   {
     slug: 'daq-module',
-    name: 'daq-layout-top',
-    src: S('2026-09-29 102956'),
-    crop: { left: 22, top: 12, width: 590, height: 762 },
-    alt: 'Top-layer PCB layout of the whole board with the placement rooms labelled: SMPS top left, PHY and MCU in the middle, DAC lower middle, with the input connectors down the left edge.',
-    caption: 'Top layer with the placement rooms: power supply, Ethernet PHY, MCU and DAC.',
-  },
-  {
-    slug: 'daq-module',
-    name: 'daq-sch-power',
-    src: 'sch/daq-sch-power.png',
-    alt: 'Schematic of the power regulator: an LT3514 triple buck taking 24 V in through an input filter, with its outputs on the nets VP5V8, VP3V3_RAW and VP13V5.',
-    caption: 'Power regulator sheet: the LT3514 triple buck.',
-  },
-  {
-    slug: 'daq-module',
-    name: 'daq-sch-adc',
-    src: 'sch/daq-sch-adc.png',
-    alt: 'Schematic of the ADC sheet: the AD4111 with eight voltage inputs and four current inputs, SPI to the MCU, an ADR4525 voltage reference and a crystal.',
-    caption: 'ADC sheet: AD4111 with its reference and crystal.',
-  },
-  {
-    slug: 'daq-module',
     name: 'daq-sch-output',
     src: 'sch/daq-sch-output.png',
     alt: 'Schematic of the voltage outputs: a TLV76701 LDO making 12 V from the 13.5 V rail, and two of the four output stages, each a TLV9301 op-amp with a 10 ohm isolation resistor, a 47 pF feedback capacitor and a 10 k / 10 k divider setting a gain of 2.',
@@ -100,56 +78,11 @@ export const images = [
     slug: 'ssd-adapter',
     name: 'adapter-cover',
     role: 'cover',
-    src: S('2026-09-29 161257'),
-    ops: [
-      // Altium light-handle (orange) under the flex section, on the background.
-      { op: 'bgRows', x0: 420, x1: 510, y0: 380, y1: 495, refX: 395 },
-      // Axis gizmo: the Y arrow on the board, then the X arrow and labels across the board edge.
-      { op: 'copyCol', x0: 850, x1: 866, y0: 376, y1: 417, srcX: 840 },
-      { op: 'copyCol', x0: 853, x1: 860, y0: 417, y1: 436, srcX: 840 }, // stop short of the TP24 label
-      { op: 'copyCol', x0: 845, x1: 932, y0: 436, y1: 490, srcX: 835 },
-    ],
-    aspect: 16 / 10,
-    alt: 'Altium 3D render of the rigid-flex adapter from the top: the M.2 end with its gold fingers on the left, the flex section in the middle, and the EDSFF end on the right with two ICs and test points.',
-    caption: 'Rigid–flex adapter, top side (Altium 3D).',
-  },
-  {
-    slug: 'ssd-adapter',
-    name: 'adapter-layout',
-    src: S('2026-10-07 143801'),
-    crop: { left: 0, top: 18, width: 1300, height: 700 },
-    alt: 'PCB layout of the whole adapter: the EDSFF end on the left and the M.2 end on the right, both rigid, with the flex region between them carrying parallel traces.',
-    caption: 'Full layout: EDSFF end (left), flex region (centre), M.2 end (right).',
-  },
-  {
-    slug: 'ssd-adapter',
-    name: 'adapter-stackup-m2',
-    src: S('2026-10-06 172344'),
-    crop: { left: 75, top: 82, width: 665, height: 325 },
-    alt: 'Stack-up drawing for the M.2 end: four copper layers with cores and prepregs between them, solder mask and nickel-gold finish on both sides, total thickness 0.813 mm.',
-    caption: 'Stack-up drawing, M.2 end: four layers, 0.813 mm total.',
-  },
-  {
-    slug: 'ssd-adapter',
-    name: 'adapter-stack-view',
     src: S('2026-10-09 101904'),
     crop: { left: 0, top: 150, width: 690, height: 460 },
+    aspect: 16 / 10,
     alt: 'Altium layer-stack view of the adapter: two thick rigid sections, labelled EDSFF end and M.2 end, joined by a thin flex section.',
     caption: 'Rigid–flex–rigid build in the layer-stack view.',
-  },
-  {
-    slug: 'ssd-adapter',
-    name: 'adapter-3d-bottom',
-    src: S('2026-10-07 143700'),
-    ops: [
-      // Remove the axis gizmo that sits on the board's bottom-left corner.
-      { op: 'copyRow', x0: 102, x1: 107, y0: 535, y1: 611, srcY: 530 },
-      { op: 'bgRows', x0: 30, x1: 101, y0: 535, y1: 662, refX: 15 },
-      { op: 'copyCol', x0: 102, x1: 185, y0: 612, y1: 662, srcX: 300 },
-      { op: 'copyRow', x0: 102, x1: 105, y0: 612, y1: 621, srcY: 530 }, // close the corner
-    ],
-    alt: '3D render of the rigid-flex adapter, bottom side: EDSFF gold fingers on the left, M.2 Key M fingers on the right, a teal flex section between them and test points along both rigid ends.',
-    caption: 'Bottom side: EDSFF edge on the left, M.2 edge on the right.',
   },
   {
     slug: 'ssd-adapter',
@@ -368,15 +301,7 @@ export const images = [
     caption: 'Helping a team at the workshop.',
   },
 
-  // ---------------- DAQ and adapter, round two (confidentiality lifted by the company) ----------------
-  {
-    slug: 'daq-module',
-    name: 'daq-mcu-pinout',
-    src: S('2026-09-21 141234'),
-    crop: { left: 0, top: 36, width: 794, height: 736 },
-    alt: 'STM32CubeMX pinout of the STM32H563 in LQFP64: pins assigned to SPI chip selects for the AD4111, the two RTD converters and the AD3531, RMII signals for Ethernet, USART for RS-485, debug and GPIO outputs.',
-    caption: 'MCU pin assignment in STM32CubeMX.',
-  },
+  // ---------------- DAQ, round two ----------------
   {
     slug: 'daq-module',
     name: 'daq-sch-ethernet',
@@ -387,47 +312,9 @@ export const images = [
   },
   {
     slug: 'daq-module',
-    name: 'daq-power-plane',
-    src: S('2026-09-15 181114'),
-    alt: 'Inner power layer of the six-layer board in Altium, shown alone: copper pours split into separate regions for the different supply rails, with the via field between them. The layer legend reads Int1 GND, Int2 signal, Int3 power, Int4 GND and bottom.',
-    caption: 'Inner layer 3, the power plane, split into regions per rail.',
-  },
-  {
-    slug: 'daq-module',
     name: 'daq-drc',
     src: S('2026-10-09 100955'),
     alt: 'Altium Design Rule Verification Report for the DAQ board: zero warnings and zero rule violations, with each clearance, short-circuit, un-routed net and width rule listed at a count of zero.',
     caption: 'Design-rule check: no warnings, no violations.',
-  },
-  {
-    slug: 'ssd-adapter',
-    name: 'adapter-sch-edsff',
-    src: S('2026-09-22 095854'),
-    alt: 'Schematic of the EDSFF edge connector, rows A1 to A42 and B1 to B42: power rails, side-band signals, I2C and the PCIe reference clock pair, each brought out to a test point.',
-    caption: 'EDSFF edge connector schematic: power, side-band signals and the PCIe reference clock, each to a test point.',
-  },
-  {
-    slug: 'ssd-adapter',
-    name: 'adapter-sch-sensors',
-    src: 'sch/adapter-sensors.png', // tooltip over U3 patched from U1 (same drawing, 234 rows up)
-    alt: 'Schematic of the temperature sensor in its three package options, WSON, SOIC and VSSOP, each a TMP1075 on the same I2C bus and supply, with a note to place only one on the top side of the board.',
-    caption: 'The same TMP1075 sensor drawn in three packages; only one is fitted.',
-  },
-  {
-    slug: 'ssd-adapter',
-    name: 'adapter-stacked-3d',
-    src: S('2026-10-07 142901'),
-    // Altium's light handle (a pale dot) above the right-hand pads.
-    ops: [{ op: 'bgRows', x0: 545, x1: 610, y0: 90, y1: 165, refX: 535 }],
-    crop: { left: 10, top: 40, width: 564, height: 675 },
-    alt: '3D view of the stacked footprint with one 8-pin package seated on the middle set of pads, the larger and smaller pad sets left empty around it.',
-    caption: '3D check of the stacked footprint with one package fitted.',
-  },
-  {
-    slug: 'ssd-adapter',
-    name: 'adapter-refclk',
-    src: S('2026-09-30 182720'),
-    alt: 'Close-up of the PCIe reference clock pair routed on inner layer 3, with Altium reporting the lengths: P at 1205.615 mils and N at 1205.323 mils, a difference of 0.291 mils.',
-    caption: 'PCIe reference-clock pair on L3: P and N within 0.3 mil of each other.',
   },
 ];

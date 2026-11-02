@@ -5,28 +5,20 @@ year: '2026'
 role: Hardware design intern, Pythonium.ai
 tools: [Altium Designer]
 tags: [Rigid-flex, IPC-2223, '2026']
-status: Layout complete, documented for fabrication
+status: Company design, shown in part
 cover: ../../assets/projects/ssd-adapter/adapter-cover.png
-coverAlt: Altium 3D render of the rigid-flex adapter from the top. The M.2 end with its gold fingers on the left, the flex section in the middle, and the EDSFF end on the right with two ICs and test points.
+coverAlt: Layer-stack view of the adapter. Two thick rigid sections, labelled EDSFF end and M.2 end, joined by a thin flex section.
 order: 3
+confidential: true
 ---
 
 import CaseSection from '../../components/case/CaseSection.astro';
 import Figure from '../../components/case/Figure.astro';
 import Decisions from '../../components/case/Decisions.astro';
 import Decision from '../../components/case/Decision.astro';
-import AdapterChain from '../../components/diagrams/AdapterChain.astro';
-import bottom from '../../assets/projects/ssd-adapter/adapter-3d-bottom.png';
 import section from '../../assets/projects/ssd-adapter/adapter-section.png';
 import m2 from '../../assets/projects/ssd-adapter/adapter-m2-footprint.png';
 import stacked from '../../assets/projects/ssd-adapter/adapter-stacked-footprint.png';
-import layout from '../../assets/projects/ssd-adapter/adapter-layout.png';
-import stackup from '../../assets/projects/ssd-adapter/adapter-stackup-m2.png';
-import stackView from '../../assets/projects/ssd-adapter/adapter-stack-view.png';
-import schEdsff from '../../assets/projects/ssd-adapter/adapter-sch-edsff.png';
-import schSensors from '../../assets/projects/ssd-adapter/adapter-sch-sensors.png';
-import stacked3d from '../../assets/projects/ssd-adapter/adapter-stacked-3d.png';
-import refclk from '../../assets/projects/ssd-adapter/adapter-refclk.png';
 
 <CaseSection num="01" title="Problem">
 
@@ -36,23 +28,7 @@ The signal path is passive. The board also carries temperature sensors and an ID
 
 </CaseSection>
 
-<CaseSection num="02" title="Architecture">
-
-Two rigid ends joined by a flex section. Each rigid end has its own stack-up, because each edge must match its own connector's thickness.
-
-<AdapterChain />
-
-<Figure src={stackView} alt="Altium layer-stack view of the adapter: two thick rigid sections, labelled EDSFF end and M.2 end, joined by a thin flex section." caption="Rigid–flex–rigid build in the layer-stack view." plate="dark" maxWidth={690} />
-
-<Figure src={layout} alt="PCB layout of the whole adapter: the EDSFF end on the left and the M.2 end on the right, both rigid, with the flex region between them carrying parallel traces." caption="Full layout: EDSFF end (left), flex region (centre), M.2 end (right)." plate="dark" wide fullSize />
-
-<Figure src={schEdsff} alt="Schematic of the EDSFF edge connector, rows A1 to A42 and B1 to B42: power rails, side-band signals, I2C and the PCIe reference clock pair, each brought out to a test point." caption="EDSFF edge connector schematic: power, side-band signals and the PCIe reference clock, each to a test point." plate="light" maxWidth={721} fullSize />
-
-<Figure src={bottom} alt="3D render of the rigid-flex adapter, bottom side: EDSFF gold fingers on the left, M.2 Key M fingers on the right, a teal flex section between them and test points along both rigid ends." caption="Bottom side: EDSFF edge on the left, M.2 edge on the right." wide />
-
-</CaseSection>
-
-<CaseSection num="03" title="Key decisions">
+<CaseSection num="02" title="Key decisions">
 
 <Decisions>
   <Decision title="Edge footprints from the specs" options={['Library footprints', 'Build from the connector specifications']} choice="Built both gold-finger footprints by hand from the spec dimensions">
@@ -76,46 +52,19 @@ Two rigid ends joined by a flex section. Each rigid end has its own stack-up, be
 
 <Figure src={stacked} alt="One footprint that overlays three 8-pin package outlines of different sizes, nested inside each other, so any one of the three packages can be fitted to the same site." caption="Stacked footprint: three package options for the same 8-pin sensor share one site." plate="dark" maxWidth={560} />
 
-<Figure src={schSensors} alt="Schematic of the temperature sensor in its three package options, WSON, SOIC and VSSOP, each a TMP1075 on the same I2C bus and supply, with a note to place only one on the top side of the board." caption="The same TMP1075 sensor drawn in three packages; only one is fitted." plate="light" maxWidth={545} fullSize />
-
-<Figure src={stacked3d} alt="3D view of the stacked footprint with one 8-pin package seated on the middle set of pads, the larger and smaller pad sets left empty around it." caption="3D check of the stacked footprint with one package fitted." plate="light" maxWidth={480} />
-
-<figure class="spec-table">
-<div class="spec-table__scroll" tabindex="0" role="region" aria-labelledby="impedance-caption">
-<table>
-  <thead>
-    <tr><th scope="col">Line</th><th scope="col">Section</th><th scope="col">Layer</th><th scope="col">Ref.</th><th scope="col">Width</th><th scope="col">Gap</th><th scope="col">Calc.</th></tr>
-  </thead>
-  <tbody>
-    <tr><td>Coated microstrip</td><td>EDSFF end</td><td>L1</td><td>L2</td><td>9.00 mil</td><td>5.00 mil</td><td>105.5 Ω</td></tr>
-    <tr><td>Offset stripline</td><td>EDSFF end</td><td>L3</td><td>L2, L4</td><td>4.25 mil</td><td>8.75 mil</td><td>99.2 Ω</td></tr>
-    <tr><td>Coated microstrip</td><td>Flex</td><td>L4</td><td>L4</td><td>5.00 mil</td><td>8.00 mil</td><td>99.8 Ω</td></tr>
-    <tr><td>Coated microstrip</td><td>M.2 end</td><td>L1</td><td>L3</td><td>8.00 mil</td><td>6.00 mil</td><td>102.5 Ω</td></tr>
-    <tr><td>Offset stripline</td><td>M.2 end</td><td>L3</td><td>L1, L4</td><td>4.25 mil</td><td>8.75 mil</td><td>99.2 Ω</td></tr>
-  </tbody>
-</table>
-</div>
-<figcaption id="impedance-caption">Impedance profiles from the layer stack manager. Every target is 100 Ω differential, ±10%.</figcaption>
-</figure>
-
-<Figure src={stackup} alt="Stack-up drawing for the M.2 end: four copper layers with cores and prepregs between them, solder mask and nickel-gold finish on both sides, total thickness 0.813 mm." caption="Stack-up drawing, M.2 end: four layers, 0.813 mm total." plate="light" maxWidth={665} fullSize />
-
 </CaseSection>
 
-<CaseSection num="04" title="Verification">
+<CaseSection num="03" title="Verification">
 
 - Every impedance profile was calculated within 100 Ω ±10% in Altium's layer stack manager.
-- The PCIe reference-clock pair is length-matched to within 0.3 mil.
 - Rigid-flex board regions, bending lines and via spans were checked in the 3D and section views.
 - Fabrication notes specify IPC-6013 Class 2 rigid-flex, selective hard gold on the fingers, ENIG elsewhere and bevelled edges on both connectors.
 
 <Figure src={section} alt="Section view of the build: the rigid EDSFF end, a thin flex section and the rigid M.2 end, with plated vias through each rigid section." caption="Section view: the flex layers run continuously into both rigid ends." plate="dark" />
 
-<Figure src={refclk} alt="Close-up of the PCIe reference clock pair routed on inner layer 3, with Altium reporting the lengths: P at 1205.615 mils and N at 1205.323 mils, a difference of 0.291 mils." caption="PCIe reference-clock pair on L3: P and N within 0.3 mil of each other." plate="dark" maxWidth={1014} />
-
 </CaseSection>
 
-<CaseSection num="05" title="Result">
+<CaseSection num="04" title="Result">
 
 A rigid-flex adapter with matched edge thicknesses and defined impedance on every section, documented for fabrication with a stack-up drawing, an impedance table and fabrication notes.
 

@@ -15,15 +15,8 @@ import CaseSection from '../../components/case/CaseSection.astro';
 import Figure from '../../components/case/Figure.astro';
 import Decisions from '../../components/case/Decisions.astro';
 import Decision from '../../components/case/Decision.astro';
-import DaqBlock from '../../components/diagrams/DaqBlock.astro';
-import DaqPowerTree from '../../components/diagrams/DaqPowerTree.astro';
-import layoutTop from '../../assets/projects/daq-module/daq-layout-top.png';
-import schPower from '../../assets/projects/daq-module/daq-sch-power.png';
-import schAdc from '../../assets/projects/daq-module/daq-sch-adc.png';
 import schOutput from '../../assets/projects/daq-module/daq-sch-output.png';
-import pinout from '../../assets/projects/daq-module/daq-mcu-pinout.png';
 import schEthernet from '../../assets/projects/daq-module/daq-sch-ethernet.png';
-import powerPlane from '../../assets/projects/daq-module/daq-power-plane.png';
 import drc from '../../assets/projects/daq-module/daq-drc.png';
 import startup from '../../assets/projects/daq-module/daq-power-startup-sim.png';
 import ripple from '../../assets/projects/daq-module/daq-ripple-sim.png';
@@ -38,29 +31,7 @@ The hard part is the mix. Twelve precision analog inputs sit on the same board a
 
 </CaseSection>
 
-<CaseSection num="02" title="Architecture">
-
-One AD4111 takes all twelve analog inputs: eight voltage inputs, usable as four differential pairs, and four current inputs. Two MAX31865 converters handle the RTDs. An AD3531 DAC feeds four op-amp buffers at a gain of 2 for a 0–10 V output range. The STM32H563 talks to all three converters over SPI, to a LAN8742A PHY over RMII and to the RS-485 transceiver over a UART.
-
-<DaqBlock />
-
-<Figure src={schAdc} alt="Schematic of the ADC sheet: the AD4111 with eight voltage inputs and four current inputs, SPI to the MCU, an ADR4525 voltage reference and a crystal." caption="ADC sheet: the AD4111 with its reference and crystal." plate="light" wide fullSize />
-
-<Figure src={pinout} alt="STM32CubeMX pinout of the STM32H563 in LQFP64: pins assigned to SPI chip selects for the AD4111, the two RTD converters and the AD3531, RMII signals for Ethernet, USART for RS-485, debug and GPIO outputs." caption="MCU pin assignment in STM32CubeMX." plate="light" maxWidth={794} fullSize />
-
-A 24 V input feeds an LT3514 triple buck. LDOs follow the buck where the load is analog: 13.5 V down to 12 V for the output buffers, 5.8 V down to 5 V, and 3.3 V down to 1.8 V for the DAC's logic. The 3.3 V output is also split through ferrite beads into digital, analog and PHY rails.
-
-<DaqPowerTree />
-
-<Figure src={schPower} alt="Schematic of the power regulator: an LT3514 triple buck taking 24 V in through an input filter, with three outputs." caption="Power sheet: the LT3514 triple buck and its input filter." plate="light" wide fullSize />
-
-<Figure src={layoutTop} alt="Top-layer PCB layout of the whole board with the placement rooms labelled: SMPS top left, PHY and MCU in the middle, DAC lower middle, with the input connectors down the left edge." caption="Top layer with the placement rooms: power supply, Ethernet PHY, MCU and DAC." plate="dark" maxWidth={590} fullSize />
-
-<Figure src={powerPlane} alt="Inner power layer of the six-layer board in Altium, shown alone: copper pours split into separate regions for the different supply rails, with the via field between them. The layer legend reads Int1 GND, Int2 signal, Int3 power, Int4 GND and bottom." caption="Inner layer 3, the power plane, split into regions per rail." plate="dark" maxWidth={580} fullSize />
-
-</CaseSection>
-
-<CaseSection num="03" title="Key decisions">
+<CaseSection num="02" title="Key decisions">
 
 <Decisions>
   <Decision title="A clean supply for the analog outputs" options={['Run the output buffers straight from the buck', 'Buck to 13.5 V, then an LDO to 12 V']} choice="13.5 V from the LT3514, regulated down to 12 V by an LDO">
@@ -83,7 +54,7 @@ A 24 V input feeds an LT3514 triple buck. LDOs follow the buck where the load is
 
 </CaseSection>
 
-<CaseSection num="04" title="Verification">
+<CaseSection num="03" title="Verification">
 
 - The LT3514 stage was simulated in LTspice for start-up and steady-state ripple.
 - The output stage was checked in a PSpice testbench against a 1 nF load.
@@ -102,7 +73,7 @@ A 24 V input feeds an LT3514 triple buck. LDOs follow the buck where the load is
 
 </CaseSection>
 
-<CaseSection num="05" title="Result">
+<CaseSection num="04" title="Result">
 
 Schematic and six-layer layout finished, with a clean design-rule check and fabrication outputs set up.
 
