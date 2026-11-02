@@ -31,7 +31,7 @@ const spec = [
   title={`${d.title} — Abubakr M. Abdelhalim`}
   description={d.summary}
   ogImage={`og/work-${project.id}.png`}
-  ogImageAlt={`Case study: ${d.title}`}
+  ogImageAlt={`Work: ${d.title}`}
   ogType="article"
 >
   <SiteHeader />
@@ -40,7 +40,7 @@ const spec = [
       <p class="case-head__crumb label">
         <a href={withBase('#work')}>Work</a>
         <span aria-hidden="true">/</span>
-        <span>Case study {num}</span>
+        <span>{num}</span>
       </p>
 
       <h1 class="case-head__title" transition:name="project-title">{d.title}</h1>
@@ -103,9 +103,9 @@ const spec = [
       <Content />
     </div>
 
-    <nav class="case-next" aria-label="Next case study">
+    <nav class="case-next" aria-label="Next work">
       <a class="case-next__link" href={withBase(`work/${next.id}/`)}>
-        <span class="label">Next case study</span>
+        <span class="label">Next work</span>
         <span class="case-next__title">{next.data.title}</span>
         <span class="case-next__summary">{next.data.summary}</span>
       </a>

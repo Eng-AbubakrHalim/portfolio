@@ -48,7 +48,7 @@ h1 { font-weight: 500; font-size: ${title.length > 26 ? 60 : 76}px; line-height:
 .cover { align-self: center; width: 470px; aspect-ratio: 16 / 10; border: 1px solid #34332e; background: #121210 url(${cover}) center / cover no-repeat; }
 </style></head><body>
 <div class="text">
-  <p class="mono">Case study ${num}</p>
+  <p class="mono">Work ${num}</p>
   <div><h1>${esc(title)}</h1><p class="sum">${esc(summary)}</p></div>
   <div class="foot"><div class="rule"></div><p class="mono">Abubakr M. Abdelhalim · Electrical engineer</p></div>
 </div>
