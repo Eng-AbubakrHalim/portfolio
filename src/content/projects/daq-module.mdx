@@ -21,6 +21,10 @@ import layoutTop from '../../assets/projects/daq-module/daq-layout-top.png';
 import schPower from '../../assets/projects/daq-module/daq-sch-power.png';
 import schAdc from '../../assets/projects/daq-module/daq-sch-adc.png';
 import schOutput from '../../assets/projects/daq-module/daq-sch-output.png';
+import pinout from '../../assets/projects/daq-module/daq-mcu-pinout.png';
+import schEthernet from '../../assets/projects/daq-module/daq-sch-ethernet.png';
+import powerPlane from '../../assets/projects/daq-module/daq-power-plane.png';
+import drc from '../../assets/projects/daq-module/daq-drc.png';
 import startup from '../../assets/projects/daq-module/daq-power-startup-sim.png';
 import ripple from '../../assets/projects/daq-module/daq-ripple-sim.png';
 import bench from '../../assets/projects/daq-module/daq-output-stage-bench.png';
@@ -42,6 +46,8 @@ One AD4111 takes all twelve analog inputs: eight voltage inputs, usable as four 
 
 <Figure src={schAdc} alt="Schematic of the ADC sheet: the AD4111 with eight voltage inputs and four current inputs, SPI to the MCU, an ADR4525 voltage reference and a crystal." caption="ADC sheet: the AD4111 with its reference and crystal." plate="light" wide fullSize />
 
+<Figure src={pinout} alt="STM32CubeMX pinout of the STM32H563 in LQFP64: pins assigned to SPI chip selects for the AD4111, the two RTD converters and the AD3531, RMII signals for Ethernet, USART for RS-485, debug and GPIO outputs." caption="MCU pin assignment in STM32CubeMX." plate="light" maxWidth={794} fullSize />
+
 A 24 V input feeds an LT3514 triple buck. LDOs follow the buck where the load is analog: 13.5 V down to 12 V for the output buffers, 5.8 V down to 5 V, and 3.3 V down to 1.8 V for the DAC's logic. The 3.3 V output is also split through ferrite beads into digital, analog and PHY rails.
 
 <DaqPowerTree />
@@ -49,6 +55,8 @@ A 24 V input feeds an LT3514 triple buck. LDOs follow the buck where the load is
 <Figure src={schPower} alt="Schematic of the power regulator: an LT3514 triple buck taking 24 V in through an input filter, with three outputs." caption="Power sheet: the LT3514 triple buck and its input filter." plate="light" wide fullSize />
 
 <Figure src={layoutTop} alt="Top-layer PCB layout of the whole board with the placement rooms labelled: SMPS top left, PHY and MCU in the middle, DAC lower middle, with the input connectors down the left edge." caption="Top layer with the placement rooms: power supply, Ethernet PHY, MCU and DAC." plate="dark" maxWidth={590} fullSize />
+
+<Figure src={powerPlane} alt="Inner power layer of the six-layer board in Altium, shown alone: copper pours split into separate regions for the different supply rails, with the via field between them. The layer legend reads Int1 GND, Int2 signal, Int3 power, Int4 GND and bottom." caption="Inner layer 3, the power plane, split into regions per rail." plate="dark" maxWidth={580} fullSize />
 
 </CaseSection>
 
@@ -71,6 +79,8 @@ A 24 V input feeds an LT3514 triple buck. LDOs follow the buck where the load is
 
 <Figure src={schOutput} alt="Schematic of the voltage outputs: a TLV76701 LDO making 12 V from the 13.5 V rail, and two of the four output stages, each a TLV9301 op-amp with a 10 ohm isolation resistor, a 47 pF feedback capacitor and a 10 k / 10 k divider setting a gain of 2." caption="Voltage-output sheet: the 12 V LDO and two of the four output stages." plate="light" wide fullSize />
 
+<Figure src={schEthernet} alt="Schematic of the Ethernet sheet: the LAN8742A PHY with its RMII lines to the MCU, its crystal and decoupling, and the transmit and receive pairs running to an RJ45 jack with integrated magnetics." caption="Ethernet sheet: the LAN8742A PHY and the RJ45 with integrated magnetics." plate="light" wide fullSize />
+
 </CaseSection>
 
 <CaseSection num="04" title="Verification">
@@ -87,6 +97,8 @@ A 24 V input feeds an LT3514 triple buck. LDOs follow the buck where the load is
 <Figure src={bench} alt="PSpice testbench of the analog output stage: a TLV9302 op-amp at a gain of 2 with a 10 ohm isolation resistor and a 47 pF feedback capacitor driving a 1 nF load. Bias points show 3 V in and 6 V out." caption="Output-stage testbench in PSpice: isolation resistor and feedback capacitor against a 1 nF load." plate="light" />
 
 <Figure src={ethernet} alt="PCB layout close-up of an Ethernet transmit pair routed together from the jack pins down to the PHY, with a small length-matching loop near the top." caption="Ethernet transmit pair, routed as a coupled differential pair (layout detail)." plate="dark" maxWidth={540} />
+
+<Figure src={drc} alt="Altium Design Rule Verification Report for the DAQ board: zero warnings and zero rule violations, with each clearance, short-circuit, un-routed net and width rule listed at a count of zero." caption="Design-rule check: no warnings, no violations." plate="light" wide fullSize />
 
 </CaseSection>
 

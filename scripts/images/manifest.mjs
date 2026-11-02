@@ -18,9 +18,12 @@ export const images = [
     role: 'cover',
     src: S('2026-09-29 103206'),
     ops: [
-      // Altium's axis gizmo at the board's bottom-left corner sits on the grey background.
-      { op: 'bgRows', x0: 140, x1: 191, y0: 686, y1: 775, refX: 110 },
-      { op: 'bgRows', x0: 140, x1: 268, y0: 725, y1: 775, refX: 110 },
+      // Altium's axis gizmo at the board's bottom-left corner. The green Y arm runs down the
+      // board's left edge (x 190-193), the red X arm along its bottom edge (y 728-732).
+      // Rebuild the bottom edge from a clean column, then clear what is left of the gizmo
+      // left of the board. Rows start at 693, below the input connector.
+      { op: 'copyCol', x0: 194, x1: 268, y0: 724, y1: 775, srcX: 275 },
+      { op: 'bgRows', x0: 140, x1: 193, y0: 693, y1: 775, refX: 130 },
     ],
     aspect: 16 / 10,
     alt: 'Altium 3D render of the whole PyDAQ mini board from the top: power section and two RJ45 jacks along the top, input terminal blocks down the left edge, output terminals on the right, the RTD input connector at the bottom and a coin cell holder.',
@@ -363,5 +366,68 @@ export const images = [
     src: 'linkedin/sbr-workshop-04.jpg',
     alt: 'Abubakr leaning over a table to help a group of participants at their laptops during the workshop.',
     caption: 'Helping a team at the workshop.',
+  },
+
+  // ---------------- DAQ and adapter, round two (confidentiality lifted by the company) ----------------
+  {
+    slug: 'daq-module',
+    name: 'daq-mcu-pinout',
+    src: S('2026-09-21 141234'),
+    crop: { left: 0, top: 36, width: 794, height: 736 },
+    alt: 'STM32CubeMX pinout of the STM32H563 in LQFP64: pins assigned to SPI chip selects for the AD4111, the two RTD converters and the AD3531, RMII signals for Ethernet, USART for RS-485, debug and GPIO outputs.',
+    caption: 'MCU pin assignment in STM32CubeMX.',
+  },
+  {
+    slug: 'daq-module',
+    name: 'daq-sch-ethernet',
+    src: S('2026-09-30 133812'),
+    crop: { left: 22, top: 0, width: 1228, height: 663 },
+    alt: 'Schematic of the Ethernet sheet: the LAN8742A PHY with its RMII lines to the MCU, its crystal and decoupling, and the transmit and receive pairs running to an RJ45 jack with integrated magnetics.',
+    caption: 'Ethernet sheet: the LAN8742A PHY and the RJ45 with integrated magnetics.',
+  },
+  {
+    slug: 'daq-module',
+    name: 'daq-power-plane',
+    src: S('2026-09-15 181114'),
+    alt: 'Inner power layer of the six-layer board in Altium, shown alone: copper pours split into separate regions for the different supply rails, with the via field between them. The layer legend reads Int1 GND, Int2 signal, Int3 power, Int4 GND and bottom.',
+    caption: 'Inner layer 3, the power plane, split into regions per rail.',
+  },
+  {
+    slug: 'daq-module',
+    name: 'daq-drc',
+    src: S('2026-10-09 100955'),
+    alt: 'Altium Design Rule Verification Report for the DAQ board: zero warnings and zero rule violations, with each clearance, short-circuit, un-routed net and width rule listed at a count of zero.',
+    caption: 'Design-rule check: no warnings, no violations.',
+  },
+  {
+    slug: 'ssd-adapter',
+    name: 'adapter-sch-edsff',
+    src: S('2026-09-22 095854'),
+    alt: 'Schematic of the EDSFF edge connector, rows A1 to A42 and B1 to B42: power rails, side-band signals, I2C and the PCIe reference clock pair, each brought out to a test point.',
+    caption: 'EDSFF edge connector schematic: power, side-band signals and the PCIe reference clock, each to a test point.',
+  },
+  {
+    slug: 'ssd-adapter',
+    name: 'adapter-sch-sensors',
+    src: 'sch/adapter-sensors.png', // tooltip over U3 patched from U1 (same drawing, 234 rows up)
+    alt: 'Schematic of the temperature sensor in its three package options, WSON, SOIC and VSSOP, each a TMP1075 on the same I2C bus and supply, with a note to place only one on the top side of the board.',
+    caption: 'The same TMP1075 sensor drawn in three packages; only one is fitted.',
+  },
+  {
+    slug: 'ssd-adapter',
+    name: 'adapter-stacked-3d',
+    src: S('2026-10-07 142901'),
+    // Altium's light handle (a pale dot) above the right-hand pads.
+    ops: [{ op: 'bgRows', x0: 545, x1: 610, y0: 90, y1: 165, refX: 535 }],
+    crop: { left: 10, top: 40, width: 564, height: 675 },
+    alt: '3D view of the stacked footprint with one 8-pin package seated on the middle set of pads, the larger and smaller pad sets left empty around it.',
+    caption: '3D check of the stacked footprint with one package fitted.',
+  },
+  {
+    slug: 'ssd-adapter',
+    name: 'adapter-refclk',
+    src: S('2026-09-30 182720'),
+    alt: 'Close-up of the PCIe reference clock pair routed on inner layer 3, with Altium reporting the lengths: P at 1205.615 mils and N at 1205.323 mils, a difference of 0.291 mils.',
+    caption: 'PCIe reference-clock pair on L3: P and N within 0.3 mil of each other.',
   },
 ];
